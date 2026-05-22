@@ -1,6 +1,6 @@
 {
     "GLOBAL": {
-        "APP_NAME": "Shikicinema",
+        "APP_NAME": "ShikiRIP Cinema",
         "SHIKIMORI": {
             "ANIME_KINDS": {
                 "TV": "TV сериал",
@@ -17,6 +17,13 @@
                 "ANONS": "анонс",
                 "ONGOING": "онгоинг",
                 "RELEASED": "вышло"
+            },
+            "MANGA_KINDS": {
+                "MANGA": "Манга",
+                "MANHWA": "Манхва",
+                "MANHUA": "Маньхуа",
+                "ONE_SHOT": "Ваншот",
+                "DOUJIN": "Додзинси"
             }
         },
         "VIDEO": {
@@ -297,6 +304,21 @@
                     "INFO": "{{ used }} (кэшировано {{ cached }}) из {{ total }}",
                     "CLEAR_CACHE_BTN": "Очистить Кэш"
                 }
+            }
+        }
+    },
+    "MANGA_MODULE": {
+        "MANGA_PAGE": {
+            "PAGE_TITLE": "Список манги",
+            "READ_ACTION": "Читать",
+            "LOAD_FAILURE": "Не удалось загрузить список манги",
+            "GRIDS": {
+                "WATCHING": "Читаю",
+                "PLANNED": "Запланировано",
+                "COMPLETED": "Прочитано",
+                "ON_HOLD": "Отложено",
+                "DROPPED": "Брошено",
+                "REWATCHING": "Перечитываю"
             }
         }
     }

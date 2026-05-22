@@ -1,10 +1,21 @@
 /* eslint-disable no-use-before-define */
-export function getAuthorizationCode(shikimoriDomain: string, shikimoriOAuthClientId: string): Promise<string> {
+const OOB_REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob';
+
+export interface AuthorizationCodeResult {
+    code: string;
+    redirectUri?: string;
+}
+
+export function getAuthorizationCode(
+    shikimoriDomain: string,
+    shikimoriOAuthClientId: string,
+): Promise<AuthorizationCodeResult> {
+    if (!hasChromeTabsApi()) {
+        return getAuthorizationCodeFromBrowser(shikimoriDomain, shikimoriOAuthClientId);
+    }
+
     return new Promise(async (resolve, reject) => {
-        const codeUrl = new URL(`${shikimoriDomain}/oauth/authorize`);
-        codeUrl.searchParams.set('client_id', shikimoriOAuthClientId);
-        codeUrl.searchParams.set('redirect_uri', 'urn:ietf:wg:oauth:2.0:oob');
-        codeUrl.searchParams.set('response_type', 'code');
+        const codeUrl = createAuthorizationUrl(shikimoriDomain, shikimoriOAuthClientId, OOB_REDIRECT_URI);
 
         chrome.tabs.query({ active: true }, ([selectedTab]) =>
             chrome.tabs.create({ active: true, url: codeUrl.toString() }, (authCodeTab) => {
@@ -39,7 +50,7 @@ export function getAuthorizationCode(shikimoriDomain: string, shikimoriOAuthClie
                     if (error || message || !code) {
                         reject(new Error(error || message));
                     } else {
-                        resolve(code);
+                        resolve({ code, redirectUri: OOB_REDIRECT_URI });
                     }
 
                     removeListeners();
@@ -60,4 +71,48 @@ export function getAuthorizationCode(shikimoriDomain: string, shikimoriOAuthClie
             }),
         );
     });
+}
+
+function getAuthorizationCodeFromBrowser(
+    shikimoriDomain: string,
+    shikimoriOAuthClientId: string,
+): Promise<AuthorizationCodeResult> {
+    return new Promise((resolve, reject) => {
+        const codeUrl = createAuthorizationUrl(shikimoriDomain, shikimoriOAuthClientId, OOB_REDIRECT_URI);
+        const authWindow = window.open(codeUrl.toString(), 'shikimori-oauth', 'popup,width=640,height=760');
+
+        if (!authWindow) {
+            reject(new Error('oauth-popup-blocked'));
+            return;
+        }
+
+        window.setTimeout(() => {
+            const code = window
+                .prompt('Скопируйте код авторизации Shikimori из открытого окна и вставьте его сюда:')
+                ?.trim();
+
+            authWindow.close();
+
+            if (!code) {
+                reject(new Error('oauth-code-missing'));
+                return;
+            }
+
+            resolve({ code, redirectUri: OOB_REDIRECT_URI });
+        }, 500);
+    });
+}
+
+function createAuthorizationUrl(shikimoriDomain: string, shikimoriOAuthClientId: string, redirectUri: string): URL {
+    const codeUrl = new URL(`${shikimoriDomain}/oauth/authorize`);
+
+    codeUrl.searchParams.set('client_id', shikimoriOAuthClientId);
+    codeUrl.searchParams.set('redirect_uri', redirectUri);
+    codeUrl.searchParams.set('response_type', 'code');
+
+    return codeUrl;
+}
+
+function hasChromeTabsApi(): boolean {
+    return typeof chrome !== 'undefined' && Boolean(chrome.tabs?.create && chrome.tabs?.query);
 }

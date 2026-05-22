@@ -30,7 +30,10 @@
                             {
                                 "glob": "**/*",
                                 "input": "src/assets",
-                                "output": "assets"
+                                "output": "assets",
+                                "ignore": [
+                                    "1x1.avif"
+                                ]
                             },
                             {
                                 "glob": "**/*",
@@ -169,7 +172,8 @@
         "defaultCollection": "@ionic/angular-toolkit",
         "schematicCollections": [
             "@ngrx/schematics"
-        ]
+        ],
+        "analytics": "053c41a0-88c3-4e47-84ac-9d58574f20b1"
     },
     "schematics": {
         "@ionic/angular-toolkit:component": {

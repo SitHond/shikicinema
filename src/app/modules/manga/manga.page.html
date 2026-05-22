@@ -1,0 +1,117 @@
+<ion-content [fullscreen]="true" class="page-content ion-padding manga-page__content">
+    @if (hasError()) {
+        <div class="manga-page__message">
+            <ion-text color="danger">
+                {{ 'MANGA_MODULE.MANGA_PAGE.LOAD_FAILURE' | transloco }}
+            </ion-text>
+        </div>
+    }
+
+    @for (status of statuses; track status; let statusIndex = $index) {
+        @let statusRates = ratesByStatus(status);
+        @let isHidden = getHiddenGridStatus(status);
+
+        <section
+            class="manga-page__section"
+            [class.ion-hide]="isSectionHidden(status)"
+            [id]="status"
+        >
+            <div class="manga-page__section-label">
+                <ion-text class="manga-page__section-text">
+                    {{ 'MANGA_MODULE.MANGA_PAGE.GRIDS.' + (status | uppercase) | transloco | uppercase }}
+
+                    @if (!isLoading()) {
+                        <span class="manga-page__counter">({{ statusRates.length }})</span>
+                    }
+                </ion-text>
+
+                <ion-button
+                    fill="clear"
+                    size="small"
+                    color="medium"
+                    (click)="toggleHiddenGridStatus(status)"
+                >
+                    <ion-icon
+                        class="manga-page__section-icon"
+                        slot="icon-only"
+                        [name]="isHidden ? 'chevron-down' : 'chevron-up'"
+                    />
+                </ion-button>
+            </div>
+
+            <div
+                class="manga-page__grid"
+                [class.ion-hide]="isHidden"
+            >
+                @if (!isLoading()) {
+                    @for (rate of statusRates; track trackById($index, rate)) {
+                        <article class="manga-page__item">
+                            <a
+                                class="manga-page__image-link"
+                                [routerLink]="['/external']"
+                                [queryParams]="{ link: remangaSearchLink(rate) }"
+                                [skipLocationChange]="true"
+                            >
+                                <app-image-card
+                                    class="manga-page__image responsive-9by13"
+                                    height="100%"
+                                    width="auto"
+                                    [name]="mangaName(rate)"
+                                    [imageUrl]="mangaImage(rate)"
+                                    [hasPriority]="statusIndex === 0"
+                                />
+                            </a>
+
+                            <h2 class="manga-page__name">{{ mangaName(rate) }}</h2>
+
+                            <footer class="manga-page__meta">
+                                @if (rate.manga.kind) {
+                                    <span>{{ 'GLOBAL.SHIKIMORI.MANGA_KINDS.' + (rate.manga.kind | uppercase) | transloco }}</span>
+                                }
+
+                                @if (rate.manga.released_on || rate.manga.aired_on) {
+                                    <time [dateTime]="rate.manga.released_on || rate.manga.aired_on">
+                                        {{ rate.manga.released_on || rate.manga.aired_on | date: 'yyyy' }}
+                                    </time>
+                                }
+                            </footer>
+
+                            <ion-button
+                                class="manga-page__read-btn"
+                                size="small"
+                                fill="clear"
+                                [routerLink]="['/external']"
+                                [queryParams]="{ link: remangaSearchLink(rate) }"
+                                [skipLocationChange]="true"
+                            >
+                                <ion-icon slot="start" name="library-outline" />
+                                {{ 'MANGA_MODULE.MANGA_PAGE.READ_ACTION' | transloco }}
+                            </ion-button>
+                        </article>
+                    }
+                } @else {
+                    @for (_ of 18 | repeat; track $index) {
+                        <div class="manga-page__item manga-page__item--skeleton">
+                            <app-skeleton-block
+                                class="manga-page__image responsive-9by13"
+                                height="100%"
+                                width="auto"
+                                borderRadius="0.25rem"
+                            />
+                            <app-skeleton-block
+                                height="1.08rem"
+                                width="100%"
+                                borderRadius="0.25rem"
+                            />
+                            <app-skeleton-block
+                                height="0.8625rem"
+                                width="60%"
+                                borderRadius="0.25rem"
+                            />
+                        </div>
+                    }
+                }
+            </div>
+        </section>
+    }
+</ion-content>

@@ -1,3 +1,4 @@
+import AuthStoreInterface from '@app/store/auth/types/auth-store.interface';
 import { Actions, ofType } from '@ngrx/effects';
 import {
     HttpErrorResponse,
@@ -5,7 +6,16 @@ import {
     HttpInterceptorFn,
     HttpRequest,
 } from '@angular/common/http';
+import { PersistenceService } from '@app/shared/services/persistence.service';
+import { ShikicinemaStoreInterface } from '@app/store/shikicinema/types/shikicinema-store.interface';
 import { Store } from '@ngrx/store';
+import { attachAccessToken } from '@app/shared/utils/attach-access-token.function';
+import {
+    authShikimoriAction,
+    authShikimoriRefreshAction,
+    authShikimoriRefreshSuccessAction,
+    authShikimoriSuccessAction,
+} from '@app/store/auth/actions/auth.actions';
 import {
     catchError,
     exhaustMap,
@@ -15,36 +25,25 @@ import {
     switchMap,
     tap,
 } from 'rxjs/operators';
-import { inject } from '@angular/core';
-import { throwError } from 'rxjs';
-
-import AuthStoreInterface from '@app/store/auth/types/auth-store.interface';
-import { PersistenceService } from '@app/shared/services/persistence.service';
-import { ShikicinemaStoreInterface } from '@app/store/shikicinema/types/shikicinema-store.interface';
-import { attachAccessToken } from '@app/shared/utils/attach-access-token.function';
-import {
-    authShikimoriAction,
-    authShikimoriRefreshAction,
-    authShikimoriRefreshSuccessAction,
-    authShikimoriSuccessAction,
-} from '@app/store/auth/actions/auth.actions';
+import { environment } from '@app-env/environment';
 import {
     getUploadTokenAction,
     getUploadTokenSuccessAction,
 } from '@app/store/shikicinema/actions/get-upload-token.action';
+import { inject } from '@angular/core';
 import { isFreshToken } from '@app/shared/utils/is-fresh-token.function';
 import {
     selectShikicinemaTokenProcessing,
     selectShikicinemaUploadToken,
 } from '@app/store/shikicinema/selectors/shikicinema.selectors';
-
+import { throwError } from 'rxjs';
 
 export const shikicinemaApiInterceptor: HttpInterceptorFn = (request, next) => {
     const persistenceService = inject(PersistenceService);
     const actions$ = inject(Actions);
     const store = inject(Store);
 
-    const isShikicinemaApi = request?.url?.includes('smarthard');
+    const isShikicinemaApi = request?.url?.startsWith(environment.smarthard.apiURI);
     const isPostRequest = request?.method === 'POST';
 
     function refreshShikimoriTokens(request: HttpRequest<unknown>, next: HttpHandlerFn) {

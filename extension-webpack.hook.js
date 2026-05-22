@@ -58,6 +58,18 @@ const webpackConfig = {
                     from: './extension-src/watch-button.css'
                 },
                 {
+                    from: './src/assets/icon64.png',
+                    to: 'assets/icon64.png'
+                },
+                {
+                    from: './src/assets/icon128.png',
+                    to: 'assets/icon128.png'
+                },
+                {
+                    from: './src/assets/1x1.avif',
+                    to: 'assets/1x1.avif'
+                },
+                {
                     from: `./extension-src/manifest.${manifestVersion}.json`,
                     to: 'manifest.json',
                     transform: (content, _) => processManifest(content),

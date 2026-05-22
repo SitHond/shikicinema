@@ -26,7 +26,6 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 import { UrlSanitizerPipe } from '@app/shared/pipes/url-sanitizer/url-sanitizer.pipe';
 
-
 @Component({
     selector: 'app-player',
     standalone: true,
@@ -83,8 +82,13 @@ export class PlayerComponent {
 
     sourceChangedEffect = explicitEffect([this.source], () => {
         this.loaded.emit(false);
-        this._sourceLoading.set(true);
 
+        if (!this.source()) {
+            this._sourceLoading.set(false);
+            return;
+        }
+
+        this._sourceLoading.set(true);
         this.timeout$ = this._getTimeout(10_000);
     });
 

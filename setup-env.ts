@@ -6,25 +6,59 @@ dotenv.config();
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+function env(name: string, fallback = ''): string {
+    return process.env[name] ?? fallback;
+}
+
+function uniqueUris(uris: string[]): string[] {
+    return uris.filter((uri, index, allUris) => uri && allUris.indexOf(uri) === index);
+}
+
+function tsStringArray(values: string[]): string {
+    return `[${values.map((value) => `'${value}'`).join(', ')}]`;
+}
+
+function shikimoriApiURIs(): string[] {
+    return uniqueUris([
+        env('SHIKIMORI_API_URI', 'https://shikimori.rip/api'),
+        env('SHIKIMORI_FALLBACK_API_URI', 'https://shikimori.fi/api'),
+    ]);
+}
+
+function smarthardApiURIs(): string[] {
+    return uniqueUris([
+        env('SMARTHARD_API_URI', 'https://api.sithond.com'),
+        env('SMARTHARD_FALLBACK_API_URI', 'https://smarthard.net'),
+    ]);
+}
+
+const target = env('PLATFORM_TARGET', 'web-extension');
+const shikimoriApis = shikimoriApiURIs();
+const smarthardApis = smarthardApiURIs();
+const shikimoriRedirectUri = env('SHIKIMORI_REDIRECT_URI', 'urn:ietf:wg:oauth:2.0:oob');
+
 const envFileContent = `import { EnvironmentInterface } from '@app-root/environments';
 
 export const environment: EnvironmentInterface = {
     isProduction: ${isProduction},
-    target: '${process.env.PLATFORM_TARGET}',
+    target: '${target}',
     kodik: {
-        apiURI: '${process.env.KODIK_API_URI}',
-        authToken: '${process.env.KODIK_AUTH_TOKEN}',
+        apiURI: '${env('KODIK_API_URI', 'https://kodikapi.com')}',
+        authToken: '${env('KODIK_AUTH_TOKEN')}',
     },
     shikimori: {
-        apiURI: '${process.env.SHIKIMORI_API_URI}',
-        authClientId: '${process.env.SHIKIMORI_CLIENT_ID}',
-        authClientSecret: '${process.env.SHIKIMORI_CLIENT_SECRET}',
-        episodeNotificationToken: '${process.env.SHIKIMORI_EPISODE_NOTIFICATION_TOKEN}',
+        apiURI: '${shikimoriApis[0]}',
+        apiURIs: ${tsStringArray(shikimoriApis)},
+        authClientId: '${env('SHIKIMORI_CLIENT_ID')}',
+        authClientSecret: '${env('SHIKIMORI_CLIENT_SECRET')}',
+        episodeNotificationToken: '${env('SHIKIMORI_EPISODE_NOTIFICATION_TOKEN')}',
+        redirectUri: '${shikimoriRedirectUri}',
     },
     smarthard: {
-        apiURI: '${process.env.SMARTHARD_API_URI}',
-        authClientId: '${process.env.SMARTHARD_CLIENT_ID}',
-        authClientSecret: '${process.env.SMARTHARD_CLIENT_SECRET}',
+        apiURI: '${smarthardApis[0]}',
+        apiURIs: ${tsStringArray(smarthardApis)},
+        authClientId: '${env('SMARTHARD_CLIENT_ID')}',
+        authClientSecret: '${env('SMARTHARD_CLIENT_SECRET')}',
     },
 };\n`;
 

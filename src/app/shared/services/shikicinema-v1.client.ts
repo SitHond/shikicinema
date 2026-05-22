@@ -1,5 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { Observable, forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { ResourceIdType } from '@app/shared/types/resource-id.type';
 import { ShikivideosInterface, UploadToken } from '@app/shared/types/shikicinema/v1';
@@ -14,15 +16,23 @@ export class ShikicinemaV1Client {
     private http = inject(HttpClient);
 
     private readonly baseUri = environment.smarthard.apiURI;
+    private readonly apiURIs = environment.smarthard.apiURIs?.length
+        ? environment.smarthard.apiURIs
+        : [environment.smarthard.apiURI];
     private readonly clientId = environment.smarthard.authClientId;
     private readonly clientSecret = environment.smarthard.authClientSecret;
 
-    findAnimes(animeId: string) {
-        const url = `${this.baseUri}/api/shikivideos/${animeId}`;
+    findAnimes(animeId: string): Observable<ShikivideosInterface[]> {
         const params = new HttpParams()
             .set('limit', 'all');
 
-        return this.http.get<ShikivideosInterface[]>(url, { params });
+        return forkJoin(
+            this.apiURIs.map((apiURI) => this.http
+                .get<ShikivideosInterface[]>(`${apiURI}/api/shikivideos/${animeId}`, { params })
+                .pipe(catchError(() => of([] as ShikivideosInterface[])))),
+        ).pipe(
+            map((sources) => this.uniqueVideos(sources.flat())),
+        );
     }
 
     getUploadToken(shikimoriToken: string) {
@@ -58,9 +68,8 @@ export class ShikicinemaV1Client {
         return this.http.post<ShikivideosInterface>(url, null, { params });
     }
 
-    getContributions(uploaderId: ResourceIdType, page = 1) {
+    getContributions(uploaderId: ResourceIdType, page = 1): Observable<ShikivideosInterface[]> {
         const limit = 100;
-        const url = `${this.baseUri}/api/shikivideos/search`;
         let params = new HttpParams()
             .set('limit', limit)
             .set('uploader', uploaderId);
@@ -69,6 +78,33 @@ export class ShikicinemaV1Client {
             params = params.set('offset', (page - 1) * limit);
         }
 
-        return this.http.get<ShikivideosInterface[]>(url, { params });
+        return forkJoin(
+            this.apiURIs.map((apiURI) => this.http
+                .get<ShikivideosInterface[]>(`${apiURI}/api/shikivideos/search`, { params })
+                .pipe(catchError(() => of([] as ShikivideosInterface[])))),
+        ).pipe(
+            map((sources) => this.uniqueVideos(sources.flat())),
+        );
+    }
+
+    private uniqueVideos(videos: ShikivideosInterface[]): ShikivideosInterface[] {
+        const unique = new Map<string, ShikivideosInterface>();
+
+        for (const video of videos || []) {
+            const key = [
+                video.url,
+                video.anime_id,
+                video.episode,
+                video.kind,
+                video.language,
+                video.author,
+            ].join('|');
+
+            if (!unique.has(key)) {
+                unique.set(key, video);
+            }
+        }
+
+        return [...unique.values()];
     }
 }

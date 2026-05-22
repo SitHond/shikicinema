@@ -26,6 +26,7 @@ import {
     UserBriefInfoInterface,
     UserBriefRateInterface,
     UserInterface,
+    UserMangaRate,
     UserRateTargetEnum,
 } from '@app/shared/types/shikimori';
 import { AnimeRatesMetadataGQLResponse, UserAnimeRatesGQLResponse } from '@app/shared/types/shikimori/graphql';
@@ -56,13 +57,13 @@ export class ShikimoriClient {
     private readonly store = inject(Store);
     private readonly shikimoriDomain$ = this.store.select(selectShikimoriDomain).pipe(filter(Boolean));
 
-    getNewToken(authCode: string): Observable<ShikimoriCredentials> {
+    getNewToken(authCode: string, redirectUri = 'urn:ietf:wg:oauth:2.0:oob'): Observable<ShikimoriCredentials> {
         const params = new HttpParams()
             .set('grant_type', 'authorization_code')
             .set('client_id', environment.shikimori.authClientId)
             .set('client_secret', environment.shikimori.authClientSecret)
             .set('code', authCode)
-            .set('redirect_uri', 'urn:ietf:wg:oauth:2.0:oob');
+            .set('redirect_uri', redirectUri);
 
         return this.shikimoriDomain$.pipe(
             take(1),
@@ -143,6 +144,7 @@ export class ShikimoriClient {
         );
     }
 
+
     getUserAnimeRates(userId: ResourceIdType, query?: UserAnimeRatesQuery): Observable<UserAnimeRate[]> {
         let params = setPaginationToParams(query);
 
@@ -158,6 +160,25 @@ export class ShikimoriClient {
             take(1),
             switchMap(
                 (domain) => this.http.get<UserAnimeRate[]>(`${domain}/api/users/${userId}/anime_rates`, { params }),
+            ),
+        );
+    }
+
+    getUserMangaRates(userId: ResourceIdType, query?: UserAnimeRatesQuery): Observable<UserMangaRate[]> {
+        let params = setPaginationToParams(query);
+
+        if (query?.censored) {
+            params = params.set('censored', query.censored);
+        }
+
+        if (query?.status) {
+            params = params.set('status', query.status);
+        }
+
+        return this.shikimoriDomain$.pipe(
+            take(1),
+            switchMap(
+                (domain) => this.http.get<UserMangaRate[]>(`${domain}/api/users/${userId}/manga_rates`, { params }),
             ),
         );
     }

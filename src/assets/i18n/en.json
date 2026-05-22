@@ -1,6 +1,6 @@
 {
     "GLOBAL": {
-        "APP_NAME": "Shikicinema",
+        "APP_NAME": "ShikiRIP Cinema",
         "SHIKIMORI": {
             "ANIME_KINDS": {
                 "TV": "TV Series",
@@ -17,6 +17,13 @@
                 "ANONS": "planned",
                 "ONGOING": "airing",
                 "RELEASED": "released"
+            },
+            "MANGA_KINDS": {
+                "MANGA": "Manga",
+                "MANHWA": "Manhwa",
+                "MANHUA": "Manhua",
+                "ONE_SHOT": "One-shot",
+                "DOUJIN": "Doujin"
             }
         },
         "VIDEO": {
@@ -292,6 +299,21 @@
                     "INFO": "{{ used }} (cached {{ cached }}) of {{ total }}",
                     "CLEAR_CACHE_BTN": "Clear cache"
                 }
+            }
+        }
+    },
+    "MANGA_MODULE": {
+        "MANGA_PAGE": {
+            "PAGE_TITLE": "Manga list",
+            "READ_ACTION": "Read",
+            "LOAD_FAILURE": "Failed to load manga list",
+            "GRIDS": {
+                "WATCHING": "Reading",
+                "PLANNED": "Planned",
+                "COMPLETED": "Completed",
+                "ON_HOLD": "On hold",
+                "DROPPED": "Dropped",
+                "REWATCHING": "Rereading"
             }
         }
     }

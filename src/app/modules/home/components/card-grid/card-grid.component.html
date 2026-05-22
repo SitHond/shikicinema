@@ -9,7 +9,7 @@
             height="100%"
             width="auto"
             [link]="animeId | getPlayerLink"
-            [imageUrl]="animeId | getAnimePoster: isHiRes(): isSupportsAvif()"
+            [imageUrl]="(animeId | getAnimePoster: isHiRes() | async) || ''"
             [name]="animeId | getAnimeName: currentLang() | async"
             [kind]="animeId | getAnimeKind | async"
             [releaseDate]="animeId | getAnimeReleaseDate | async"

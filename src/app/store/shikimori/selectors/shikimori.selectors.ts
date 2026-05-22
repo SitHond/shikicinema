@@ -1,8 +1,21 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 
+import { DEFAULT_SHIKIMORI_DOMAIN } from '@app/core/providers/shikimori-domain/default-shikimori-domain.token';
 import { ShikimoriStoreInterface } from '@app/store/shikimori/types/shikimori-store.interface';
 
 export const selectShikimori = createFeatureSelector<ShikimoriStoreInterface>('shikimori');
+
+function toAbsoluteShikimoriUrl(url: string | undefined, domain = DEFAULT_SHIKIMORI_DOMAIN): string | undefined {
+    if (!url) {
+        return url;
+    }
+
+    if (/^https?:\/\//.test(url)) {
+        return url;
+    }
+
+    return `${domain || DEFAULT_SHIKIMORI_DOMAIN}${url}`;
+}
 
 export const selectShikimoriCurrentUser = createSelector(
     selectShikimori,
@@ -29,14 +42,27 @@ export const selectShikimoriCurrentUserId = createSelector(
     (currentUser) => currentUser?.id,
 );
 
+export const selectShikimoriDomain = createSelector(
+    selectShikimori,
+    (state) => state.shikimoriDomain,
+);
+
 export const selectShikimoriCurrentUserAvatar = createSelector(
     selectShikimoriCurrentUser,
-    (currentUser) => currentUser?.image?.x80 || currentUser?.image?.x64 || currentUser?.avatar,
+    selectShikimoriDomain,
+    (currentUser, domain) => toAbsoluteShikimoriUrl(
+        currentUser?.image?.x80 || currentUser?.image?.x64 || currentUser?.avatar,
+        domain,
+    ),
 );
 
 export const selectShikimoriCurrentUserAvatarHiRes = createSelector(
     selectShikimoriCurrentUser,
-    (currentUser) => currentUser?.image?.x160 || currentUser?.image?.x148 || currentUser?.avatar,
+    selectShikimoriDomain,
+    (currentUser, domain) => toAbsoluteShikimoriUrl(
+        currentUser?.image?.x160 || currentUser?.image?.x148 || currentUser?.avatar,
+        domain,
+    ),
 );
 
 export const selectShikimoriCurrentUserNickname = createSelector(
@@ -46,10 +72,18 @@ export const selectShikimoriCurrentUserNickname = createSelector(
 
 export const selectShikimoriCurrentUserProfileLink = createSelector(
     selectShikimoriCurrentUser,
-    (currentUser) => currentUser?.url,
+    selectShikimoriDomain,
+    (currentUser, domain) => toAbsoluteShikimoriUrl(currentUser?.url, domain),
 );
 
-export const selectShikimoriDomain = createSelector(
-    selectShikimori,
-    (state) => state.shikimoriDomain,
-);
+function toAbsoluteShikimoriUrl(url: string | undefined, domain = DEFAULT_SHIKIMORI_DOMAIN): string | undefined {
+    if (!url) {
+        return url;
+    }
+
+    if (/^https?:\/\//.test(url)) {
+        return url;
+    }
+
+    return `${domain || DEFAULT_SHIKIMORI_DOMAIN}${url}`;
+}

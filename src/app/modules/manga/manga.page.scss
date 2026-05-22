@@ -1,0 +1,78 @@
+.manga-page {
+    &__section {
+        max-width: 1550px;
+        margin: 0 auto 1rem;
+    }
+
+    &__section-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 2.875rem;
+        padding: 0 1rem;
+        border-radius: 0.25rem;
+        background: var(--ion-color-step-100, #202329);
+    }
+
+    &__section-text {
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: 0;
+    }
+
+    &__counter {
+        margin-left: 0.35rem;
+        color: var(--ion-color-medium);
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
+        gap: 1rem;
+        padding: 1rem 0.25rem;
+    }
+
+    &__item {
+        min-width: 0;
+    }
+
+    &__image-link {
+        display: block;
+        width: 100%;
+    }
+
+    &__image {
+        display: block;
+        width: 100%;
+        min-height: 0;
+    }
+
+    &__name {
+        margin: 0.5rem 0 0;
+        overflow: hidden;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+        color: var(--ion-color-medium);
+        font-size: 0.78rem;
+    }
+
+    &__read-btn {
+        width: 100%;
+        margin-top: 0.25rem;
+    }
+
+    &__message {
+        max-width: 1550px;
+        margin: 0 auto 1rem;
+    }
+}

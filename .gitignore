@@ -10,6 +10,7 @@ sources/
 
 src/environments/environment*.ts
 .env*
+!.env.example
 
 videos.csv
 

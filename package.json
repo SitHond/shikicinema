@@ -1,7 +1,7 @@
 {
-  "name": "shikicinema",
+  "name": "shikirip-cinema",
   "version": "0.9.11",
-  "description": "Returns video player on Shikimori",
+  "description": "ShikiRIP Cinema fork: returns video player on Shikimori",
   "main": "src/shikicinema.js",
   "engines": {
     "node": ">=18"
@@ -11,7 +11,7 @@
     "extension",
     "shikimori"
   ],
-  "author": "Smarthard",
+  "author": "Smarthard; fork maintained separately",
   "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/Smarthard/shikicinema/issues"
@@ -28,10 +28,17 @@
     "npx": "npx",
     "ionic": "ionic",
     "webpack-bundle-analyzer": "webpack-bundle-analyzer",
-    "start": "ionic serve",
+    "install-deps": "npm install",
+    "server:upload": "node server/upload-server.js",
+    "dev:with-upload": "npm-run-all -p server:upload start",
+    "extension:build": "node -e \"require('./extension-webpack.hook')()\"",
+    "start": "npm run set-env && npm run extension:build && ng run app:serve --host=127.0.0.1 --port=8100",
+    "start:ionic": "npm run set-env && ionic serve",
     "start:native": "npm-run-all -s 'ionic cap sync' 'npx cap sync @capacitor-community/electron' 'npx cap open @capacitor-community/electron'",
-    "build": "ionic build --c=development",
-    "build:prod": "ionic build --c=production",
+    "build": "npm run set-env && ionic build --c=development",
+    "build:prod": "npm run set-env && ionic build --c=production",
+    "bundle": "npm run build:prod",
+    "release": "npm run build:prod",
     "test": "ng test",
     "lint": "ng lint",
     "commit-lint": "ng lint --max-warnings 0",

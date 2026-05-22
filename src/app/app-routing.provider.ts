@@ -23,6 +23,10 @@ const routes: Routes = [
         loadChildren: () => import('./modules/player/player.routes').then((p) => p.PLAYER_ROUTES),
     },
     {
+        path: 'manga',
+        loadChildren: () => import('./modules/manga/manga.routes').then((m) => m.MANGA_ROUTES),
+    },
+    {
         path: 'contributions',
         loadChildren: () => import('./modules/contributions/contributions.routes').then((p) => p.CONTRIBUTIONS_ROUTES),
     },

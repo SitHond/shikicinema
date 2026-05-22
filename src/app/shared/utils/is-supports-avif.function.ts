@@ -11,7 +11,7 @@ export function isSupportsAvif(): Observable<boolean> {
             const image = new Image();
             image.onerror = () => resolve(false);
             image.onload = () => resolve(true);
-            image.src = '/assets/1x1.avif';
+            image.src = 'assets/1x1.avif';
         }).catch(() => false),
     ).pipe(
         startWith(undefined),

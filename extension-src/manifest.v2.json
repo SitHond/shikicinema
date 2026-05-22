@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "name": "shikicinema",
+    "name": "ShikiRIP Cinema",
     "version": "__processed-automatically__",
 
     "icons": {
@@ -8,7 +8,7 @@
       "128": "assets/icon128.png"
     },
 
-    "description": "Returns video player on Shikimori",
+    "description": "ShikiRIP Cinema fork: returns video player on Shikimori",
     "content_security_policy": "default-src 'self'; img-src *; frame-src *; font-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src *; script-src 'self'",
 
     "browser_specific_settings": {
@@ -20,11 +20,8 @@
     "content_scripts": [
       {
         "matches": [
-          "*://shikimori.org/*",
-          "*://shikimori.one/*",
-          "*://shikimori.me/*",
-          "*://shikimori.io/*",
-          "*://shiki.one/*"
+          "*://shikimori.rip/*",
+          "*://shikimori.fi/*"
         ],
         "js": [
           "shikicinema.js"
@@ -49,13 +46,13 @@
     ],
 
     "permissions": [
-      "https://shikimori.org/*",
-      "https://shikimori.one/*",
-      "https://shikimori.me/*",
-      "https://shikimori.io/*",
-      "https://shiki.one/*",
+      "https://shikimori.rip/*",
+      "https://shikimori.fi/*",
+      "https://api.sithond.com/*",
       "https://smarthard.net/*",
       "https://kodikapi.com/*",
+      "https://remanga.org/*",
+      "https://*.remanga.org/*",
       "https://smotret-anime.online/*",
       "storage",
       "unlimitedStorage",

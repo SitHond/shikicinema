@@ -1,8 +1,8 @@
 {
-    "name": "shikicinema",
+    "name": "shikirip-cinema",
     "version": "0.9.11",
-    "description": "Shikicinema - player app for Shikimori",
-    "author": "Smarthard",
+    "description": "ShikiRIP Cinema - player app for Shikimori",
+    "author": "Smarthard; fork maintained separately",
     "repository": {
         "type": "git",
         "url": "https://github.com/Smarthard/shikicinema.git"

@@ -22,7 +22,7 @@ import { GetPlayerLinkPipe } from '@app/shared/pipes/get-player-link/get-player-
 import { IS_SUPPORTS_AVIF } from '@app/core/providers/avif';
 import { SkeletonBlockComponent } from '@app/shared/components/skeleton-block/skeleton-block.component';
 import { UserAnimeRate } from '@app/shared/types/shikimori';
-import { provideSmarthardNetImageLoader } from '@app/shared/providers';
+import { provideShikimoriImageLoader } from '@app/shared/providers';
 import { trackById } from '@app/shared/utils/common-ngfor-tracking';
 
 @Component({
@@ -42,7 +42,7 @@ import { trackById } from '@app/shared/utils/common-ngfor-tracking';
         GetAnimeReleaseDatePipe,
     ],
     providers: [
-        provideSmarthardNetImageLoader(),
+        provideShikimoriImageLoader(160),
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     encapsulation: ViewEncapsulation.None,

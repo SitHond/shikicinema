@@ -5,12 +5,15 @@ export interface EnvironmentInterface {
     target: PlatformTargetType;
     shikimori: {
         apiURI: string;
+        apiURIs: string[];
         authClientId: string;
         authClientSecret: string;
         episodeNotificationToken: string;
+        redirectUri: string;
     };
     smarthard: {
         apiURI: string;
+        apiURIs: string[];
         authClientId: string;
         authClientSecret: string;
     };

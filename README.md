@@ -1,6 +1,8 @@
-# shikicinema
+# ShikiRIP Cinema
 
-Браузерное расширение, возвращающее возможность смотреть аниме онлайн на сайте [Shikimori](https://shikimori.one), с поддержкой учета просмотра и возможностью добавления видео.
+Форк Shikicinema: браузерное расширение, возвращающее возможность смотреть аниме онлайн на сайте [Shikimori](https://shikimori.rip), с поддержкой учета просмотра и возможностью добавления видео.
+
+> Это форк проекта `Smarthard/shikicinema`. Исходная лицензия BSD 2-Clause сохранена в `LICENSE`; отдельная пометка о форке находится в `FORK_NOTICE.md`.
 
 -   [FAQ](https://github.com/Smarthard/shikicinema#faq)
     -   [Почему стоит пользоваться именно Shikicinema](https://github.com/Smarthard/shikicinema#%D0%BF%D0%BE%D1%87%D0%B5%D0%BC%D1%83-%D1%81%D1%82%D0%BE%D0%B8%D1%82-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C%D1%81%D1%8F-%D0%B8%D0%BC%D0%B5%D0%BD%D0%BD%D0%BE-shikicinema)
@@ -79,32 +81,35 @@ Shikicinema и сайт Smarthard.net не располагают физичес
 
 ### Подготовка к запуску
 
-Для полностью функциональной сборки необходимы следующие переменные окружения:
+1. Установите зависимости: `npm run install-deps` или `npm install`.
+2. Создайте `.env`: скопируйте `.env.example` в `.env` и заполните токены, которые нужны для вашей сборки. Для dev-запуска без авторизации можно оставить OAuth-поля пустыми.
+3. Запустите dev-сервер: `npm start`. Он напрямую использует Angular dev server на `http://127.0.0.1:8100/`, потому что `ionic serve` на некоторых системах зависает на проверке connectivity.
 
--   `KODIK_TOKEN=                 # Токен для использования Kodikapi`
--   `EPISODE_NOTIFICATION_TOKEN=  # Токен для создания уведомлений о новой серии (https://shikimori.one/api/doc/2.0/episode_notifications/create)`
--   `SHIKIVIDEOS_CLIENT_ID=       # SmarthardNet OAuth client id`
--   `SHIKIVIDEOS_CLIENT_SECRET=   # SmarthardNet OAuth client secret`
--   `SHIKIMORI_CLIENT_ID=         # Shikimori OAuth client id`
--   `SHIKIMORI_CLIENT_SECRET=     # Shikimori OAuth client secret`
+Если нужна именно Ionic-обёртка, остался запасной вариант: `npm run start:ionic`.
 
-1.  `npm run install-deps`;
-2.  `npm run release` или `npm run bundle`;
+Полезные команды:
 
-Также можно использовать `npm run watch`, если вы активно вносите изменения в код UI.
+-   `npm run set-env` - сгенерировать `src/environments/environment.ts` и `environment.prod.ts` из `.env`;
+-   `npm run build` - development-сборка расширения;
+-   `npm run build:prod`, `npm run bundle` или `npm run release` - production-сборка расширения;
+-   `npm run watch` - сборка UI в watch-режиме.
+
+Для полностью функциональной сборки используются переменные из `.env.example`: `KODIK_API_URI`, `KODIK_AUTH_TOKEN`, `SHIKIMORI_API_URI`, `SHIKIMORI_FALLBACK_API_URI`, `SHIKIMORI_CLIENT_ID`, `SHIKIMORI_CLIENT_SECRET`, `SHIKIMORI_REDIRECT_URI`, `SHIKIMORI_EPISODE_NOTIFICATION_TOKEN`, `SMARTHARD_API_URI`, `SMARTHARD_FALLBACK_API_URI`, `SMARTHARD_CLIENT_ID`, `SMARTHARD_CLIENT_SECRET`, `PLATFORM_TARGET`.
+
+Для OAuth-приложения Shikimori в UI настроек укажите Redirect URI: `urn:ietf:wg:oauth:2.0:oob`. Такое же значение должно быть в `.env` в `SHIKIMORI_REDIRECT_URI`.
 
 ### Загрузка временного плагина в Firefox
 
 1.  Перейдите на страницу `about:debugging`;
 2.  Нажмите "Загрузить временное дополнение...";
-3.  Выберите `manifest.json` в директории `shikicinema`;
+3.  Выберите `manifest.json` в директории `shikirip-cinema`;
 
 ### Загрузка временного плагина в Chrome
 
 1.  Перейдите на страницу `chrome://extensions`;
 2.  Включите режим разработчика;
 3.  Нажмите "Загрузить распакованное расширение...";
-4.  Выберите директорию `shikicinema`;
+4.  Выберите директорию `shikirip-cinema`;
 
 Готово, можно проверять работу.
 
@@ -127,3 +132,28 @@ Shikicinema и сайт Smarthard.net не располагают физичес
 -   На устройстве пользователя хранится информация о просмотрах серий для автоматического учета его предпочтений;
 
 -   Пользовательские запросы к Шикимори или к архивам видео используют шифрование посредством HTTPS-соединения.
+
+### Локальный сервер загрузки
+
+Для разработки можно поднять совместимый локальный сервер архива видео:
+
+```sh
+npm run server:upload
+```
+
+По умолчанию он слушает `http://127.0.0.1:8787` и хранит записи в `data/shikivideos.json`.
+Чтобы запустить фронт и сервер вместе:
+
+```sh
+npm run dev:with-upload
+```
+
+Для локального сервера в `.env` используйте:
+
+```env
+SMARTHARD_API_URI=http://127.0.0.1:8787
+SMARTHARD_CLIENT_ID=local-dev
+SMARTHARD_CLIENT_SECRET=local-dev
+```
+
+Поддерживаемые endpoint'ы: `PUT /oauth/token`, `GET /api/shikivideos/:animeId`, `GET /api/shikivideos/search`, `POST /api/shikivideos`.

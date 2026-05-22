@@ -1,5 +1,5 @@
 {
-    "appId": "net.smarthard.shikicinema",
+    "appId": "net.smarthard.shikirip.cinema",
     "electronVersion": "22.3.25",
     "directories": {
         "buildResources": "resources"
