@@ -6,7 +6,7 @@
         "64": "assets/icon64.png",
         "128": "assets/icon128.png"
     },
-    "description": "Watch anime directly on Shikimori. ShikiRIP Cinema adds an inline video player to shikimori.rip, shikimori.fi, shikimori.net and shikimori.moe anime pages. Browse your watching list, track episodes and switch between dubbed and subtitled versions without leaving Shikimori.",
+    "description": "Adds an inline video player to Shikimori (rip/fi/net/moe). Browse your anime list, track episodes, switch between dubs and subs.",
     "content_security_policy": "default-src 'self'; img-src *; frame-src *; font-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src *; script-src 'self'",
     "browser_specific_settings": {
         "gecko": {
