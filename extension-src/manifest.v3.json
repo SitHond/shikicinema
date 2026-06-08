@@ -2,65 +2,60 @@
     "manifest_version": 3,
     "name": "ShikiRIP Cinema",
     "version": "__processed-automatically__",
-
     "icons": {
-      "64": "assets/icon64.png",
-      "128": "assets/icon128.png"
+        "64": "assets/icon64.png",
+        "128": "assets/icon128.png"
     },
-
-    "description": "ShikiRIP Cinema fork: returns video player on Shikimori",
+    "description": "Watch anime directly on Shikimori. ShikiRIP Cinema adds an inline video player to shikimori.rip, shikimori.fi, shikimori.net and shikimori.moe anime pages. Browse your watching list, track episodes and switch between dubbed and subtitled versions without leaving Shikimori.",
     "content_security_policy": {
-      "extension_pages": "default-src 'self'; img-src *; frame-src *; font-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src *; script-src 'self'"
+        "extension_pages": "default-src 'self'; img-src *; frame-src *; font-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src https://shikimori.rip https://shikimori.fi https://shikimori.net https://shikimori.moe https://api.sithond.com https://smarthard.net ws://127.0.0.1:*; script-src 'self'"
     },
-
     "content_scripts": [
-      {
-        "matches": [
-          "*://shikimori.rip/*",
-          "*://shikimori.fi/*"
-        ],
-        "js": [
-          "shikicinema.js"
-        ],
-        "css": [
-          "watch-button.css"
-        ],
-        "run_at": "document_idle"
-      }
+        {
+            "matches": [
+                "*://shikimori.rip/*",
+                "*://shikimori.fi/*",
+                "*://shikimori.net/*",
+                "*://shikimori.moe/*"
+            ],
+            "js": [
+                "shikicinema.js"
+            ],
+            "css": [
+                "watch-button.css"
+            ],
+            "run_at": "document_idle"
+        }
     ],
-
     "background": {
-      "service_worker": "background.js"
+        "service_worker": "background.js"
     },
-
     "web_accessible_resources": [
-      {
-        "resources": [
-          "assets/*.png",
-          "index.html",
-          "styles.css",
-          "*.js"
-        ],
-        "matches": [
-          "<all_urls>"
-        ]
-      }
+        {
+            "resources": [
+                "assets/*.png",
+                "index.html"
+            ],
+            "matches": [
+                "*://shikimori.rip/*",
+                "*://shikimori.fi/*",
+                "*://shikimori.net/*",
+                "*://shikimori.moe/*"
+            ]
+        }
     ],
-
     "permissions": [
-      "storage",
-      "tabs",
-      "unlimitedStorage"
+        "storage",
+        "tabs"
     ],
-
     "host_permissions": [
-      "https://shikimori.rip/*",
-      "https://shikimori.fi/*",
-      "https://api.sithond.com/*",
-      "https://smarthard.net/*",
-      "https://kodikapi.com/*",
-      "https://remanga.org/*",
-      "https://*.remanga.org/*",
-      "https://smotret-anime.online/*"
+        "https://shikimori.rip/*",
+        "https://shikimori.fi/*",
+        "https://shikimori.net/*",
+        "https://shikimori.moe/*",
+        "https://api.sithond.com/*",
+        "https://smarthard.net/*",
+        "https://remanga.org/*",
+        "https://*.remanga.org/*"
     ]
-  }
+}

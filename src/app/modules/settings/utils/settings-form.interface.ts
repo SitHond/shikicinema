@@ -10,4 +10,6 @@ export interface SettingsFormInterface {
     shikimoriDomain: string;
     isUserAnimeStatusReorder: boolean;
     userAnimeStatusOrder: string[];
+    discordRichPresence: boolean;
+    discordClientId: string;
 }

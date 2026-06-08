@@ -159,6 +159,19 @@
 
             <ion-item
                 class="menu-item"
+                [routerLink]="['support']"
+            >
+                <ion-icon
+                    class="menu-item__icon"
+                    icon="help-circle-outline"
+                ></ion-icon>
+                <ion-text class="menu-item__label menu-item__label--with-icon">
+                    {{ 'GLOBAL.HEADER.TOOLBAR_MENU.SUPPORT' | transloco }}
+                </ion-text>
+            </ion-item>
+
+            <ion-item
+                class="menu-item"
                 id="languages-popover"
                 [button]="true"
             >
@@ -234,6 +247,19 @@
                 ></ion-icon>
                 <ion-text class="menu-item__label menu-item__label--with-icon">
                     {{ 'GLOBAL.HEADER.TOOLBAR_MENU.SETTINGS' | transloco }}
+                </ion-text>
+            </ion-item>
+
+            <ion-item
+                class="menu-item"
+                [routerLink]="['support']"
+            >
+                <ion-icon
+                    class="menu-item__icon"
+                    icon="help-circle-outline"
+                ></ion-icon>
+                <ion-text class="menu-item__label menu-item__label--with-icon">
+                    {{ 'GLOBAL.HEADER.TOOLBAR_MENU.SUPPORT' | transloco }}
                 </ion-text>
             </ion-item>
 

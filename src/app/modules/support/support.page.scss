@@ -1,0 +1,20 @@
+.support-page {
+    &__card {
+        margin-bottom: 16px;
+    }
+
+    &__link-item {
+        --padding-start: 0;
+        cursor: pointer;
+
+        &:hover {
+            --background: var(--ion-item-background-hover, rgba(0, 0, 0, 0.04));
+        }
+
+        ion-label p {
+            font-size: 0.8em;
+            color: var(--ion-color-medium);
+            word-break: break-all;
+        }
+    }
+}

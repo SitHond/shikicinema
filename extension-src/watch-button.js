@@ -4,8 +4,8 @@ import { FETCH_RESOURCE_TIMEOUT, fetch } from './fetch-timeout';
 import { getShikimoriLocale } from './get-shikimori-locale';
 
 const PLAYER_URL = chrome.runtime.getURL('/index.html');
-const SHIKIVIDEOS_API = 'https://smarthard.net/api/shikivideos';
-const KODIK_TOKEN = `${process.env.KODIK_AUTH_TOKEN}`;
+const SHIKIRIP_API = `${process.env.SMARTHARD_API_URI}`;
+const SHIKIVIDEOS_API = `${SHIKIRIP_API}/api/shikivideos`;
 const PLAYER_BUTTON = document.createElement('a');
 const INFO_DIV = document.createElement('div');
 
@@ -70,9 +70,9 @@ function _getUploadedEpisodes(animeId, timeout = FETCH_RESOURCE_TIMEOUT) {
 }
 
 function _getKodikEpisodes(anime, timeout = FETCH_RESOURCE_TIMEOUT) {
-  const query = `with_episodes=true&shikimori_id=${anime.id}&token=${KODIK_TOKEN}`;
+  const query = `with_episodes=true&shikimori_id=${anime.id}`;
 
-  return fetch(`https://kodikapi.com/search?${query}`, {}, timeout)
+  return fetch(`${SHIKIRIP_API}/api/kodik/search?${query}`, {}, timeout)
     .then((res) => res.json())
     .then((res) => res?.total)
     .catch(() => 0);

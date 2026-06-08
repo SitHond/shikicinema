@@ -11,6 +11,7 @@ sources/
 src/environments/environment*.ts
 .env*
 !.env.example
+.env.example
 
 videos.csv
 
@@ -30,6 +31,9 @@ $RECYCLE.BIN/
 log.txt
 npm-debug.log*
 
+dist.zip
+shikirip-cinema-cws.zip
+
 /.ionic
 /.sass-cache
 /.sourcemaps
@@ -37,9 +41,17 @@ npm-debug.log*
 /.vscode
 /coverage
 /dist
+/shikirip-cinema-cws
 /node_modules
 /platforms
 /plugins
 /www
+
+# Android build artifacts (Capacitor)
+android/.gradle/
+android/app/build/
+android/local.properties
+android/app/release/
+android/capacitor-cordova-android-plugins/
 
 .nx

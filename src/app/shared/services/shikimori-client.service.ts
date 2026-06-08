@@ -51,40 +51,40 @@ import { setPaginationToParams } from '@app/shared/types/shikimori/helpers';
 export class ShikimoriClient {
     readonly episodeNotificationToken = environment.shikimori.episodeNotificationToken;
     readonly shikimoriClientId = environment.shikimori.authClientId;
-    readonly shikimoriClientSecret = environment.shikimori.authClientSecret;
 
     private readonly http = inject(HttpClient);
     private readonly store = inject(Store);
+    private readonly shikiripApiURI = environment.smarthard.apiURI;
     private readonly shikimoriDomain$ = this.store.select(selectShikimoriDomain).pipe(filter(Boolean));
 
     getNewToken(authCode: string, redirectUri = 'urn:ietf:wg:oauth:2.0:oob'): Observable<ShikimoriCredentials> {
-        const params = new HttpParams()
-            .set('grant_type', 'authorization_code')
-            .set('client_id', environment.shikimori.authClientId)
-            .set('client_secret', environment.shikimori.authClientSecret)
-            .set('code', authCode)
-            .set('redirect_uri', redirectUri);
-
         return this.shikimoriDomain$.pipe(
             take(1),
-            switchMap((domain) => this.http.post<Credentials>(`${domain}/oauth/token`, null, { params })
-                .pipe(map(toShikimoriCredentials)),
-            ),
+            switchMap((domain) => {
+                const params = new HttpParams()
+                    .set('grant_type', 'authorization_code')
+                    .set('code', authCode)
+                    .set('redirect_uri', redirectUri)
+                    .set('shikimori_domain', domain);
+
+                return this.http.post<Credentials>(`${this.shikiripApiURI}/api/shikimori/oauth/token`, null, { params })
+                    .pipe(map(toShikimoriCredentials));
+            }),
         );
     }
 
     refreshToken(refreshToken: string): Observable<ShikimoriCredentials> {
-        const params = new HttpParams()
-            .set('grant_type', 'refresh_token')
-            .set('client_id', this.shikimoriClientId)
-            .set('client_secret', this.shikimoriClientSecret)
-            .set('refresh_token', refreshToken);
-
         return this.shikimoriDomain$.pipe(
             take(1),
-            switchMap((domain) => this.http.post<Credentials>(`${domain}/oauth/token`, null, { params })
-                .pipe(map(toShikimoriCredentials)),
-            ),
+            switchMap((domain) => {
+                const params = new HttpParams()
+                    .set('grant_type', 'refresh_token')
+                    .set('refresh_token', refreshToken)
+                    .set('shikimori_domain', domain);
+
+                return this.http.post<Credentials>(`${this.shikiripApiURI}/api/shikimori/oauth/token`, null, { params })
+                    .pipe(map(toShikimoriCredentials));
+            }),
         );
     }
 

@@ -70,6 +70,7 @@
                 "ANIME_LIST": "Список аниме",
                 "MANGA_LIST": "Список манги",
                 "SETTINGS": "Настройки",
+                "SUPPORT": "Поддержка",
                 "THEME_TOGGLE": {
                     "LIGHT": "Светлая тема",
                     "DARK": "Тёмная тема"
@@ -320,6 +321,17 @@
                 "DROPPED": "Брошено",
                 "REWATCHING": "Перечитываю"
             }
+        }
+    },
+    "SUPPORT_MODULE": {
+        "SUPPORT_PAGE": {
+            "TITLE": "Поддержка",
+            "DESCRIPTION": "Если у вас возникли вопросы или проблемы с приложением, вы можете связаться с нами через следующие каналы.",
+            "CONTACTS_TITLE": "Контакты",
+            "TELEGRAM_CHANNEL": "Telegram-канал",
+            "SHIKIMORI_CLUB": "Клуб на Shikimori",
+            "LEGAL_TITLE": "Правовая информация",
+            "PRIVACY_POLICY": "Политика конфиденциальности"
         }
     }
 }

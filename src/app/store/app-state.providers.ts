@@ -1,6 +1,5 @@
 import { Actions, provideEffects } from '@ngrx/effects';
 import { RootStoreConfig, provideStore } from '@ngrx/store';
-import { StoreDevtoolsOptions, provideStoreDevtools } from '@ngrx/store-devtools';
 
 import { AppStoreInterface } from '@app/store/app-store.interface';
 import { AuthNativeAppEffects } from '@app/store/auth/effects/auth.native-app.effects';
@@ -38,12 +37,6 @@ const storeConfig: RootStoreConfig<AppStoreInterface> = {
     ],
 };
 
-const storeDevtoolsConfig: StoreDevtoolsOptions = {
-    name: 'Shikicinema State Devtools',
-    maxAge: 100,
-    logOnly: environment.isProduction,
-};
-
 export function provideAppState() {
     return [
         provideStore<AppStoreInterface>({
@@ -60,7 +53,7 @@ export function provideAppState() {
             CacheEffects,
             authEffectFactory(),
         ]),
-        provideStoreDevtools(storeDevtoolsConfig),
+        ...environment.devtoolsProviders,
         Actions,
         ElectronIpcProxyService,
         ShikimoriClient,

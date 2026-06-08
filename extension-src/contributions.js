@@ -6,7 +6,7 @@ import { getShikimoriLocale } from './get-shikimori-locale';
 let timeout = null;
 
 const PLAYER_URL = chrome.runtime.getURL('/index.html');
-const SHIKIVIDEOS_API = 'https://smarthard.net/api/shikivideos';
+const SHIKIVIDEOS_API = `${process.env.SMARTHARD_API_URI}/api/shikivideos`;
 const CONTRIBUTIONS_ELEMENT_CLASS_NAME = 'uploader_contributions';
 
 function hasAppendedCotributions(htmlEl) {
@@ -58,7 +58,12 @@ async function correctContributions(element) {
     const uploadsTextEn = `${contributions} video upload${contributions > 1 ? 's' : ''}`;
 
     element.classList.add(CONTRIBUTIONS_ELEMENT_CLASS_NAME);
-    element.innerHTML = `<span><a href="${contribPageUrl}">${isEnglishLocale ? uploadsTextEn : uploadsTextRu}</a></span>`;
+    const link = document.createElement('a');
+    link.href = contribPageUrl;
+    link.textContent = isEnglishLocale ? uploadsTextEn : uploadsTextRu;
+    const span = document.createElement('span');
+    span.appendChild(link);
+    element.replaceChildren(span);
 
     // если нет списка активности вообще, создаём
     if (
@@ -69,7 +74,9 @@ async function correctContributions(element) {
       cInfoDiv.classList.add(CONTRIBUTIONS_ELEMENT_CLASS_NAME);
       activityDiv = document.createElement('div');
       activityDiv.classList.add('c-additionals');
-      activityDiv.innerHTML = isEnglishLocale ? '<b>Activity</b>' : '<b>Активность:</b>';
+      const bold = document.createElement('b');
+      bold.textContent = isEnglishLocale ? 'Activity' : 'Активность:';
+      activityDiv.appendChild(bold);
       cInfoDiv.appendChild(activityDiv);
     }
 

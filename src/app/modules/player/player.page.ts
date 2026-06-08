@@ -41,6 +41,7 @@ import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief
 import { Comment } from '@app/shared/types/shikimori/comment';
 import { CommentsComponent } from '@app/modules/player/components/comments/comments.component';
 import { ControlPanelComponent } from '@app/modules/player/components/control-panel/control-panel.component';
+import { DiscordRpcService } from '@app/core/services/discord-rpc.service';
 import { FilterByKindPipe } from '@app/shared/pipes/filter-by-kind/filter-by-kind.pipe';
 import { GetActiveKindsPipe } from '@app/shared/pipes/get-active-kinds/get-active-kinds.pipe';
 import { GetShikimoriPagePipe } from '@app/shared/pipes/get-shikimori-page/get-shikimori-page.pipe';
@@ -86,6 +87,8 @@ import { isEq } from '@app/shared/utils/is-eq.function';
 import { isEqId } from '@app/shared/utils/is-eq-id.function';
 import {
     selectAuthorPreferencesByAnime,
+    selectDiscordClientId,
+    selectDiscordRichPresence,
     selectDomainFilters,
     selectDomainPreferencesByAnime,
     selectKindPreferencesByAnime,
@@ -146,6 +149,7 @@ export class PlayerPage implements OnInit {
 
     private readonly store = inject(Store);
     private readonly router = inject(Router);
+    private readonly discordRpc = inject(DiscordRpcService);
     private readonly title = inject(Title);
     private readonly platform = inject(Platform);
     private readonly breakpointObserver = inject(BreakpointObserver);
@@ -161,6 +165,8 @@ export class PlayerPage implements OnInit {
     private readonly userCommentFormEl = viewChild('userCommentForm', { read: ElementRef });
 
     readonly isPreferencesToggleOn = this.store.selectSignal(selectPreferencesToggle);
+    readonly isDiscordRichPresence = this.store.selectSignal(selectDiscordRichPresence);
+    readonly discordClientId = this.store.selectSignal(selectDiscordClientId);
     readonly playerMode = this.store.selectSignal(selectPlayerMode);
     readonly playerKindDisplayMode = this.store.selectSignal(selectPlayerKindDisplayMode);
     readonly isUserAuthorized = this.store.selectSignal(selectIsAuthenticated);
@@ -280,6 +286,22 @@ export class PlayerPage implements OnInit {
             this.changeTitle(anime, episode);
 
             this.store.dispatch(visitAnimePageAction({ anime, episode }));
+        }
+    });
+
+    readonly discordActivityEffect = effect(() => {
+        const anime = this.anime();
+        const episode = this.episodeQ();
+        const isEnabled = this.isDiscordRichPresence();
+        const clientId = this.discordClientId();
+
+        if (isEnabled && clientId && anime?.name && episode) {
+            this.discordRpc.updateActivity(clientId, {
+                details: getAnimeName(anime, null) || anime.name,
+                state: `Серия ${episode}`,
+                timestamps: { start: Date.now() },
+                type: 3,
+            });
         }
     });
 

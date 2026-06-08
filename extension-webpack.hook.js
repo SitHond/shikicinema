@@ -11,6 +11,7 @@ dotenv.config();
 
 const isProduction = process.env.NODE_ENV === 'production';
 const manifestVersion = process.env.MANIFEST_VERSION || 'v2';
+const smarthardApiURI = (process.env.SMARTHARD_API_URI || 'https://api.sithond.com').replace(/\/+$/, '');
 
 function processManifest(content) {
     const manifestContents = JSON.parse(content.toString());
@@ -77,7 +78,7 @@ const webpackConfig = {
             ]
         }),
         new webpack.DefinePlugin({
-            'process.env.KODIK_AUTH_TOKEN': JSON.stringify(process.env.KODIK_AUTH_TOKEN)
+            'process.env.SMARTHARD_API_URI': JSON.stringify(smarthardApiURI)
         })
     ],
     optimization: {
@@ -94,7 +95,7 @@ const webpackConfig = {
             })
         ],
     },
-    devtool: isProduction ? 'hidden-source-map' : 'source-map'
+    devtool: isProduction ? false : 'source-map'
 };
 
 module.exports = function() {

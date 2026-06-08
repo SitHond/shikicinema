@@ -37,20 +37,24 @@ const shikimoriApis = shikimoriApiURIs();
 const smarthardApis = smarthardApiURIs();
 const shikimoriRedirectUri = env('SHIKIMORI_REDIRECT_URI', 'urn:ietf:wg:oauth:2.0:oob');
 
-const envFileContent = `import { EnvironmentInterface } from '@app-root/environments';
+const devtoolsImport = isProduction
+    ? ''
+    : `import { provideStoreDevtools } from '@ngrx/store-devtools';\n\n`;
+
+const devtoolsProviders = isProduction
+    ? `devtoolsProviders: [],`
+    : `devtoolsProviders: [provideStoreDevtools({ name: 'Shikicinema State Devtools', maxAge: 100 })],`;
+
+const envFileContent = `${devtoolsImport}import { EnvironmentInterface } from '@app-root/environments';
 
 export const environment: EnvironmentInterface = {
     isProduction: ${isProduction},
     target: '${target}',
-    kodik: {
-        apiURI: '${env('KODIK_API_URI', 'https://kodikapi.com')}',
-        authToken: '${env('KODIK_AUTH_TOKEN')}',
-    },
+    ${devtoolsProviders}
     shikimori: {
         apiURI: '${shikimoriApis[0]}',
         apiURIs: ${tsStringArray(shikimoriApis)},
         authClientId: '${env('SHIKIMORI_CLIENT_ID')}',
-        authClientSecret: '${env('SHIKIMORI_CLIENT_SECRET')}',
         episodeNotificationToken: '${env('SHIKIMORI_EPISODE_NOTIFICATION_TOKEN')}',
         redirectUri: '${shikimoriRedirectUri}',
     },
@@ -58,7 +62,6 @@ export const environment: EnvironmentInterface = {
         apiURI: '${smarthardApis[0]}',
         apiURIs: ${tsStringArray(smarthardApis)},
         authClientId: '${env('SMARTHARD_CLIENT_ID')}',
-        authClientSecret: '${env('SMARTHARD_CLIENT_SECRET')}',
     },
 };\n`;
 

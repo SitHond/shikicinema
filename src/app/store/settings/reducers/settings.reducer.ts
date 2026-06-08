@@ -28,6 +28,8 @@ const initialState: SettingsStoreInterface = {
     useCustomAnimeStatusOrder: false,
     userAnimeStatusOrder: DEFAULT_ANIME_STATUS_ORDER,
     filterPlayerDomains: [],
+    discordRichPresence: false,
+    discordClientId: '',
 };
 
 const reducer = createReducer(

@@ -140,6 +140,8 @@ export class SettingsPage implements OnInit {
         useCustomAnimeStatusOrder: new FormControl<boolean>(false),
         userAnimeStatusOrder: mapAnimeStatusOrderToFormArray(DEFAULT_ANIME_STATUS_ORDER),
         filterPlayerDomains: new FormControl([]),
+        discordRichPresence: new FormControl<boolean>(false),
+        discordClientId: new FormControl<string>(''),
     });
 
     readonly themeCtrl = this.settingsForm?.get('theme');
@@ -149,6 +151,8 @@ export class SettingsPage implements OnInit {
     readonly useCustomAnimeStatusOrder = this.settingsForm?.get('useCustomAnimeStatusOrder');
     readonly userAnimeStatusOrderCtrl = this.settingsForm?.get('userAnimeStatusOrder');
     readonly filterPlayerDomainsCtrl = this.settingsForm?.get('filterPlayerDomains');
+    readonly discordRichPresenceCtrl = this.settingsForm?.get('discordRichPresence');
+    readonly discordClientIdCtrl = this.settingsForm?.get('discordClientId');
     readonly addFilterDomainCtrl = new FormControl('', [urlValidator()]);
 
     readonly localStorageLimit = this.persistenceService.getMaxByxes();

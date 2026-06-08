@@ -35,6 +35,10 @@ const routes: Routes = [
         loadChildren: () => import('./modules/settings/settings.routes').then((p) => p.SETTINGS_ROUTES),
     },
     {
+        path: 'support',
+        loadChildren: () => import('./modules/support/support.routes').then((s) => s.SUPPORT_ROUTES),
+    },
+    {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',

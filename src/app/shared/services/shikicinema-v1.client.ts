@@ -19,8 +19,6 @@ export class ShikicinemaV1Client {
     private readonly apiURIs = environment.smarthard.apiURIs?.length
         ? environment.smarthard.apiURIs
         : [environment.smarthard.apiURI];
-    private readonly clientId = environment.smarthard.authClientId;
-    private readonly clientSecret = environment.smarthard.authClientSecret;
 
     findAnimes(animeId: string): Observable<ShikivideosInterface[]> {
         const params = new HttpParams()
@@ -39,8 +37,6 @@ export class ShikicinemaV1Client {
         const url = `${this.baseUri}/oauth/token`;
         const params = new HttpParams()
             .set('grant_type', 'shikimori_token')
-            .set('client_id', this.clientId)
-            .set('client_secret', this.clientSecret)
             .set('scopes', 'database:shikivideos_create');
         const body = { shikimori_token: shikimoriToken };
 
@@ -78,13 +74,9 @@ export class ShikicinemaV1Client {
             params = params.set('offset', (page - 1) * limit);
         }
 
-        return forkJoin(
-            this.apiURIs.map((apiURI) => this.http
-                .get<ShikivideosInterface[]>(`${apiURI}/api/shikivideos/search`, { params })
-                .pipe(catchError(() => of([] as ShikivideosInterface[])))),
-        ).pipe(
-            map((sources) => this.uniqueVideos(sources.flat())),
-        );
+        return this.http
+            .get<ShikivideosInterface[]>(`${this.baseUri}/api/shikivideos/search`, { params })
+            .pipe(catchError(() => of([] as ShikivideosInterface[])));
     }
 
     private uniqueVideos(videos: ShikivideosInterface[]): ShikivideosInterface[] {

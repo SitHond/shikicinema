@@ -1,18 +1,21 @@
 .episode-selector {
     display: flex;
-    gap: .25rem;
-    padding: .5rem .25rem;
-    background-color: var(--ion-color-light);
-    border-radius: .25rem;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background-color: #1d2227;
+    border-radius: 0;
 
     .scrollbar {
-        --scrollbar-thumb-color: var(--shc-scrollbar-color);
-        --scrollbar-track-color: var(--shc-scrollbar-background-color);
+        --scrollbar-thumb-color: rgba(var(--ion-color-primary-rgb), 0.5);
+        --scrollbar-track-color: transparent;
+        width: 100%;
     }
 
     &__wrapper {
         display: flex;
-        gap: 0.25rem;
+        gap: 1.6rem;
+        align-items: center;
+        min-width: max-content;
         overflow: hidden;
     }
 }

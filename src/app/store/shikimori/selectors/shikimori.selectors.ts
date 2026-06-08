@@ -14,7 +14,9 @@ function toAbsoluteShikimoriUrl(url: string | undefined, domain = DEFAULT_SHIKIM
         return url;
     }
 
-    return `${domain || DEFAULT_SHIKIMORI_DOMAIN}${url}`;
+    const base = domain || DEFAULT_SHIKIMORI_DOMAIN;
+    const separator = url.startsWith('/') ? '' : '/';
+    return `${base}${separator}${url}`;
 }
 
 export const selectShikimoriCurrentUser = createSelector(
@@ -75,15 +77,3 @@ export const selectShikimoriCurrentUserProfileLink = createSelector(
     selectShikimoriDomain,
     (currentUser, domain) => toAbsoluteShikimoriUrl(currentUser?.url, domain),
 );
-
-function toAbsoluteShikimoriUrl(url: string | undefined, domain = DEFAULT_SHIKIMORI_DOMAIN): string | undefined {
-    if (!url) {
-        return url;
-    }
-
-    if (/^https?:\/\//.test(url)) {
-        return url;
-    }
-
-    return `${domain || DEFAULT_SHIKIMORI_DOMAIN}${url}`;
-}

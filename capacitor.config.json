@@ -1,5 +1,5 @@
 {
-    "appId": "io.ionic.starter.shikirip.cinema",
+    "appId": "me.sithond.shikicinema",
     "appName": "ShikiRIP Cinema",
     "webDir": "dist",
     "bundledWebRuntime": false

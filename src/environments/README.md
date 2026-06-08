@@ -1,24 +1,19 @@
-Create a `.env` file before building. The easiest path is to copy `.env.example` from the repository root and adjust values as needed.
+# Environment generation
 
-```sh
-PLATFORM_TARGET=web-extension
-NODE_ENV=development
-MANIFEST_VERSION=v2
+Run `npm run set-env` before starting or building the app. The generated Angular environment files must contain only public extension settings.
 
-KODIK_API_URI=https://kodikapi.com
-KODIK_AUTH_TOKEN=
+Client-side values:
 
+```env
 SHIKIMORI_API_URI=https://shikimori.rip/api
 SHIKIMORI_FALLBACK_API_URI=https://shikimori.fi/api
 SHIKIMORI_CLIENT_ID=
-SHIKIMORI_CLIENT_SECRET=
 SHIKIMORI_EPISODE_NOTIFICATION_TOKEN=
 SHIKIMORI_REDIRECT_URI=urn:ietf:wg:oauth:2.0:oob
-
 SMARTHARD_API_URI=https://api.sithond.com
 SMARTHARD_FALLBACK_API_URI=https://smarthard.net
 SMARTHARD_CLIENT_ID=shikirip-cinema
-SMARTHARD_CLIENT_SECRET=
+PLATFORM_TARGET=web-extension
 ```
 
-Run `npm run set-env` to generate `environment.ts` and `environment.prod.ts`.
+Secrets such as `KODIK_AUTH_TOKEN`, `SHIKIMORI_CLIENT_SECRET`, and `SMARTHARD_CLIENT_SECRET` belong only on `api.sithond.com`.

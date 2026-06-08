@@ -1,0 +1,78 @@
+<ion-content [fullscreen]="true" class="page-content ion-padding">
+    <ion-card class="support-page__card">
+        <ion-card-header>
+            <ion-card-title>
+                {{ 'SUPPORT_MODULE.SUPPORT_PAGE.TITLE' | transloco }}
+            </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <p>{{ 'SUPPORT_MODULE.SUPPORT_PAGE.DESCRIPTION' | transloco }}</p>
+        </ion-card-content>
+    </ion-card>
+
+    <ion-card class="support-page__card">
+        <ion-card-header>
+            <ion-card-title>
+                {{ 'SUPPORT_MODULE.SUPPORT_PAGE.CONTACTS_TITLE' | transloco }}
+            </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list lines="none">
+                <ion-item
+                    class="support-page__link-item"
+                    [button]="true"
+                    (click)="openUrl(telegramUrl)"
+                >
+                    <ion-icon
+                        slot="start"
+                        name="paper-plane-outline"
+                    ></ion-icon>
+                    <ion-label>
+                        <h3>{{ 'SUPPORT_MODULE.SUPPORT_PAGE.TELEGRAM_CHANNEL' | transloco }}</h3>
+                        <p>{{ telegramUrl }}</p>
+                    </ion-label>
+                    <ion-icon slot="end" name="open-outline"></ion-icon>
+                </ion-item>
+
+                <ion-item
+                    class="support-page__link-item"
+                    [button]="true"
+                    (click)="openUrl(shikimoriClubUrl)"
+                >
+                    <ion-icon
+                        slot="start"
+                        name="people-outline"
+                    ></ion-icon>
+                    <ion-label>
+                        <h3>{{ 'SUPPORT_MODULE.SUPPORT_PAGE.SHIKIMORI_CLUB' | transloco }}</h3>
+                        <p>{{ shikimoriClubUrl }}</p>
+                    </ion-label>
+                    <ion-icon slot="end" name="open-outline"></ion-icon>
+                </ion-item>
+            </ion-list>
+        </ion-card-content>
+    </ion-card>
+
+    <ion-card class="support-page__card">
+        <ion-card-header>
+            <ion-card-title>
+                {{ 'SUPPORT_MODULE.SUPPORT_PAGE.LEGAL_TITLE' | transloco }}
+            </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list lines="none">
+                <ion-item
+                    class="support-page__link-item"
+                    [button]="true"
+                    (click)="openUrl('https://github.com/SitHond/shikicinema/blob/master/README.md')"
+                >
+                    <ion-icon slot="start" name="document-text-outline"></ion-icon>
+                    <ion-label>
+                        <h3>{{ 'SUPPORT_MODULE.SUPPORT_PAGE.PRIVACY_POLICY' | transloco }}</h3>
+                    </ion-label>
+                    <ion-icon slot="end" name="open-outline"></ion-icon>
+                </ion-item>
+            </ion-list>
+        </ion-card-content>
+    </ion-card>
+</ion-content>

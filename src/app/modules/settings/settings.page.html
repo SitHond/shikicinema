@@ -192,6 +192,29 @@
             }
         </app-settings-group>
 
+        <!-- Discord Rich Presence -->
+        <app-settings-group
+            class="settings-page__section"
+            icon="logo-discord"
+            title="Discord Rich Presence"
+        >
+            <ion-toggle formControlName="discordRichPresence"
+                labelPlacement="end"
+                enableOnOffLabels>
+                Показывать активность в Discord
+            </ion-toggle>
+
+            @if (discordRichPresenceCtrl?.value) {
+                <ion-input
+                    formControlName="discordClientId"
+                    fill="outline"
+                    labelPlacement="floating"
+                    label="Discord Client ID"
+                    helperText="Application Client ID из Discord Developer Portal"
+                />
+            }
+        </app-settings-group>
+
         <!-- Профиль -->
         <app-settings-group
             class="settings-page__section"

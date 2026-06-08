@@ -70,6 +70,7 @@
                 "ANIME_LIST": "Anime list",
                 "MANGA_LIST": "Manga list",
                 "SETTINGS": "Settings",
+                "SUPPORT": "Support",
                 "THEME_TOGGLE": {
                     "LIGHT": "Light theme",
                     "DARK": "Dark theme"
@@ -315,6 +316,17 @@
                 "DROPPED": "Dropped",
                 "REWATCHING": "Rereading"
             }
+        }
+    },
+    "SUPPORT_MODULE": {
+        "SUPPORT_PAGE": {
+            "TITLE": "Support",
+            "DESCRIPTION": "If you have any questions or issues with the app, you can reach us through the following channels.",
+            "CONTACTS_TITLE": "Contacts",
+            "TELEGRAM_CHANNEL": "Telegram Channel",
+            "SHIKIMORI_CLUB": "Shikimori Club",
+            "LEGAL_TITLE": "Legal",
+            "PRIVACY_POLICY": "Privacy Policy"
         }
     }
 }

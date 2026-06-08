@@ -97,3 +97,13 @@ export const selectAnimeStatusOrder = createSelector(
         ? userAnimeStatusOrder
         : DEFAULT_ANIME_STATUS_ORDER) as ExtendedUserRateStatusType[],
 );
+
+export const selectDiscordRichPresence = createSelector(
+    selectSettings,
+    (state) => state.discordRichPresence ?? false,
+);
+
+export const selectDiscordClientId = createSelector(
+    selectSettings,
+    (state) => state.discordClientId ?? '',
+);

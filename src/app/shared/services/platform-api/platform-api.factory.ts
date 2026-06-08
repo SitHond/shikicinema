@@ -1,6 +1,7 @@
 import { InjectionToken } from '@angular/core';
 
 import { PlatformApi } from '@app/shared/types/platform/platform-api';
+import { PlatformApiAndroidService } from '@app/shared/services/platform-api/platform-api.android.service';
 import { PlatformApiNativeAppService } from '@app/shared/services/platform-api/platform-api.native-app.service';
 import { PlatformApiWebExtensionService } from '@app/shared/services/platform-api/platform-api.web-extension.service';
 import { environment } from '@app-env/environment';
@@ -15,5 +16,7 @@ export const platformApiFactory = (): PlatformApi => {
             return new PlatformApiWebExtensionService();
         case 'native-app':
             return new PlatformApiNativeAppService();
+        case 'android':
+            return new PlatformApiAndroidService();
     }
 };

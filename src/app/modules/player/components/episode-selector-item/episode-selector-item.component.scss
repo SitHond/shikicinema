@@ -4,46 +4,69 @@
     overflow: hidden;
     // for ionic ripple effect -->
 
-    &.skeleton {
-        color: transparent;
-    }
-
     user-select: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 100vmax;
-    border: 1px solid var(--ion-color-medium-tint);
-    min-width: 2rem;
-    min-height: 2rem;
-    padding: .25rem;
-    font-weight: 600;
-    font-size: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0.125rem solid rgba(255, 255, 255, 0.28);
+    border-radius: 0.25rem;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.92);
+    background: transparent;
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1;
     cursor: pointer;
+    transition:
+        background-color 120ms ease,
+        border-color 120ms ease,
+        color 120ms ease,
+        transform 120ms ease;
+
+    &:hover {
+        border-color: rgba(var(--ion-color-primary-rgb), 0.72);
+    }
+
+    &:focus-visible {
+        outline: 0.125rem solid rgba(var(--ion-color-primary-rgb), 0.85);
+        outline-offset: 0.1875rem;
+    }
+
+    &.skeleton {
+        color: transparent;
+        border-color: transparent;
+        background: rgba(255, 255, 255, 0.12);
+    }
 
     &--watched {
-        background-color: rgba(var(--shc-watched-episode-color-rgb), 0.85) !important;
-        color: var(--ion-color-light) !important;
-        border-color: transparent;
+        color: var(--ion-color-light);
+        border-color: rgba(var(--ion-color-primary-rgb), 0.8);
+        background-color: rgba(var(--ion-color-primary-rgb), 0.78);
     }
 
     &--selected {
-        $selectedColor: var(--ion-color-primary);
-
-        color: $selectedColor;
-        border-color: $selectedColor;
-    }
-
-    &--long {
-        min-width: 3.2rem;
+        color: var(--ion-color-primary);
+        border-color: rgba(255, 255, 255, 0.86);
+        background-color: var(--ion-color-light);
+        box-shadow: 0 0 0 0.0625rem rgba(0, 0, 0, 0.25) inset;
     }
 
     &--not-aired {
-        background-color: var(--shc-episode-not-aired-background-color);
-        color: var(--shc-episode-not-aired-color);
+        width: auto;
+        min-width: 1.5rem;
+        border-color: transparent;
+        color: rgba(255, 255, 255, 0.86);
+        background-color: transparent;
+        cursor: default;
     }
 
-    &--skeleton {
+    &--not-aired:hover {
         border-color: transparent;
+    }
+
+    &--long {
+        width: 3.2rem;
     }
 }

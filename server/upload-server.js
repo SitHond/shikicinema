@@ -8,6 +8,17 @@ const HOST = process.env.UPLOAD_SERVER_HOST || '127.0.0.1';
 const PORT = Number(process.env.UPLOAD_SERVER_PORT || 8787);
 const DATA_FILE = process.env.UPLOAD_SERVER_DATA || path.resolve(__dirname, '..', 'data', 'shikivideos.json');
 const ACCESS_TOKEN = process.env.UPLOAD_SERVER_TOKEN || 'local-upload-token';
+const KODIK_API_URI = (process.env.KODIK_API_URI || 'https://kodik-api.com').replace(/\/+$/, '');
+const KODIK_AUTH_TOKEN = process.env.KODIK_AUTH_TOKEN || '';
+const SHIKIMORI_CLIENT_ID = process.env.SHIKIMORI_CLIENT_ID || '';
+const SHIKIMORI_CLIENT_SECRET = process.env.SHIKIMORI_CLIENT_SECRET || '';
+const DEFAULT_SHIKIMORI_DOMAIN = (process.env.SHIKIMORI_DOMAIN || 'https://shikimori.rip').replace(/\/+$/, '');
+const ALLOWED_SHIKIMORI_DOMAINS = new Set(
+    (process.env.SHIKIMORI_ALLOWED_DOMAINS || 'https://shikimori.rip,https://shikimori.fi')
+        .split(',')
+        .map((domain) => normalizeOrigin(domain))
+        .filter(Boolean),
+);
 
 function readVideos() {
     try {
@@ -63,6 +74,76 @@ function createUploadToken() {
     };
 }
 
+
+function normalizeOrigin(value) {
+    try {
+        return new URL(value).origin;
+    } catch {
+        return '';
+    }
+}
+
+async function proxyJson(res, upstreamUrl, options = {}) {
+    const response = await fetch(upstreamUrl, options);
+    const text = await response.text();
+    let body;
+
+    try {
+        body = JSON.parse(text);
+    } catch {
+        body = { error: text || response.statusText || 'upstream_error' };
+    }
+
+    sendJson(res, response.status, body);
+}
+
+async function handleKodik(req, res, url) {
+    if (req.method !== 'GET' || url.pathname !== '/api/kodik/search') {
+        return false;
+    }
+
+    if (!KODIK_AUTH_TOKEN) {
+        sendJson(res, 200, { time: '0ms', total: 0, results: [] });
+        return true;
+    }
+
+    const params = new URLSearchParams(url.searchParams);
+    params.delete('token');
+    params.set('token', KODIK_AUTH_TOKEN);
+
+    await proxyJson(res, KODIK_API_URI + '/search?' + params.toString());
+    return true;
+}
+
+function resolveShikimoriTokenURL() {
+    return normalizeOrigin(DEFAULT_SHIKIMORI_DOMAIN) + '/oauth/token';
+}
+
+async function handleShikimoriOAuth(req, res, url) {
+    if (req.method !== 'POST' || url.pathname !== '/api/shikimori/oauth/token') {
+        return false;
+    }
+
+    if (!SHIKIMORI_CLIENT_ID || !SHIKIMORI_CLIENT_SECRET) {
+        sendJson(res, 500, { error: 'shikimori_oauth_is_not_configured' });
+        return true;
+    }
+
+    const params = new URLSearchParams(url.searchParams);
+    params.set('client_id', SHIKIMORI_CLIENT_ID);
+    params.set('client_secret', SHIKIMORI_CLIENT_SECRET);
+
+    const upstreamUrl = resolveShikimoriTokenURL();
+    params.delete('shikimori_domain');
+
+    await proxyJson(res, upstreamUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+    });
+    return true;
+}
+
 function normalizeVideo(query, videos) {
     const animeId = Number(query.get('anime_id'));
     const episode = Number(query.get('episode'));
@@ -115,6 +196,16 @@ function handleShikivideos(req, res, url) {
             return true;
         }
 
+        const lengthMatch = url.pathname.match(/^\/api\/shikivideos\/(\d+)\/length$/);
+
+        if (lengthMatch) {
+            const animeId = Number(lengthMatch[1]);
+            const count = videos.filter((video) => Number(video.anime_id) === animeId).length;
+
+            sendJson(res, 200, { length: count });
+            return true;
+        }
+
         if (url.pathname === '/api/shikivideos/search') {
             const uploader = url.searchParams.get('uploader');
             const animeId = url.searchParams.get('anime_id');
@@ -149,7 +240,7 @@ function handleShikivideos(req, res, url) {
     return false;
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host || `${HOST}:${PORT}`}`);
 
     if (req.method === 'OPTIONS') {
@@ -158,6 +249,14 @@ const server = http.createServer((req, res) => {
     }
 
     try {
+        if (await handleKodik(req, res, url)) {
+            return;
+        }
+
+        if (await handleShikimoriOAuth(req, res, url)) {
+            return;
+        }
+
         if (req.method === 'PUT' && url.pathname === '/oauth/token') {
             sendJson(res, 200, createUploadToken());
             return;
