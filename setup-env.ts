@@ -32,7 +32,8 @@ function smarthardApiURIs(): string[] {
     ]);
 }
 
-const target = env('PLATFORM_TARGET', 'web-extension');
+const target = 'web-extension';
+const appVersion = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8')).version as string;
 const shikimoriApis = shikimoriApiURIs();
 const smarthardApis = smarthardApiURIs();
 const shikimoriRedirectUri = env('SHIKIMORI_REDIRECT_URI', 'urn:ietf:wg:oauth:2.0:oob');
@@ -50,11 +51,13 @@ const envFileContent = `${devtoolsImport}import { EnvironmentInterface } from '@
 export const environment: EnvironmentInterface = {
     isProduction: ${isProduction},
     target: '${target}',
+    appVersion: '${appVersion}',
     ${devtoolsProviders}
     shikimori: {
         apiURI: '${shikimoriApis[0]}',
         apiURIs: ${tsStringArray(shikimoriApis)},
         authClientId: '${env('SHIKIMORI_CLIENT_ID')}',
+        authClientSecret: '${env('SHIKIMORI_CLIENT_SECRET')}',
         episodeNotificationToken: '${env('SHIKIMORI_EPISODE_NOTIFICATION_TOKEN')}',
         redirectUri: '${shikimoriRedirectUri}',
     },

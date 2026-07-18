@@ -109,6 +109,7 @@ function createAuthorizationUrl(shikimoriDomain: string, shikimoriOAuthClientId:
     codeUrl.searchParams.set('client_id', shikimoriOAuthClientId);
     codeUrl.searchParams.set('redirect_uri', redirectUri);
     codeUrl.searchParams.set('response_type', 'code');
+    codeUrl.searchParams.set('scope', 'user_rates comments topics');
 
     return codeUrl;
 }

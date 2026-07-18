@@ -19,7 +19,7 @@ import {
 import { concatLatestFrom } from '@ngrx/operators';
 import { merge, of, switchMap } from 'rxjs';
 
-import { KodikClient, ShikicinemaV1Client, ShikimoriClient } from '@app/shared/services';
+import { CvhClient, KodikClient, ShikicinemaV1Client, ShikimoriClient } from '@app/shared/services';
 import { UserAnimeRate } from '@app/shared/types/shikimori/user-anime-rate';
 import { UserRateStatusType } from '@app/shared/types/shikimori/user-rate-status.type';
 import { UserRateTargetEnum } from '@app/shared/types/shikimori';
@@ -38,6 +38,9 @@ import {
     getCommentsAction,
     getCommentsFailureAction,
     getCommentsSuccessAction,
+    getRelatedAnimesAction,
+    getRelatedAnimesFailureAction,
+    getRelatedAnimesSuccessAction,
     getTopicsAction,
     getTopicsFailureAction,
     getTopicsSuccessAction,
@@ -51,11 +54,13 @@ import {
     watchAnimeFailureAction,
     watchAnimeSuccessAction,
 } from '@app/modules/player/store/actions';
+import { cvhVideoMapper } from '@app/shared/types/cvh';
 import { getMaxEpisode, toUserRatesUpdate } from '@app/modules/player/utils';
 import { kodikVideoMapper } from '@app/shared/types/kodik/mappers';
 import {
     selectPlayerAnime,
     selectPlayerComments,
+    selectPlayerRelatedAnimes,
     selectPlayerTopic,
     selectPlayerUserRate,
     selectPlayerVideos,
@@ -72,6 +77,7 @@ export class PlayerEffects {
     private readonly store$ = inject(Store);
     private readonly shikimori = inject(ShikimoriClient);
     private readonly kodik = inject(KodikClient);
+    private readonly cvh = inject(CvhClient);
     private readonly toast = inject(ToastController);
     private readonly translate = inject(TranslocoService);
     private readonly shikivideos = inject(ShikicinemaV1Client);
@@ -84,6 +90,7 @@ export class PlayerEffects {
             ([{ animeId }]) => merge(
                 this.shikivideos.findAnimes(animeId).pipe(toVideoInfo(shikicinemaVideoMapper)),
                 this.kodik.findAnimes(animeId).pipe(toVideoInfo(kodikVideoMapper)),
+                this.cvh.findAnimes(animeId).pipe(toVideoInfo(cvhVideoMapper)),
             ).pipe(
                 /* accumulating videos into storage */
                 map((videos) => addVideosAction({ animeId, videos })),
@@ -99,6 +106,21 @@ export class PlayerEffects {
         switchMap(([{ animeId }]) => this.shikimori.getAnimeInfo(animeId).pipe(
             map((anime) => getAnimeInfoSuccessAction({ anime })),
             catchError(() => of(getAnimeInfoFailureAction())),
+        )),
+    ));
+
+    loadRelatedOnAnimeInfo$ = createEffect(() => this.actions$.pipe(
+        ofType(getAnimeInfoSuccessAction),
+        map(({ anime }) => getRelatedAnimesAction({ animeId: anime.id })),
+    ));
+
+    getRelatedAnimes$ = createEffect(() => this.actions$.pipe(
+        ofType(getRelatedAnimesAction),
+        concatLatestFrom(({ animeId }) => this.store$.select(selectPlayerRelatedAnimes(animeId))),
+        filter(([, related]) => related === null),
+        switchMap(([{ animeId }]) => this.shikimori.getRelatedAnimes(animeId).pipe(
+            map((related) => getRelatedAnimesSuccessAction({ animeId, related })),
+            catchError(() => of(getRelatedAnimesFailureAction())),
         )),
     ));
 
@@ -175,6 +197,22 @@ export class PlayerEffects {
         concatLatestFrom(({ animeId, episode }) => this.store$.select(selectPlayerTopic(animeId, episode))),
         filter(([, topic]) => !topic?.id),
         switchMap(([{ animeId, episode, revalidate }]) => this.shikimori.getTopics(animeId, episode, revalidate).pipe(
+            switchMap((topics) => {
+                if (topics.length > 0) {
+                    return of(topics);
+                }
+
+                const episodeNum = Number(episode);
+                const pattern = new RegExp(`\\b${episodeNum}\\b`);
+
+                return this.shikimori.getAnimeTopics(animeId, revalidate).pipe(
+                    map((allTopics) => allTopics
+                        .filter((t) => t.episode === episodeNum ||
+                            t.type?.includes('NewsTopic') && pattern.test(t.topic_title))
+                        .sort((a, b) => (b.comments_count || 0) - (a.comments_count || 0)),
+                    ),
+                );
+            }),
             map((topics) => getTopicsSuccessAction({ animeId, episode, topics })),
             catchError((errors) => of(getTopicsFailureAction({ errors }))),
         )),
@@ -204,22 +242,33 @@ export class PlayerEffects {
     sendComment$ = createEffect(() => this.actions$.pipe(
         ofType(sendCommentAction),
         concatLatestFrom(({ animeId, episode }) => this.store$.select(selectPlayerTopic(animeId, episode))),
-        switchMap(([{ animeId, episode, commentText }, topic]) => (!topic?.id
-            // если топика для комментирования эпизода нет - его надо создать
-            ? this.shikimori.createEpisodeTopic(animeId, episode).pipe(
-                switchMap(() => this.shikimori.getTopics(animeId, episode, true).pipe(
-                    map((newTopic) => {
-                        const newTopicId = newTopic?.[0]?.id;
+        switchMap(([{ animeId, episode, commentText }, topic]) => (topic?.id
+            ? of(topic.id)
+            // топика нет в store — сначала пробуем найти существующий на сервере
+            : this.shikimori.getTopics(animeId, episode, true).pipe(
+                switchMap((topics) => {
+                    const existingId = topics?.[0]?.id;
 
-                        if (!newTopicId) {
-                            throw new Error('Topic id missing');
-                        }
+                    if (existingId) {
+                        return of(existingId);
+                    }
 
-                        return newTopicId;
-                    }),
-                )),
-            )
-            : of(topic.id))
+                    // топика нет вообще — создаём через episode_notification
+                    return this.shikimori.createEpisodeTopic(animeId, episode).pipe(
+                        switchMap(() => this.shikimori.getTopics(animeId, episode, true).pipe(
+                            map((newTopics) => {
+                                const newTopicId = newTopics?.[0]?.id;
+
+                                if (!newTopicId) {
+                                    throw new Error('Topic id missing');
+                                }
+
+                                return newTopicId;
+                            }),
+                        )),
+                    );
+                }),
+            ))
             .pipe(
                 exhaustMap((commentableId) => this.shikimori.createComment(commentableId, commentText)),
                 map((comment) => sendCommentSuccessAction({ animeId, episode, comment })),

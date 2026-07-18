@@ -1,12 +1,19 @@
 import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief-info.interface';
 import { EpisodeCommentsInterface, VideoInfoInterface } from '@app/modules/player/types';
+import { RelatedAnimeInterface } from '@app/shared/types/shikimori/related-anime.interface';
+import { ResourceIdType } from '@app/shared/types';
 
 export interface PlayerStoreInterface {
+    currentAnimeId?: ResourceIdType;
+    currentEpisode?: number;
     videos: {
         [animeId: string]: VideoInfoInterface[];
     };
     animeInfo: {
         [animeId: string]: AnimeBriefInfoInterface;
+    };
+    relatedAnimes: {
+        [animeId: string]: RelatedAnimeInterface[];
     };
     comments: {
         [animeId: string]: EpisodeCommentsInterface;

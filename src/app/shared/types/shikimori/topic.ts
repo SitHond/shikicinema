@@ -16,7 +16,7 @@ export interface Topic {
         url: string
     },
     user: UserBriefInfoInterface,
-    type: 'Topic' | 'User',
+    type: string,
     linked_id: number,
     linked_type: string,
     linked: {

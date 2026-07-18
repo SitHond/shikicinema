@@ -7,10 +7,13 @@ import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief
 import { PlayerStoreInterface } from '@app/modules/player/store/types';
 import {
     addVideosAction,
+    changeCurrentAnimeAction,
+    changeCurrentEpisodeAction,
     deleteCommentSuccessAction,
     editCommentSuccessAction,
     getAnimeInfoSuccessAction,
     getCommentsSuccessAction,
+    getRelatedAnimesSuccessAction,
     getTopicsAction,
     getTopicsSuccessAction,
     getUserRateSuccessAction,
@@ -22,12 +25,29 @@ import { filterComments, patchComments } from '@app/modules/player/store/utils';
 import { filterDuplicatedIds } from '@app/shared/utils/filter-duplicated-ids.function';
 
 const initialState: PlayerStoreInterface = {
+    currentAnimeId: undefined,
+    currentEpisode: undefined,
     videos: {},
     animeInfo: {},
+    relatedAnimes: {},
     comments: {},
 };
 
 export const playerReducer = createReducer(initialState,
+    on(
+        changeCurrentAnimeAction,
+        (state, { animeId }) => ({
+            ...state,
+            currentAnimeId: animeId,
+        }),
+    ),
+    on(
+        changeCurrentEpisodeAction,
+        (state, { episode }) => ({
+            ...state,
+            currentEpisode: episode,
+        }),
+    ),
     on(
         addVideosAction,
         (state, { animeId, videos }) => ({
@@ -45,6 +65,16 @@ export const playerReducer = createReducer(initialState,
             animeInfo: {
                 ...state.animeInfo,
                 [anime.id]: anime,
+            },
+        }),
+    ),
+    on(
+        getRelatedAnimesSuccessAction,
+        (state, { animeId, related }) => ({
+            ...state,
+            relatedAnimes: {
+                ...state.relatedAnimes,
+                [animeId]: related,
             },
         }),
     ),
@@ -109,7 +139,7 @@ export const playerReducer = createReducer(initialState,
                         isLoading: comments?.length > limit,
                         isShownAll: state.comments?.[animeId]?.[episode]?.isShownAll ?? comments?.length <= 20,
                         comments: [...state.comments?.[animeId]?.[episode]?.comments || [], ...comments]
-                            .filter(filterDuplicatedIds),
+                            .filter(filterDuplicatedIds()),
                     },
                 },
             },

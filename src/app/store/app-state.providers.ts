@@ -2,10 +2,8 @@ import { Actions, provideEffects } from '@ngrx/effects';
 import { RootStoreConfig, provideStore } from '@ngrx/store';
 
 import { AppStoreInterface } from '@app/store/app-store.interface';
-import { AuthNativeAppEffects } from '@app/store/auth/effects/auth.native-app.effects';
 import { AuthWebExtensionEffects } from '@app/store/auth/effects/auth.web-extension.effects';
 import { CacheEffects } from '@app/store/cache/effects/cache.effects';
-import { ElectronIpcProxyService } from '@app/shared/services/electron-ipc-proxy.service';
 import { SettingsEffects } from '@app/store/settings/effects/settings.effects';
 import { ShikicinemaEffects } from '@app/store/shikicinema/effects/shikicinema.effects';
 import { ShikimoriClient } from '@app/shared/services/shikimori-client.service';
@@ -55,9 +53,7 @@ export function provideAppState() {
         ]),
         ...environment.devtoolsProviders,
         Actions,
-        ElectronIpcProxyService,
         ShikimoriClient,
         AuthWebExtensionEffects,
-        AuthNativeAppEffects,
     ];
 }

@@ -29,6 +29,7 @@ import {
     tap,
 } from 'rxjs/operators';
 import { detectShikimoriDomainAction, updateShikimoriDomainAction } from '@app/store/shikimori/actions';
+import { environment } from '@app-env/environment';
 import { getCurrentUserAction } from '@app/store/shikimori/actions/get-current-user.action';
 import { selectCacheLastCheckUp } from '@app/store/cache/selectors/cache.selectors';
 import { selectCustomTheme, selectLanguage, selectTheme } from '@app/store/settings/selectors/settings.selectors';
@@ -49,6 +50,7 @@ import { updateLanguageAction, visitPageAction } from '@app/store/settings/actio
     encapsulation: ViewEncapsulation.None,
 })
 export class AppComponent implements OnInit {
+    readonly version = environment.appVersion;
     private readonly document = inject(DOCUMENT);
     private readonly store = inject(Store);
     private readonly renderer = inject(Renderer2);

@@ -3,6 +3,7 @@ import { createAction, props } from '@ngrx/store';
 import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief-info.interface';
 import { ApiErrorInfo } from '@app/shared/types/shikimori/api-error-info.interface';
 import { Comment } from '@app/shared/types/shikimori/comment';
+import { RelatedAnimeInterface } from '@app/shared/types/shikimori/related-anime.interface';
 import { ResourceIdType } from '@app/shared/types/resource-id.type';
 import { Topic } from '@app/shared/types/shikimori/topic';
 import { UserAnimeRate } from '@app/shared/types/shikimori/user-anime-rate';
@@ -198,4 +199,28 @@ export const deleteCommentSuccessAction = createAction(
 export const deleteCommentFailureAction = createAction(
     '[Player] delete comment failure',
     props<{ errors: any }>(),
+);
+
+export const changeCurrentAnimeAction = createAction(
+    '[Player] change current anime',
+    props<{ animeId: ResourceIdType }>(),
+);
+
+export const changeCurrentEpisodeAction = createAction(
+    '[Player] change current episode',
+    props<{ episode: number }>(),
+);
+
+export const getRelatedAnimesAction = createAction(
+    '[Player] Get related animes',
+    props<{ animeId: ResourceIdType }>(),
+);
+
+export const getRelatedAnimesSuccessAction = createAction(
+    '[Player] Get related animes success',
+    props<{ animeId: ResourceIdType, related: RelatedAnimeInterface[] }>(),
+);
+
+export const getRelatedAnimesFailureAction = createAction(
+    '[Player] Get related animes failure',
 );

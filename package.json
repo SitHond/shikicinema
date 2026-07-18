@@ -1,6 +1,6 @@
 {
   "name": "shikirip-cinema",
-  "version": "0.9.12",
+  "version": "0.9.13",
   "description": "ShikiRIP Cinema fork: returns video player on Shikimori",
   "main": "src/shikicinema.js",
   "engines": {
@@ -34,7 +34,6 @@
     "extension:build": "node -e \"require('./extension-webpack.hook')()\"",
     "start": "npm run patch:ngx-scrollbar && npm run set-env && npm run extension:build && ng run app:serve --host=127.0.0.1 --port=8100",
     "start:ionic": "npm run patch:ngx-scrollbar && npm run set-env && ionic serve",
-    "start:native": "npm-run-all -s 'ionic cap sync' 'npx cap sync @capacitor-community/electron' 'npx cap open @capacitor-community/electron'",
     "build": "npm run patch:ngx-scrollbar && npm run set-env && ionic build --c=development",
     "build:prod": "npm run patch:ngx-scrollbar && npm run set-env && ionic build --c=production",
     "bundle": "npm run build:prod",
@@ -49,9 +48,6 @@
     "analyze-bundle": "ng build -c production --stats-json",
     "patch:ngx-scrollbar": "node scripts/patch-ngx-scrollbar.js"
   },
-  "workspaces": [
-    "electron"
-  ],
   "pre-commit": [
     "commit-lint"
   ],
@@ -64,14 +60,6 @@
     "@angular/platform-browser": "^21.1.1",
     "@angular/platform-browser-dynamic": "^21.1.1",
     "@angular/router": "^21.1.1",
-    "@capacitor-community/electron": "^5.0.1",
-    "@capacitor/android": "file:../../capacitor-android-8.3.4.tgz",
-    "@capacitor/app": "^8.0.0",
-    "@capacitor/browser": "^8.0.0",
-    "@capacitor/core": "^8.0.1",
-    "@capacitor/haptics": "^8.0.0",
-    "@capacitor/keyboard": "^8.0.0",
-    "@capacitor/status-bar": "^8.0.0",
     "@ionic/angular": "^8.7.17",
     "@ionic/core": "^8.7.17",
     "@ionic/storage-angular": "^4.0.0",
@@ -100,7 +88,6 @@
     "@angular/compiler": "^21.1.1",
     "@angular/compiler-cli": "^21.1.1",
     "@angular/language-service": "^21.1.1",
-    "@capacitor/cli": "^8.0.1",
     "@fastify/pre-commit": "^2.2.1",
     "@ionic/angular-toolkit": "^12.3.0",
     "@ionic/cli": "^7.2.1",

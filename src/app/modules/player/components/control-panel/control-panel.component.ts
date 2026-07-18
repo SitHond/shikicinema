@@ -1,3 +1,4 @@
+import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief-info.interface';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -8,6 +9,7 @@ import {
     output,
     viewChild,
 } from '@angular/core';
+import { EpisodeSelectorComponent } from '@app/modules/player/components/episode-selector/episode-selector.component';
 import {
     InputCustomEvent,
     IonButton,
@@ -15,13 +17,9 @@ import {
     IonInput,
     IonItem,
 } from '@ionic/angular/standalone';
-
-import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief-info.interface';
-import { EpisodeSelectorComponent } from '@app/modules/player/components/episode-selector/episode-selector.component';
 import { PlayerModeType } from '@app/store/settings/types';
 import { SidePanelComponent } from '@app/modules/player/components/side-panel/side-panel.component';
 import { UserAnimeRate } from '@app/shared/types/shikimori/user-anime-rate';
-import { VideoInfoInterface } from '@app/modules/player/types';
 import { adjustEpisode } from '@app/shared/utils/adjust-episode.function';
 import { getLastAiredEpisode } from '@app/modules/player/utils';
 
@@ -57,16 +55,17 @@ export class ControlPanelComponent {
     showSidePanel = input(false);
     isRewatching = input(false);
     isMinified = input(false);
-    playerMode = input<PlayerModeType>('auto');
+    playerMode = input<PlayerModeType>('compact');
 
     selection = output<number>();
     watch = output<number>();
     openVideoModal = output<void>();
-    uploaded = output<VideoInfoInterface>();
     togglePlayerMode = output<void>();
 
     maxAiredEpisode = computed(() => getLastAiredEpisode(this.anime()));
     maxWatchedEpisode = computed(() => this.userRate()?.episodes || 0);
+    changePlayerModeIcon = computed(() => this.playerMode() === 'full' ? 'contract-outline' : 'expand-outline');
+    showVideoSelectionBtn = computed(() => this.isMinified() || this.playerMode() === 'full');
 
     private adjustEpisode(episode): number {
         return adjustEpisode(episode, this.selected(), this.maxEpisode());

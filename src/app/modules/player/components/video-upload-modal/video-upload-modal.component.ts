@@ -7,7 +7,6 @@ import {
     ViewEncapsulation,
     effect,
     inject,
-    input,
     signal,
 } from '@angular/core';
 import {
@@ -27,6 +26,7 @@ import {
     IonSelectOption,
     ModalController,
 } from '@ionic/angular/standalone';
+import { Store } from '@ngrx/store';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief-info.interface';
@@ -41,6 +41,7 @@ import {
 } from '@app/modules/player/types';
 import { cutUrlFromText, getMaxEpisode } from '@app/modules/player/utils';
 import { getAnimeName } from '@app/shared/utils/get-anime-name.function';
+import { saveVideoUploadFormAction, selectVideoUploadForm } from '@app/store/cache';
 
 
 @Component({
@@ -68,10 +69,14 @@ export class VideoUploadModalComponent extends IonModal implements OnInit {
 
     private readonly transloco = inject(TranslocoService);
     private readonly _modalController = inject(ModalController);
+    private readonly store = inject(Store);
 
-    readonly anime= input.required<AnimeBriefInfoInterface>();
+    readonly previousForm = this.store.selectSignal(selectVideoUploadForm);
 
-    readonly episode = input.required<number>();
+    // Ionic ModalController sets these directly as plain properties via componentProps
+    anime!: AnimeBriefInfoInterface;
+
+    episode!: number;
 
     readonly uploadModel = signal<VideoUploadFormInterface>({
         url: '',
@@ -110,10 +115,20 @@ export class VideoUploadModalComponent extends IonModal implements OnInit {
     readonly onUrlChangeEffect = effect(() => {
         this.uploadForm.url();
         this.onUrlLoadReset();
-    })
+    });
+
+    readonly onFormChangeEffect = effect(() => {
+        if (this.uploadForm().valid()) {
+            this.store.dispatch(saveVideoUploadFormAction({ form: this.uploadForm().value() }));
+        }
+    });
 
     ngOnInit(): void {
-        this.uploadForm.episode().setControlValue(this.episode());
+        this.uploadForm.episode().setControlValue(this.episode);
+
+        if (this.previousForm()) {
+            this.uploadForm().setControlValue(this.previousForm());
+        }
     }
 
     onUrlLoadReset(): void {

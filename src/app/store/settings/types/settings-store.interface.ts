@@ -18,6 +18,4 @@ export interface SettingsStoreInterface {
     useCustomAnimeStatusOrder: boolean;
     userAnimeStatusOrder: string[];
     filterPlayerDomains: string[];
-    discordRichPresence: boolean;
-    discordClientId: string;
 }

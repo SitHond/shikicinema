@@ -1,9 +1,11 @@
 <ion-content [fullscreen]="true" class="page-content ion-padding"
     appSwipe
     (appSwipeRight)="onOpenVideoSelectorModal()">
+
     <div class="player-page__wrapper"
         [class.player-page__wrapper--mobile]="isSmallScreen()"
         [class.player-page__wrapper--compact]="playerMode() === 'compact'">
+
         <div class="player-page__anime-info common-info">
             <div class="common-info__title">
                 @if (isAnimeLoading()) {
@@ -29,30 +31,28 @@
             </div>
         </div>
 
-        <app-kind-selector
-            class="player-page__kind"
-            [class.ion-hide]="isSmallScreen()"
-            [kinds]="episodeVideos() | getActiveKinds"
-            [selected]="currentKind()"
-            (selection)="onKindChange($event)"
-        />
-
         <app-player class="player-page__player responsive-16by9"
-            [loading]="isVideosLoading()"
-            [source]="currentVideo()?.url"
+            [showNextEpisodeAt]="nextEpisodeAt() !== null"
+            [source]="resolvedSource()"
+            [urlType]="currentVideo()?.urlType"
             [nextEpisodeAt]="nextEpisodeAt()"
         />
 
-        <app-video-selector
-            class="player-page__video-selector"
+        <app-player-selector
+            class="player-page__player-selector"
             [class.ion-hide]="isSmallScreen()"
-            [videos]="episodeVideos() | filterByKind: currentKind()"
-            [selected]="currentVideo()"
-            [kindDisplayMode]="playerKindDisplayMode()"
-            [warnAvailability]="authorAvailability()"
-            [hasUnfilteredVideos]="hasUnfilteredVideos()"
-            (selection)="onVideoChange($event)"
-            (disableFilters)="setDomainFilters(false)"
+            [animeId]="animeIdQ()"
+            [kind]="currentKind()"
+            [episode]="episodeQ()"
+            [lastAiredEpisode]="lastAiredEpisode()"
+            [maxEpisode]="maxEpisode()"
+            [isFilterDomains]="isDomainFilterOn()"
+            [isLoading]="isVideosLoading()"
+            [videos]="videos()"
+            [selectedVideo]="currentVideo()"
+            (changeVideo)="onVideoChange($event[0], $event[1])"
+            (changeKind)="onKindChange($event)"
+            (domainFiltersOff)="setDomainFilters(false)"
         />
 
         <app-control-panel
@@ -78,11 +78,18 @@
                 class="player-page__side-panel"
                 [anime]="anime()"
                 [episode]="episodeQ()"
+                [video]="currentVideo()"
                 [isLoading]="isAnimeLoading()"
                 [isMinified]="isPanelsMinified()"
                 [isDomainFiltersActive]="isDomainFilterOn()"
-                (uploaded)="onVideoUpload($event)"
                 (filtersToggle)="setDomainFilters($event)"
+            />
+        }
+
+        @if (relatedAnimes()?.length) {
+            <app-franchise-panel
+                class="player-page__franchise"
+                [related]="relatedAnimes()"
             />
         }
 

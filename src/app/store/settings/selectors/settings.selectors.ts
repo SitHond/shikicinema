@@ -73,7 +73,7 @@ export const selectPreferencesToggle = createSelector(
 
 export const selectPlayerMode = createSelector(
     selectSettings,
-    (state) => state.playerMode || 'auto',
+    (state) => state.playerMode || 'compact',
 );
 
 export const selectPlayerKindDisplayMode = createSelector(
@@ -98,12 +98,3 @@ export const selectAnimeStatusOrder = createSelector(
         : DEFAULT_ANIME_STATUS_ORDER) as ExtendedUserRateStatusType[],
 );
 
-export const selectDiscordRichPresence = createSelector(
-    selectSettings,
-    (state) => state.discordRichPresence ?? false,
-);
-
-export const selectDiscordClientId = createSelector(
-    selectSettings,
-    (state) => state.discordClientId ?? '',
-);

@@ -41,6 +41,7 @@ shikirip-cinema-cws.zip
 /.vscode
 /coverage
 /dist
+/native-host
 /shikirip-cinema-cws
 /node_modules
 /platforms

@@ -1,0 +1,67 @@
+<div class="anime-info-card">
+    <div class="anime-info-card__poster">
+        @if (isLoading() || !posterUrl()) {
+            <ion-skeleton-text class="anime-info-card__poster-img" animated />
+        } @else {
+            <img class="anime-info-card__poster-img"
+                [src]="posterUrl()"
+                [alt]="anime()?.russian || anime()?.name"
+            />
+        }
+    </div>
+
+    <div class="anime-info-card__details">
+        @if (isLoading()) {
+            @for (_ of [1,2,3,4]; track $index) {
+                <ion-skeleton-text class="anime-info-card__skeleton-row" animated />
+            }
+        } @else if (anime()) {
+            @if (score()) {
+                <div class="anime-info-card__row">
+                    <span class="anime-info-card__label">{{ 'PLAYER_MODULE.PLAYER_PAGE.ANIME_INFO.SCORE' | transloco }}</span>
+                    <span class="anime-info-card__badge"
+                        [class]="'anime-info-card__badge--' + scoreColor()">
+                        ★ {{ score() | number: '1.2-2' }}
+                    </span>
+                </div>
+            }
+
+            @if (anime()?.kind) {
+                <div class="anime-info-card__row">
+                    <span class="anime-info-card__label">{{ 'PLAYER_MODULE.PLAYER_PAGE.ANIME_INFO.KIND' | transloco }}</span>
+                    <span class="anime-info-card__value">
+                        {{ 'GLOBAL.SHIKIMORI.ANIME_KINDS.' + (anime()?.kind | uppercase) | transloco }}
+                    </span>
+                </div>
+            }
+
+            @if (anime()?.status) {
+                <div class="anime-info-card__row">
+                    <span class="anime-info-card__label">{{ 'PLAYER_MODULE.PLAYER_PAGE.ANIME_INFO.STATUS' | transloco }}</span>
+                    <span class="anime-info-card__value">
+                        {{ 'GLOBAL.SHIKIMORI.ANIME_STATUSES.' + (anime()?.status | uppercase) | transloco }}
+                    </span>
+                </div>
+            }
+
+            @if (episodesLabel()) {
+                <div class="anime-info-card__row">
+                    <span class="anime-info-card__label">{{ 'PLAYER_MODULE.PLAYER_PAGE.ANIME_INFO.EPISODES' | transloco }}</span>
+                    <span class="anime-info-card__value">{{ episodesLabel() }}</span>
+                </div>
+            }
+
+            @if (anime()?.aired_on) {
+                <div class="anime-info-card__row">
+                    <span class="anime-info-card__label">{{ 'PLAYER_MODULE.PLAYER_PAGE.ANIME_INFO.AIRED' | transloco }}</span>
+                    <span class="anime-info-card__value">
+                        {{ anime()?.aired_on | date: 'dd.MM.yyyy' }}
+                        @if (anime()?.released_on) {
+                            — {{ anime()?.released_on | date: 'dd.MM.yyyy' }}
+                        }
+                    </span>
+                </div>
+            }
+        }
+    </div>
+</div>

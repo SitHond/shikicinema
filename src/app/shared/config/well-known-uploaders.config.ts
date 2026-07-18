@@ -1,4 +1,4 @@
-import { DELETED_UPLOADER, KODIK_UPLOADER } from '@app/shared/types/well-known-uploader-ids';
+import { CVH_UPLOADER, DELETED_UPLOADER, KODIK_UPLOADER } from '@app/shared/types/well-known-uploader-ids';
 import { WellKnownType } from '@app/shared/types/well-known-uploaders.type';
 
 
@@ -8,6 +8,13 @@ export const WELL_KNOWN_UPLOADERS_MAP = {
         name: 'GLOBAL.VIDEO.WELL_KNOWN_UPLOADERS.KODIK',
         avatar: '/assets/kodik.png',
         url: 'mailto:support@kodik.biz',
+    },
+
+    [CVH_UPLOADER]: {
+        id: CVH_UPLOADER,
+        name: 'GLOBAL.VIDEO.WELL_KNOWN_UPLOADERS.CVH',
+        avatar: '/assets/shikimori-404.png',
+        url: 'https://cdnvideohub.com',
     },
 
     [DELETED_UPLOADER]: {

@@ -5,7 +5,7 @@ import { UploadToken } from '@app/shared/types/shikicinema/v1';
 
 export const getUploadTokenAction = createAction(
     '[Smarthard API] get upload token',
-    props<{ shikimoriToken: ShikimoriCredentials }>(),
+    props<{ shikimoriToken: ShikimoriCredentials; shikimoriDomain: string }>(),
 );
 
 export const getUploadTokenSuccessAction = createAction(

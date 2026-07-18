@@ -12,7 +12,6 @@ import { provideScrollbarPolyfill } from 'ngx-scrollbar';
 import { AppComponent } from '@app/app.component';
 import { DEFAULT_SHIKIMORI_DOMAIN, DEFAULT_SHIKIMORI_DOMAIN_TOKEN } from '@app/core/providers/shikimori-domain';
 import {
-    ElectronIpcProxyService,
     PLATFORM_API_TOKEN,
     platformApiFactory,
 } from '@app/shared/services';
@@ -53,7 +52,7 @@ bootstrapApplication(AppComponent, {
         provideAnimations(),
         provideIonicStorage(),
         provideIsSupportsAvif(),
-        { provide: PLATFORM_API_TOKEN, useFactory: platformApiFactory, deps: [ElectronIpcProxyService] },
+        { provide: PLATFORM_API_TOKEN, useFactory: platformApiFactory },
         { provide: DEFAULT_SHIKIMORI_DOMAIN_TOKEN, useValue: DEFAULT_SHIKIMORI_DOMAIN },
     ],
 }).catch((err) => console.log(err));

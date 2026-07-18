@@ -1,4 +1,5 @@
 export { filterVideosByDomains } from './filter-videos-by-domains.function';
+export { isWellKnownUploader } from './is-well-known-uploader.function';
 export { isEpisodeWatched } from './is-episode-watched.function';
 export { getLastAiredEpisode } from './get-last-aired-episode.function';
 export { getLastUnwatchedEpisode } from './get-last-unwatched-episode.function';

@@ -33,12 +33,12 @@ export class ShikicinemaV1Client {
         );
     }
 
-    getUploadToken(shikimoriToken: string) {
+    getUploadToken(shikimoriToken: string, shikimoriDomain: string) {
         const url = `${this.baseUri}/oauth/token`;
         const params = new HttpParams()
             .set('grant_type', 'shikimori_token')
             .set('scopes', 'database:shikivideos_create');
-        const body = { shikimori_token: shikimoriToken };
+        const body = { shikimori_token: shikimoriToken, shikimori_domain: shikimoriDomain };
 
         return this.http.put<UploadToken>(url, body, { params });
     }
@@ -62,6 +62,16 @@ export class ShikicinemaV1Client {
         }
 
         return this.http.post<ShikivideosInterface>(url, null, { params });
+    }
+
+    getTotalContributions(uploaderId: ResourceIdType) {
+        const url = `${this.baseUri}/api/shikivideos/contributions`;
+        const params = new HttpParams()
+            .set('uploader', uploaderId);
+
+        return this.http.get(url, { params }).pipe(
+            map((res: any) => res?.count as number),
+        );
     }
 
     getContributions(uploaderId: ResourceIdType, page = 1): Observable<ShikivideosInterface[]> {

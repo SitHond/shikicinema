@@ -45,6 +45,7 @@
             },
             "WELL_KNOWN_UPLOADERS": {
                 "KODIK": "Кодик",
+                "CVH": "CVH",
                 "DELETED_UPLOADER": "Аноним"
             }
         },
@@ -77,6 +78,9 @@
                 },
                 "LANGUAGE": "Язык",
                 "EXIT": "Выход"
+            },
+            "UPLOAD_BUTTON": {
+                "ACTION_TEXT": "Добавить"
             }
         },
         "GO_EXTERNAL_PAGE": {
@@ -101,6 +105,22 @@
         "COMMON": {
             "DATES": {
                 "YEAR": "{{ year }} год"
+            }
+        },
+        "INLINE_EXPANDER": {
+            "OPEN": "...ещё",
+            "CLOSE": "скрыть"
+        },
+        "FOOTER": {
+            "SOCIALS": {
+                "TELEGRAM": "Телеграм",
+                "VK": "ВКонтакте",
+                "SHIKIMORI": "Разработчик на Шикимори"
+            },
+            "OTHER_LINKS": {
+                "HOW_TO_UPLOAD_VIDEO": "Как загрузить видео",
+                "HOW_TO_ADD_TRANSLATION": "Как добавить перевод",
+                "DONATE": "Поддержать"
             }
         }
     },
@@ -133,6 +153,13 @@
             "WATCH_ACTION": {
                 "SUCCESS": "Просмотрено",
                 "FAILURE": "Ошибка"
+            },
+            "ANIME_INFO": {
+                "SCORE": "Оценка",
+                "KIND": "Тип",
+                "STATUS": "Статус",
+                "EPISODES": "Серии",
+                "AIRED": "Эфир"
             },
             "RELEVANT_VIDEOS_MISSING": "Не смогли найти похожие видео",
             "COMMENT_REPLY_MISSING": "Комментарий был удален",
@@ -207,6 +234,10 @@
                     "REMINDER_TEXT": "Тут есть видео, но нужно",
                     "DISABLE_FILTERS_BTN": "Отключить Фильтры"
                 }
+            },
+            "UPLOADER": {
+                "UPLOADER_IS_A_SERVICE": "Сторонний сервис",
+                "UPLOADS_COUNT": "{ count }{ suffix, select, K { тыс.} M { млн.} B { млрд.} T { трлн.} other {} } { count, plural, one {загрузка} few {загрузки} other {загрузок} }"
             }
         },
         "VIDEO_SELECT_MODAL": {

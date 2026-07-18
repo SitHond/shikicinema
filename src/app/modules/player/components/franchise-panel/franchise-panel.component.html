@@ -1,0 +1,19 @@
+@for (item of sortedItems(); track item.anime?.id) {
+    @let link = '/player/' + item.anime.id + '/1';
+
+    <a class="franchise-panel__card"
+        [routerLink]="link"
+        (keydown.space)="onNavigate(link)"
+        (keydown.enter)="onNavigate(link)">
+        <img
+            class="franchise-panel__poster"
+            [src]="item.anime.image?.preview"
+            [alt]="item.anime.russian || item.anime.name"
+        />
+        <span class="franchise-panel__badge"
+            [class.franchise-panel__badge--sequel]="item.relation === 'Sequel'"
+            [class.franchise-panel__badge--prequel]="item.relation === 'Prequel'">
+            {{ item.relation_text }}
+        </span>
+    </a>
+}

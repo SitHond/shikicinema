@@ -4,9 +4,10 @@ import {
     HttpParams,
 } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import {
+    catchError,
     filter,
     map,
     switchMap,
@@ -21,6 +22,7 @@ import {
     Credentials,
     EpisodeNotification,
     EpisodeNotificationResponse,
+    RelatedAnimeInterface,
     Topic,
     UserAnimeRate,
     UserBriefInfoInterface,
@@ -45,6 +47,36 @@ import { selectShikimoriDomain } from '@app/store/shikimori/selectors';
 import { setPaginationToParams } from '@app/shared/types/shikimori/helpers';
 
 
+const RELATION_KIND_MAP: Record<string, string> = {
+    'prequel': 'Prequel',
+    'sequel': 'Sequel',
+    'side_story': 'Side Story',
+    'parent_story': 'Parent Story',
+    'full_story': 'Parent Story',
+    'alternative_version': 'Alternative Version',
+    'alternative_setting': 'Alternative Setting',
+    'spin_off': 'Spin-off',
+    'summary': 'Summary',
+    'other': 'Other',
+    'character': 'Character',
+    'adaptation': 'Adaptation',
+};
+
+const RELATION_TEXT_MAP: Record<string, string> = {
+    'prequel': 'Предыстория',
+    'sequel': 'Продолжение',
+    'side_story': 'Другая история',
+    'parent_story': 'Изначальная история',
+    'full_story': 'Изначальная история',
+    'alternative_version': 'Альтернативная версия',
+    'alternative_setting': 'Альтернативная вселенная',
+    'spin_off': 'Ответвление',
+    'summary': 'Обобщение',
+    'other': 'Прочее',
+    'character': 'Общий персонаж',
+    'adaptation': 'Адаптация',
+};
+
 @Injectable({
     providedIn: 'root',
 })
@@ -54,7 +86,6 @@ export class ShikimoriClient {
 
     private readonly http = inject(HttpClient);
     private readonly store = inject(Store);
-    private readonly shikiripApiURI = environment.smarthard.apiURI;
     private readonly shikimoriDomain$ = this.store.select(selectShikimoriDomain).pipe(filter(Boolean));
 
     getNewToken(authCode: string, redirectUri = 'urn:ietf:wg:oauth:2.0:oob'): Observable<ShikimoriCredentials> {
@@ -63,11 +94,12 @@ export class ShikimoriClient {
             switchMap((domain) => {
                 const params = new HttpParams()
                     .set('grant_type', 'authorization_code')
+                    .set('client_id', environment.shikimori.authClientId)
+                    .set('client_secret', environment.shikimori.authClientSecret)
                     .set('code', authCode)
-                    .set('redirect_uri', redirectUri)
-                    .set('shikimori_domain', domain);
+                    .set('redirect_uri', redirectUri);
 
-                return this.http.post<Credentials>(`${this.shikiripApiURI}/api/shikimori/oauth/token`, null, { params })
+                return this.http.post<Credentials>(`${domain}/oauth/token`, null, { params })
                     .pipe(map(toShikimoriCredentials));
             }),
         );
@@ -79,10 +111,11 @@ export class ShikimoriClient {
             switchMap((domain) => {
                 const params = new HttpParams()
                     .set('grant_type', 'refresh_token')
-                    .set('refresh_token', refreshToken)
-                    .set('shikimori_domain', domain);
+                    .set('client_id', environment.shikimori.authClientId)
+                    .set('client_secret', environment.shikimori.authClientSecret)
+                    .set('refresh_token', refreshToken);
 
-                return this.http.post<Credentials>(`${this.shikiripApiURI}/api/shikimori/oauth/token`, null, { params })
+                return this.http.post<Credentials>(`${domain}/oauth/token`, null, { params })
                     .pipe(map(toShikimoriCredentials));
             }),
         );
@@ -227,6 +260,65 @@ export class ShikimoriClient {
         );
     }
 
+    getRelatedAnimes(animeId: ResourceIdType): Observable<RelatedAnimeInterface[]> {
+        return this.shikimoriDomain$.pipe(
+            take(1),
+            switchMap((domain) => this.http.get<any[]>(`${domain}/api/animes/${animeId}/related`).pipe(
+                switchMap((items) => {
+                    if (!items?.length) return of([]);
+
+                    // стандартный формат shikimori.one: { relation, relation_text, anime, manga }
+                    if ('relation' in items[0]) {
+                        return of((items as RelatedAnimeInterface[]).map((item) => ({
+                            ...item,
+                            anime: item.anime ? this.prefixAnimeImageUrls(item.anime, domain) : null,
+                        })));
+                    }
+
+                    // формат shikimori.rip: { related_media_id, related_media_type, relation_kind }
+                    const animeItems = items.filter((i) => i.related_media_type === 'Anime');
+
+                    if (!animeItems.length) return of([]);
+
+                    return forkJoin(
+                        animeItems.map((item) =>
+                            this.http
+                                .get<AnimeBriefInfoInterface>(`${domain}/api/animes/${item.related_media_id}`)
+                                .pipe(
+                                    map((anime) => ({
+                                        relation: RELATION_KIND_MAP[item.relation_kind] ?? item.relation_kind,
+                                        relation_text: RELATION_TEXT_MAP[item.relation_kind] ?? item.relation_kind,
+                                        anime: this.prefixAnimeImageUrls(anime, domain),
+                                        manga: null,
+                                    } as RelatedAnimeInterface)),
+                                    catchError(() => of(null)),
+                                ),
+                        ),
+                    ).pipe(
+                        map((results) => results.filter(Boolean) as RelatedAnimeInterface[]),
+                    );
+                }),
+            )),
+        );
+    }
+
+    private prefixAnimeImageUrls(anime: AnimeBriefInfoInterface, domain: string): AnimeBriefInfoInterface {
+        if (!anime?.image) return anime;
+
+        const prefix = (url: string) => url && !/^https?:\/\//.test(url) ? `${domain}${url}` : url;
+
+        return {
+            ...anime,
+            image: {
+                ...anime.image,
+                original: prefix(anime.image.original),
+                preview: prefix(anime.image.preview),
+                x96: prefix(anime.image.x96),
+                x48: prefix(anime.image.x48),
+            },
+        };
+    }
+
     getUserRate(
         userId: ResourceIdType,
         targetId: ResourceIdType,
@@ -259,14 +351,40 @@ export class ShikimoriClient {
         );
     }
 
-    getTopics(animeId: ResourceIdType, episode?: ResourceIdType, revalidate = false): Observable<Topic[]> {
+    getTopics(
+        animeId: ResourceIdType,
+        episode?: ResourceIdType,
+        revalidate = false,
+        kind: string | null = 'episode',
+    ): Observable<Topic[]> {
         let headers = new HttpHeaders();
-        let params = new HttpParams()
-            .set('kind', 'episode');
+        let params = new HttpParams();
+
+        if (kind) {
+            params = params.set('kind', kind);
+        }
 
         if (episode) {
             params = params.set('episode', `${episode}`);
         }
+
+        if (revalidate) {
+            headers = headers
+                .set('Cache-Control', 'no-cache, no-store, must-revalidate')
+                .set('Pragma', 'no-cache');
+        }
+
+        return this.shikimoriDomain$.pipe(
+            take(1),
+            switchMap(
+                (domain) => this.http.get<Topic[]>(`${domain}/api/animes/${animeId}/topics`, { params, headers }),
+            ),
+        );
+    }
+
+    getAnimeTopics(animeId: ResourceIdType, revalidate = false): Observable<Topic[]> {
+        let headers = new HttpHeaders();
+        const params = new HttpParams().set('limit', '100');
 
         if (revalidate) {
             headers = headers

@@ -3,6 +3,7 @@ export {
     chevronUp,
     closeOutline,
     filmOutline,
+    helpCircleOutline,
     languageOutline,
     libraryOutline,
     logInOutline,

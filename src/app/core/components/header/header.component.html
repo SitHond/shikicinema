@@ -11,6 +11,10 @@
                 [placeholder]="'HOME_MODULE.HOME_PAGE.ANIME_SEARCHBAR_PLACEHOLDER' | transloco"
             />
 
+            @if (isPlayerPage()) {
+                <app-upload-button class="toolbar__upload-btn" />
+            }
+
             <ion-button
                 id="menu-trigger"
                 expand="full"

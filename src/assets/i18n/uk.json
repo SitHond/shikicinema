@@ -45,6 +45,7 @@
             },
             "WELL_KNOWN_UPLOADERS": {
                 "KODIK": "Кодік",
+                "CVH": "CVH",
                 "DELETED_UPLOADER": "Анонім"
             }
         },
@@ -128,6 +129,13 @@
             "WATCH_ACTION": {
                 "SUCCESS": "Переглянуто",
                 "FAILURE": "Помилка"
+            },
+            "ANIME_INFO": {
+                "SCORE": "Оцінка",
+                "KIND": "Тип",
+                "STATUS": "Статус",
+                "EPISODES": "Серії",
+                "AIRED": "Ефір"
             },
             "RELEVANT_VIDEOS_MISSING": "Схожі відео не було знайдено",
             "COMMENT_REPLY_MISSING": "Коментарій було видалено",

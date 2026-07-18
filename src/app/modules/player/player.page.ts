@@ -21,33 +21,30 @@ import {
     IonText,
     ModalController,
     Platform,
-    ToastController,
 } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Title } from '@angular/platform-browser';
 import { TranslocoService } from '@jsverse/transloco';
 import {
+    catchError,
     debounceTime,
     map,
     take,
     tap,
 } from 'rxjs/operators';
-import { explicitEffect } from 'ngxtension/explicit-effect';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { timer } from 'rxjs';
+import { of, switchMap, timer } from 'rxjs';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief-info.interface';
 import { Comment } from '@app/shared/types/shikimori/comment';
 import { CommentsComponent } from '@app/modules/player/components/comments/comments.component';
 import { ControlPanelComponent } from '@app/modules/player/components/control-panel/control-panel.component';
-import { DiscordRpcService } from '@app/core/services/discord-rpc.service';
-import { FilterByKindPipe } from '@app/shared/pipes/filter-by-kind/filter-by-kind.pipe';
-import { GetActiveKindsPipe } from '@app/shared/pipes/get-active-kinds/get-active-kinds.pipe';
+import { CvhClient } from '@app/shared/services';
+import { FranchisePanelComponent } from '@app/modules/player/components/franchise-panel/franchise-panel.component';
 import { GetShikimoriPagePipe } from '@app/shared/pipes/get-shikimori-page/get-shikimori-page.pipe';
-import { KindSelectorComponent } from '@app/modules/player/components/kind-selector/kind-selector.component';
-import { NoPreferenceSymbol } from '@app/store/settings/types';
 import { PlayerComponent } from '@app/modules/player/components/player/player.component';
+import { PlayerSelectorComponent } from '@app/modules/player/components/player-selector';
 import { ResourceIdType } from '@app/shared/types/resource-id.type';
 import { ShikimoriAnimeLinkPipe } from '@app/shared/pipes/shikimori-anime-link/shikimori-anime-link.pipe';
 import { SidePanelComponent } from '@app/modules/player/components/side-panel/side-panel.component';
@@ -58,43 +55,37 @@ import { UploaderComponent } from '@app/modules/player/components/uploader/uploa
 import { UserCommentFormComponent } from '@app/modules/player/components/user-comment-form/user-comment-form.component';
 import { VideoInfoInterface } from '@app/modules/player/types';
 import { VideoKindEnum } from '@app/modules/player/types/video-kind.enum';
-import { VideoSelectorComponent } from '@app/modules/player/components/video-selector/video-selector.component';
 import { authShikimoriAction } from '@app/store/auth/actions/auth.actions';
 import {
-    authorAvailability,
-    filterVideosByDomains,
-    getLastAiredEpisode,
-    getMaxEpisode,
-    getMaxEpisodeFromVideos,
-    isEpisodeWatched,
-} from '@app/modules/player/utils';
-import {
+    changeCurrentAnimeAction,
+    changeCurrentEpisodeAction,
     deleteCommentAction,
     editCommentAction,
     editCommentSuccessAction,
     findVideosAction,
     getAnimeInfoAction,
+    getRelatedAnimesAction,
     sendCommentAction,
     setIsShownAllAction,
     watchAnimeAction,
     watchAnimeSuccessAction,
 } from '@app/modules/player/store/actions';
 import { filterByEpisode } from '@app/shared/utils/filter-by-episode.function';
-import { filterVideosByPreferences } from '@app/modules/player/utils/filter-videos-by-preferences.function';
+import {
+    filterVideosByDomains,
+    getLastAiredEpisode,
+    getMaxEpisode,
+    getMaxEpisodeFromVideos,
+    isEpisodeWatched,
+} from '@app/modules/player/utils';
 import { getAnimeName } from '@app/shared/utils/get-anime-name.function';
 import { getDomain } from '@app/shared/utils/get-domain.function';
 import { isEq } from '@app/shared/utils/is-eq.function';
 import { isEqId } from '@app/shared/utils/is-eq-id.function';
 import {
-    selectAuthorPreferencesByAnime,
-    selectDiscordClientId,
-    selectDiscordRichPresence,
     selectDomainFilters,
-    selectDomainPreferencesByAnime,
-    selectKindPreferencesByAnime,
     selectPlayerKindDisplayMode,
     selectPlayerMode,
-    selectPreferencesToggle,
 } from '@app/store/settings/selectors/settings.selectors';
 import { selectIsAuthenticated } from '@app/store/auth/selectors/auth.selectors';
 import {
@@ -104,15 +95,17 @@ import {
     selectPlayerIsCommentsLoading,
     selectPlayerIsCommentsPartiallyLoading,
     selectPlayerIsShownAllComments,
+    selectPlayerRelatedAnimes,
+    selectPlayerTopic,
     selectPlayerUserRate,
     selectPlayerVideos,
     selectPlayerVideosLoading,
 } from '@app/modules/player/store/selectors/player.selectors';
+import { selectShikimoriDomain } from '@app/store/shikimori/selectors/shikimori.selectors';
 import {
     togglePlayerModeAction,
     updatePlayerPreferencesAction,
 } from '@app/store/settings/actions/settings.actions';
-import { uploadVideoAction } from '@app/store/shikicinema/actions/upload-video.action';
 import { visitAnimePageAction } from '@app/modules/home/store/recent-animes/actions';
 
 
@@ -123,11 +116,8 @@ import { visitAnimePageAction } from '@app/modules/home/store/recent-animes/acti
     imports: [
         AsyncPipe,
         PlayerComponent,
-        VideoSelectorComponent,
-        KindSelectorComponent,
+        PlayerSelectorComponent,
         SkeletonBlockComponent,
-        GetActiveKindsPipe,
-        FilterByKindPipe,
         ControlPanelComponent,
         UploaderComponent,
         ToUploaderPipe,
@@ -136,6 +126,7 @@ import { visitAnimePageAction } from '@app/modules/home/store/recent-animes/acti
         UserCommentFormComponent,
         ShikimoriAnimeLinkPipe,
         GetShikimoriPagePipe,
+        FranchisePanelComponent,
         SidePanelComponent,
         IonText,
         IonContent,
@@ -149,28 +140,25 @@ export class PlayerPage implements OnInit {
 
     private readonly store = inject(Store);
     private readonly router = inject(Router);
-    private readonly discordRpc = inject(DiscordRpcService);
     private readonly title = inject(Title);
     private readonly platform = inject(Platform);
     private readonly breakpointObserver = inject(BreakpointObserver);
     private readonly actions$ = inject(Actions);
-    private readonly toast = inject(ToastController);
     private readonly transloco = inject(TranslocoService);
     private readonly modalController = inject(ModalController);
     private readonly destroyRef = inject(DestroyRef);
+    private readonly cvhClient = inject(CvhClient);
 
     readonly animeId = input.required<string>();
     readonly episode = input.required<string>();
 
     private readonly userCommentFormEl = viewChild('userCommentForm', { read: ElementRef });
 
-    readonly isPreferencesToggleOn = this.store.selectSignal(selectPreferencesToggle);
-    readonly isDiscordRichPresence = this.store.selectSignal(selectDiscordRichPresence);
-    readonly discordClientId = this.store.selectSignal(selectDiscordClientId);
     readonly playerMode = this.store.selectSignal(selectPlayerMode);
     readonly playerKindDisplayMode = this.store.selectSignal(selectPlayerKindDisplayMode);
     readonly isUserAuthorized = this.store.selectSignal(selectIsAuthenticated);
     readonly domainFilters = this.store.selectSignal(selectDomainFilters);
+    readonly shikimoriDomain = this.store.selectSignal(selectShikimoriDomain);
 
     readonly isMediaMatch = toSignal(this.breakpointObserver.observe([
         '(max-width: 1599px) and (max-resolution: 1dppx)',
@@ -192,11 +180,10 @@ export class PlayerPage implements OnInit {
     videos = computed(() => this.store.selectSignal(selectPlayerVideos(this.animeIdQ()))());
     isAnimeLoading = computed(() => this.store.selectSignal(selectPlayerAnimeLoading(this.animeIdQ()))());
     anime = computed(() => this.store.selectSignal(selectPlayerAnime(this.animeIdQ()))(), { equal: isEqId });
+    relatedAnimes = computed(() => this.store.selectSignal(selectPlayerRelatedAnimes(this.animeIdQ()))());
     userRate = computed(() => this.store.selectSignal(selectPlayerUserRate(this.animeIdQ()))());
-    authorPreferences = computed(() => this.store.selectSignal(selectAuthorPreferencesByAnime(this.animeIdQ()))());
-    kindPreferences = computed(() => this.store.selectSignal(selectKindPreferencesByAnime(this.animeIdQ()))());
-    domainPreferences = computed(() => this.store.selectSignal(selectDomainPreferencesByAnime(this.animeIdQ()))());
     comments = computed(() => this.store.selectSignal(selectPlayerComments(this.animeIdQ(), this.episodeQ()))());
+    topic = computed(() => this.store.selectSignal(selectPlayerTopic(this.animeIdQ(), this.episodeQ()))());
     isShownAllComments = computed(() => this.store.selectSignal(
         selectPlayerIsShownAllComments(this.animeIdQ(), this.episodeQ()),
     )());
@@ -230,11 +217,30 @@ export class PlayerPage implements OnInit {
         return isCurrentEpisodeNotAired ? nextEpisodeAt : null;
     });
 
-    authorAvailability = computed(() => authorAvailability(this.videos(), this.lastAiredEpisode()));
-
     currentVideo = signal<VideoInfoInterface>(null);
     currentKind = signal<VideoKindEnum>(null);
     isOrientationPortrait = signal<boolean>(false);
+
+    readonly resolvedSource = toSignal(
+        toObservable(this.currentVideo).pipe(
+            switchMap((video) => {
+                if (!video?.url) return of(null as string | null);
+
+                const CVH_BASE = 'https://cdnvideohub.com/video/';
+
+                if (video.urlType === 'video' && video.url.startsWith(CVH_BASE)) {
+                    const vkId = video.url.slice(CVH_BASE.length);
+
+                    return this.cvhClient.resolveVideoUrl(vkId).pipe(
+                        catchError(() => of(null as string | null)),
+                    );
+                }
+
+                return of(video.url);
+            }),
+        ),
+        { initialValue: null as string | null },
+    );
     editComment = signal<Comment>(null);
     highlightComment = signal<ResourceIdType>(null);
 
@@ -243,40 +249,9 @@ export class PlayerPage implements OnInit {
 
         this.store.dispatch(findVideosAction({ animeId }));
         this.store.dispatch(getAnimeInfoAction({ animeId }));
+        this.store.dispatch(getRelatedAnimesAction({ animeId }));
+        this.store.dispatch(changeCurrentAnimeAction({ animeId }));
     });
-
-    readonly episodeVideosChangeEffect = explicitEffect(
-        [this.episodeVideos, this.isVideosLoading],
-        ([videos, isLoading]) => {
-            if (!isLoading && videos?.length > 0) {
-                const author = this.authorPreferences();
-                const domain = this.domainPreferences();
-                const kind = this.kindPreferences();
-                const isPreferencesToggleOn = this.isPreferencesToggleOn();
-
-                const relevantVideos = isPreferencesToggleOn
-                    ? filterVideosByPreferences(videos, author, domain, kind)
-                    : videos;
-
-                if (!relevantVideos &&
-                    author !== NoPreferenceSymbol &&
-                    domain !== NoPreferenceSymbol &&
-                    kind !== NoPreferenceSymbol
-                ) {
-                    this.toast.create({
-                        id: 'player-relevant-videos-missing',
-                        color: 'warning',
-                        message: this.transloco.translate('PLAYER_MODULE.PLAYER_PAGE.RELEVANT_VIDEOS_MISSING'),
-                        duration: 1000,
-                    }).then((toast) => toast.present());
-                }
-
-                const chosenVideo = (relevantVideos || videos)?.[0];
-
-                this.onVideoChange(chosenVideo, false);
-            }
-        },
-    );
 
     readonly animeOrEpisodeChangeEffect = effect(() => {
         const anime = this.anime();
@@ -286,22 +261,8 @@ export class PlayerPage implements OnInit {
             this.changeTitle(anime, episode);
 
             this.store.dispatch(visitAnimePageAction({ anime, episode }));
-        }
-    });
-
-    readonly discordActivityEffect = effect(() => {
-        const anime = this.anime();
-        const episode = this.episodeQ();
-        const isEnabled = this.isDiscordRichPresence();
-        const clientId = this.discordClientId();
-
-        if (isEnabled && clientId && anime?.name && episode) {
-            this.discordRpc.updateActivity(clientId, {
-                details: getAnimeName(anime, null) || anime.name,
-                state: `Серия ${episode}`,
-                timestamps: { start: Date.now() },
-                type: 3,
-            });
+            this.store.dispatch(changeCurrentAnimeAction({ animeId: anime.id }));
+            this.store.dispatch(changeCurrentEpisodeAction({ episode }));
         }
     });
 
@@ -433,12 +394,6 @@ export class PlayerPage implements OnInit {
         const episode = this.episodeQ();
 
         this.store.dispatch(sendCommentAction({ animeId, episode, commentText }));
-    }
-
-    onVideoUpload(video: VideoInfoInterface): void {
-        const animeId = this.animeIdQ();
-
-        this.store.dispatch(uploadVideoAction({ animeId, video }));
     }
 
     togglePlayerMode(): void {

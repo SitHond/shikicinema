@@ -3,15 +3,14 @@ import {
     ChangeDetectionStrategy,
     Component,
     DestroyRef,
-    HostBinding,
     ViewEncapsulation,
-    computed,
     inject,
     input,
     output,
     signal,
 } from '@angular/core';
 import {
+    EMPTY,
     Observable,
     filter,
     map,
@@ -39,27 +38,27 @@ import { UrlSanitizerPipe } from '@app/shared/pipes/url-sanitizer/url-sanitizer.
     styleUrl: './player.component.scss',
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    host: {
+        'class': 'player',
+        '[class.skeleton]': 'isLoading()',
+    },
 })
 export class PlayerComponent {
-    @HostBinding('class.player')
-    protected playerClass = true;
-
     private readonly destroyRef = inject(DestroyRef);
 
-    private _sourceLoading = signal(true);
-    private _sourceLoading$ = toObservable(this._sourceLoading);
+    protected isLoading = signal(true);
 
-    loading = input(true);
+    private _sourceLoading$ = toObservable(this.isLoading);
+
     source = input<string>();
-    nextEpisodeAt = input<Date | string | number>();
+    urlType = input<'iframe' | 'video'>('iframe');
+    showNextEpisodeAt = input(false);
+    nextEpisodeAt = input<Date | string | number | null>();
 
     loaded = output<boolean>();
     timedOut = output<boolean>();
 
-    @HostBinding('class.skeleton')
-    readonly isLoading = computed(() => this._sourceLoading() || this.loading());
-
-    timeout$: Observable<boolean>;
+    timeout$: Observable<boolean> = EMPTY;
 
     private _getTimeout(timeoutMs: number): Observable<boolean> {
         return race(
@@ -84,17 +83,17 @@ export class PlayerComponent {
         this.loaded.emit(false);
 
         if (!this.source()) {
-            this._sourceLoading.set(false);
+            this.isLoading.set(false);
             return;
         }
 
-        this._sourceLoading.set(true);
+        this.isLoading.set(true);
         this.timeout$ = this._getTimeout(10_000);
     });
 
     onLoad(): void {
         this.loaded.emit(true);
-        this._sourceLoading.set(false);
+        this.isLoading.set(false);
     }
 
     onTimeout(): void {

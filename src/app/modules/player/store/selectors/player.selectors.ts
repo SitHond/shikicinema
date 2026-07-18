@@ -2,6 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief-info.interface';
 import { PlayerStoreInterface } from '@app/modules/player/store/types';
+import { RelatedAnimeInterface } from '@app/shared/types/shikimori/related-anime.interface';
 import { ResourceIdType } from '@app/shared/types/resource-id.type';
 
 export const selectPlayer = createFeatureSelector<PlayerStoreInterface>('player');
@@ -19,6 +20,16 @@ export const selectPlayerVideosLoading = (animeId: ResourceIdType) => createSele
 export const selectPlayerAnime = (animeId: ResourceIdType) => createSelector(
     selectPlayer,
     ({ animeInfo }) => animeInfo[`${animeId}`] || {} as AnimeBriefInfoInterface,
+);
+
+export const selectCurrentPlayerAnime = createSelector(
+    selectPlayer,
+    ({ animeInfo, currentAnimeId }) => animeInfo[`${currentAnimeId}`] || {} as AnimeBriefInfoInterface,
+);
+
+export const selectCurrentPlayerEpisode = createSelector(
+    selectPlayer,
+    ({ currentEpisode }) => currentEpisode || 1,
 );
 
 export const selectPlayerAnimeLoading = (animeId: ResourceIdType) => createSelector(
@@ -56,4 +67,9 @@ export const selectPlayerIsShownAllComments = (animeId: ResourceIdType, episode:
 export const selectPlayerComments = (animeId: ResourceIdType, episode: ResourceIdType) => createSelector(
     selectPlayer,
     ({ comments }) => comments?.[animeId]?.[episode]?.comments || [],
+);
+
+export const selectPlayerRelatedAnimes = (animeId: ResourceIdType) => createSelector(
+    selectPlayer,
+    ({ relatedAnimes }) => (relatedAnimes?.[animeId] || null) as RelatedAnimeInterface[] | null,
 );

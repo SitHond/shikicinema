@@ -4,6 +4,7 @@ import {
     ofType,
 } from '@ngrx/effects';
 import { Injectable, inject } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { ToastController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import {
@@ -34,13 +35,16 @@ export class ShikicinemaEffects {
     private _shikicinemaV1 = inject(ShikicinemaV1Client);
     private _transloco = inject(TranslocoService);
     private _toast = inject(ToastController);
+    private _store = inject(Store);
 
     getUploadToken$ = createEffect(() => this._actions$.pipe(
         ofType(getUploadTokenAction),
-        switchMap(({ shikimoriToken }) => this._shikicinemaV1.getUploadToken(shikimoriToken?.shikimoriBearerToken).pipe(
-            map((uploadToken) => getUploadTokenSuccessAction({ uploadToken })),
-            catchError((errors) => of(getUploadTokenFailureAction({ errors }))),
-        )),
+        switchMap(({ shikimoriToken, shikimoriDomain }) => this._shikicinemaV1
+            .getUploadToken(shikimoriToken?.shikimoriBearerToken, shikimoriDomain)
+            .pipe(
+                map((uploadToken) => getUploadTokenSuccessAction({ uploadToken })),
+                catchError((errors) => of(getUploadTokenFailureAction({ errors }))),
+            )),
     ));
 
     uploadVideo$ = createEffect(() => this._actions$.pipe(

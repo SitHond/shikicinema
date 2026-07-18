@@ -45,6 +45,7 @@
             },
             "WELL_KNOWN_UPLOADERS": {
                 "KODIK": "Kodik",
+                "CVH": "CVH",
                 "DELETED_UPLOADER": "Anonym"
             }
         },
@@ -77,6 +78,9 @@
                 },
                 "LANGUAGE": "Language",
                 "EXIT": "Exit"
+            },
+            "UPLOAD_BUTTON": {
+                "ACTION_TEXT": "Add"
             }
         },
         "GO_EXTERNAL_PAGE": {
@@ -101,6 +105,22 @@
         "COMMON": {
             "DATES": {
                 "YEAR": "{{ year }}"
+            }
+        },
+        "INLINE_EXPANDER": {
+            "OPEN": "...more",
+            "CLOSE": "hide"
+        },
+        "FOOTER": {
+            "SOCIALS": {
+                "TELEGRAM": "Telegram",
+                "VK": "VKontakte",
+                "SHIKIMORI": "Developer on Shikimori"
+            },
+            "OTHER_LINKS": {
+                "HOW_TO_UPLOAD_VIDEO": "How to upload video",
+                "HOW_TO_ADD_TRANSLATION": "How to add translation",
+                "DONATE": "Support"
             }
         }
     },
@@ -128,6 +148,13 @@
             "WATCH_ACTION": {
                 "SUCCESS": "Watched",
                 "FAILURE": "Failed"
+            },
+            "ANIME_INFO": {
+                "SCORE": "Score",
+                "KIND": "Type",
+                "STATUS": "Status",
+                "EPISODES": "Episodes",
+                "AIRED": "Aired"
             },
             "RELEVANT_VIDEOS_MISSING": "We couldn't find relevant videos",
             "COMMENT_REPLY_MISSING": "Reply was deleted",
@@ -202,6 +229,10 @@
                     "REMINDER_TEXT": "There are videos here, but you need to",
                     "DISABLE_FILTERS_BTN": "turn off filters"
                 }
+            },
+            "UPLOADER": {
+                "UPLOADER_IS_A_SERVICE": "Third-party service",
+                "UPLOADS_COUNT": "{ count }{ suffix, select, K {K} M {M} B {B} T {T} other {} } { count, plural, one {upload} other {uploads} }"
             }
         },
         "VIDEO_SELECT_MODAL": {
