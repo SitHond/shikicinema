@@ -1,0 +1,42 @@
+<ion-content [fullscreen]="true" class="embed-page__content">
+    <div class="embed-page__wrapper">
+        <app-player class="embed-page__player responsive-16by9"
+            [showNextEpisodeAt]="nextEpisodeAt() !== null"
+            [source]="resolvedSource()"
+            [urlType]="currentVideo()?.urlType"
+            [nextEpisodeAt]="nextEpisodeAt()"
+        />
+
+        <app-player-selector
+            class="embed-page__selector"
+            [animeId]="animeIdQ()"
+            [kind]="currentKind()"
+            [episode]="episodeQ()"
+            [lastAiredEpisode]="lastAiredEpisode()"
+            [maxEpisode]="maxEpisode()"
+            [isFilterDomains]="isDomainFilterOn()"
+            [isLoading]="isVideosLoading()"
+            [videos]="videos()"
+            [selectedVideo]="currentVideo()"
+            (changeVideo)="onVideoChange($event[0], $event[1])"
+            (changeKind)="onKindChange($event)"
+            (domainFiltersOff)="setDomainFilters(false)"
+        />
+
+        <app-control-panel
+            class="embed-page__control-panel"
+            [anime]="anime()"
+            [maxEpisode]="maxEpisode()"
+            [selected]="episodeQ()"
+            [userRate]="userRate()"
+            [isLoading]="isAnimeLoading()"
+            [isWatched]="isWatched()"
+            [showSidePanel]="false"
+            [isRewatching]="isRewatching()"
+            [isMinified]="false"
+            [playerMode]="'compact'"
+            (selection)="onEpisodeChange($event)"
+            (watch)="onWatch($event, isWatched())"
+        />
+    </div>
+</ion-content>

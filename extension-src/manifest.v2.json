@@ -10,7 +10,12 @@
     "content_security_policy": "default-src 'self'; img-src *; frame-src *; font-src *; media-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src *; script-src 'self'",
     "browser_specific_settings": {
         "gecko": {
-            "id": "{78e6c1a5-0b68-4e13-a0ac-f3a7597cf220}"
+            "id": "shikicinema@sithond.com",
+            "strict_min_version": "109.0",
+            "data_collection_permissions": {
+                "required": ["none"],
+                "optional": []
+            }
         }
     },
     "content_scripts": [
@@ -19,7 +24,8 @@
                 "*://shikimori.rip/*",
                 "*://shikimori.fi/*",
                 "*://shikimori.net/*",
-                "*://shikimori.moe/*"
+                "*://shikimori.moe/*",
+                "*://ygg.shiki.rip/*"
             ],
             "js": [
                 "shikicinema.js"
@@ -47,6 +53,7 @@
         "https://shikimori.fi/*",
         "https://shikimori.net/*",
         "https://shikimori.moe/*",
+        "https://ygg.shiki.rip/*",
         "https://api.sithond.com/*",
         "https://smarthard.net/*",
         "https://remanga.org/*",

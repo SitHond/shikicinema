@@ -10,4 +10,10 @@
         border-top: 1px solid var(--ion-color-light);
         opacity: 0.6;
     }
+
+    &--embed {
+        .root__content {
+            height: 100%;
+        }
+    }
 }

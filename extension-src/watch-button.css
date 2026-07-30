@@ -22,3 +22,118 @@ a.upload-video:before {
     margin-right: 10px;
     margin-top: 2px;
 }
+
+#shikicinema-embed {
+    width: 100%;
+    margin: 16px 0;
+    overflow: hidden;
+}
+
+.shikicinema-embed__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--headline-color);
+    font-family: var(--font-alt);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.13px;
+    line-height: 30px;
+    text-transform: uppercase;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    white-space: nowrap;
+    background: var(--headline-background-color);
+    border-left: 5px solid var(--headline-border-color);
+    padding: 0 10px;
+    position: relative;
+}
+
+.shikicinema-embed__source {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 0.6;
+}
+
+.shikicinema-embed__controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: var(--headline-background-color, #f0eded);
+    border-top: 1px solid var(--headline-border-color, #ccc);
+    flex-wrap: wrap;
+}
+
+.shikicinema-embed__nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.shikicinema-embed__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    border: 1px solid var(--headline-border-color, #ccc);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--headline-color, #363636);
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+}
+
+.shikicinema-embed__btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.shikicinema-embed__btn:not(:disabled):hover {
+    background: var(--headline-border-color, #ccc);
+}
+
+.shikicinema-embed__select {
+    padding: 3px 6px;
+    border: 1px solid var(--headline-border-color, #ccc);
+    border-radius: 3px;
+    background: var(--headline-background-color, #f0eded);
+    color: var(--headline-color, #363636);
+    font-size: 13px;
+    cursor: pointer;
+    max-width: 130px;
+}
+
+.shikicinema-embed__select--author {
+    flex: 1;
+    max-width: 200px;
+}
+
+.shikicinema-embed__player {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    background: #000;
+}
+
+#shikicinema-embed__frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.shikicinema-embed__loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 14px;
+}

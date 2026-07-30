@@ -1,6 +1,6 @@
 {
   "name": "shikirip-cinema",
-  "version": "0.9.13",
+  "version": "0.9.14",
   "description": "ShikiRIP Cinema fork: returns video player on Shikimori",
   "main": "src/shikicinema.js",
   "engines": {
@@ -38,6 +38,7 @@
     "build:prod": "npm run patch:ngx-scrollbar && npm run set-env && ionic build --c=production",
     "bundle": "npm run build:prod",
     "bundle:cws": "MANIFEST_VERSION=v3 NODE_ENV=production npm run build:prod && MANIFEST_VERSION=v3 NODE_ENV=production npm run extension:build && find dist -name '*.map' -delete",
+    "bundle:firefox": "NODE_ENV=production npm run build:prod && NODE_ENV=production npm run extension:build && find dist -name '*.map' -delete",
     "release": "npm run build:prod",
     "test": "ng test",
     "lint": "ng lint",

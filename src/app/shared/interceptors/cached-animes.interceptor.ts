@@ -30,7 +30,7 @@ export const cachedAnimeInterceptor: HttpInterceptorFn = (request, next) => {
     const store = inject(Store);
     const actions$ = inject(Actions);
 
-    if (/\/\/shikimori.*?\/api\/animes\/\d+$/.test(request?.url)) {
+    if (/\/\/(shikimori.*?|ygg\.shiki\.rip)\/api\/animes\/\d+$/.test(request?.url)) {
         const [animeId = -1] = request?.url?.match(/\d+/) || [];
 
         const animeFromCache$ = store.select(selectCachedAnimeById(animeId));

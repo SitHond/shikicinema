@@ -1,0 +1,29 @@
+.embed-page {
+    display: block;
+    height: 100%;
+
+    &__content {
+        --background: var(--ion-background-color, #121212);
+    }
+
+    &__wrapper {
+        display: flex;
+        flex-direction: column;
+        row-gap: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    &__player {
+        width: 100%;
+    }
+
+    &__selector {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    &__control-panel {
+        padding-bottom: 0.25rem;
+    }
+}

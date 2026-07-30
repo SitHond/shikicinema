@@ -4,6 +4,7 @@ import { Routes } from '@angular/router';
 import { provideEffects } from '@ngrx/effects';
 import { provideState } from '@ngrx/store';
 
+import { EmbedPage } from '@app/modules/player/embed.page';
 import { PlayerEffects } from '@app/modules/player/store/effects/player.effects';
 import { PlayerPage } from '@app/modules/player/player.page';
 import { WELL_KNOWN_UPLOADERS_MAP } from '@app/shared/config/well-known-uploaders.config';
@@ -21,6 +22,11 @@ const providers: (EnvironmentProviders | Provider)[] = [
 ];
 
 export const PLAYER_ROUTES: Routes = [
+    {
+        path: 'embed/:animeId/:episode',
+        component: EmbedPage,
+        providers,
+    },
     {
         path: ':animeId/:episode',
         component: PlayerPage,

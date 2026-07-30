@@ -9,6 +9,7 @@ import {
     Renderer2,
     ViewEncapsulation,
     inject,
+    signal,
 } from '@angular/core';
 import { DEFAULT_SHIKIMORI_DOMAIN, SHIKIMORI_DOMAINS } from '@app/core/providers/shikimori-domain';
 import { HeaderComponent } from '@app/core/components/header/header.component';
@@ -51,6 +52,8 @@ import { updateLanguageAction, visitPageAction } from '@app/store/settings/actio
 })
 export class AppComponent implements OnInit {
     readonly version = environment.appVersion;
+    readonly isEmbedMode = signal(false);
+
     private readonly document = inject(DOCUMENT);
     private readonly store = inject(Store);
     private readonly renderer = inject(Renderer2);
@@ -62,6 +65,12 @@ export class AppComponent implements OnInit {
 
     constructor() {
         addIcons(usedIcons);
+
+        this.router.events.pipe(
+            filter((event) => event instanceof NavigationEnd),
+            tap<NavigationEnd>(({ url }) => this.isEmbedMode.set(url.includes('/player/embed/'))),
+            takeUntilDestroyed(this.destroyRef),
+        ).subscribe();
     }
 
     readonly isCustomThemeHardDisable$ = this.route.queryParams.pipe(
