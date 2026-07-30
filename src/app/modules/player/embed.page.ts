@@ -32,6 +32,7 @@ import {
     watchAnimeAction,
     watchAnimeSuccessAction,
 } from '@app/modules/player/store/actions';
+import { filterByEpisode } from '@app/shared/utils/filter-by-episode.function';
 import {
     filterVideosByDomains,
     getLastAiredEpisode,
@@ -39,7 +40,6 @@ import {
     getMaxEpisodeFromVideos,
     isEpisodeWatched,
 } from '@app/modules/player/utils';
-import { filterByEpisode } from '@app/shared/utils/filter-by-episode.function';
 import { getDomain } from '@app/shared/utils/get-domain.function';
 import { isEq } from '@app/shared/utils/is-eq.function';
 import { isEqId } from '@app/shared/utils/is-eq-id.function';
