@@ -50,11 +50,11 @@ Shikicinema имеет собственный архив видеозаписе�
 
 ### Какая информация хранится на сервере о пользователях
 
-Прочтите [Privacy Policy](https://github.com/Smarthard/shikicinema#privacy-policy).
+Прочтите [Privacy Policy](https://github.com/SitHond/shikicinema#privacy-policy).
 
 ### API для получения списка видео
 
-[Документация](https://sithond.com/docs/swagger). Пользоваться можно свободно.
+[Документация](https://api.sithond.com/). Пользоваться можно свободно.
 
 ### Получение OAuth2 доступа
 
