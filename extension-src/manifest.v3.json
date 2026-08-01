@@ -8,7 +8,7 @@
     },
     "description": "Adds an inline video player to Shikimori (rip/fi/net/moe). Browse your anime list, track episodes, switch between dubs and subs.",
     "content_security_policy": {
-        "extension_pages": "default-src 'self'; img-src *; frame-src *; font-src *; media-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src https://shikimori.rip https://shikimori.fi https://shikimori.net https://shikimori.moe https://ygg.shiki.rip https://api.sithond.com https://smarthard.net https://plapi.cdnvideohub.com ws://127.0.0.1:*; script-src 'self'"
+        "extension_pages": "default-src 'self'; img-src *; frame-src *; font-src *; media-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src https://shikimori.rip https://shikimori.fi https://shikimori.net https://shikimori.moe https://ygg.shiki.rip https://api.sithond.com https://plapi.cdnvideohub.com ws://127.0.0.1:*; script-src 'self'"
     },
     "content_scripts": [
         {
@@ -57,7 +57,7 @@
         "https://shikimori.moe/*",
         "https://ygg.shiki.rip/*",
         "https://api.sithond.com/*",
-        "https://smarthard.net/*",
+
         "https://remanga.org/*",
         "https://*.remanga.org/*",
         "https://plapi.cdnvideohub.com/*",

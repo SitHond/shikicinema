@@ -7,11 +7,10 @@ const PLAYER_URL = chrome.runtime.getURL('/index.html');
 const SHIKIRIP_API = `${process.env.SMARTHARD_API_URI}`;
 const SHIKIVIDEOS_API = `${SHIKIRIP_API}/api/shikivideos`;
 
-// Все источники видео — зеркала, как в Angular-приложении
-const SHIKIRIP_API_URIS = [
-    `${process.env.SMARTHARD_API_URI}`,
-    'https://smarthard.net',
-].filter((uri, i, arr) => arr.indexOf(uri) === i);
+const SHIKIRIP_API_URIS = [`${process.env.SMARTHARD_API_URI}`];
+const PROXY_HEADERS = process.env.SHIKIVIDEOS_PROXY_TOKEN
+    ? { 'X-Shikicinema-Token': `${process.env.SHIKIVIDEOS_PROXY_TOKEN}` }
+    : {};
 const PLAYER_BUTTON = document.createElement('a');
 const INFO_DIV = document.createElement('div');
 
@@ -88,7 +87,7 @@ async function embedInlinePlayer(animeId) {
     const [shikiResults, kodikVideos, cvhVideos] = await Promise.all([
         Promise.allSettled(
             SHIKIRIP_API_URIS.map((apiUri) =>
-                fetch(`${apiUri}/api/shikivideos/${animeId}?limit=all`, {}, FETCH_RESOURCE_TIMEOUT)
+                fetch(`${apiUri}/api/shikivideos/${animeId}?limit=all`, { headers: PROXY_HEADERS }, FETCH_RESOURCE_TIMEOUT)
                     .then((res) => res.json())
                     .catch(() => []),
             ),

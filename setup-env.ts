@@ -28,7 +28,7 @@ function shikimoriApiURIs(): string[] {
 function smarthardApiURIs(): string[] {
     return uniqueUris([
         env('SMARTHARD_API_URI', 'https://api.sithond.com'),
-        env('SMARTHARD_FALLBACK_API_URI', 'https://smarthard.net'),
+        env('SMARTHARD_FALLBACK_API_URI', ''),
     ]);
 }
 

@@ -4,7 +4,7 @@ import { getPath } from '@app/shared/utils/get-path.function';
 
 // TODO: реализовать выбор меньших разрешений для ограниченного интернет соединения
 export const smarthardNetImageLoader = (): ImageLoader => {
-    const domain = 'https://smarthard.net';
+    const domain = 'https://api.sithond.com';
 
     return (config: ImageLoaderConfig): string => {
         const path = getPath(config.src);
