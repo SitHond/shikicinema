@@ -65,6 +65,7 @@ export const environment: EnvironmentInterface = {
         apiURI: '${smarthardApis[0]}',
         apiURIs: ${tsStringArray(smarthardApis)},
         authClientId: '${env('SMARTHARD_CLIENT_ID')}',
+        proxyToken: '${env('SHIKIVIDEOS_PROXY_TOKEN')}',
     },
 };\n`;
 

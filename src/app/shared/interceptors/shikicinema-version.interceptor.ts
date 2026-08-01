@@ -9,9 +9,14 @@ export const shikicinemaVersionInterceptor: HttpInterceptorFn = (req, next) => {
     const version = shikicinemaMeta.getAppVersion();
     const isShikicinemaApi = environment.smarthard.apiURIs.some((apiURI) => req.url.startsWith(apiURI));
 
-    const modifiedReq = isShikicinemaApi
-        ? req.clone({ setHeaders: { 'X-Shikicinema': version } })
-        : req;
+    if (!isShikicinemaApi) {
+        return next(req);
+    }
 
-    return next(modifiedReq);
+    const headers: Record<string, string> = { 'X-Shikicinema': version };
+    if (environment.smarthard.proxyToken) {
+        headers['X-Shikicinema-Token'] = environment.smarthard.proxyToken;
+    }
+
+    return next(req.clone({ setHeaders: headers }));
 };

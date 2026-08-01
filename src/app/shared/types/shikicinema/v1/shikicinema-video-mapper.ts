@@ -16,7 +16,7 @@ function mapShikicinemaKindToCommon(kind: ShikivideosKindType): VideoKindEnum {
         case 'оригинал':
             return VideoKindEnum.ORIGINAL;
         default:
-            throw new Error('Unknown video kind type!');
+            return VideoKindEnum.DUBBING;
     }
 }
 

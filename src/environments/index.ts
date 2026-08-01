@@ -19,5 +19,6 @@ export interface EnvironmentInterface {
         apiURI: string;
         apiURIs: string[];
         authClientId: string;
+        proxyToken: string;
     };
 }

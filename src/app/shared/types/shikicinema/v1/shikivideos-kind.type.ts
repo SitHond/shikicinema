@@ -1,2 +1,2 @@
-export type ShikivideosKindType = 'озвучка' | 'субтитры' | 'оригинал';
+export type ShikivideosKindType = 'озвучка' | 'субтитры' | 'оригинал' | string;
 
