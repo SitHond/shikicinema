@@ -71,7 +71,7 @@ ShikiRIP Cinema и сайт sithond.com не располагают физиче
 ## Установка
 
 Если вы просто хотите воспользоваться аддоном:
-[Chrome Web Store](https://chromewebstore.google.com/detail/lpimjpdjgfjjfpfmgbmdaembghofocdh?utm_source=item-share-cb)
+[Chrome Web Store](https://chromewebstore.google.com/detail/lpimjpdjgfjjfpfmgbmdaembghofocdh?utm_source=item-share-cb) [Firefox Add-ons](https://addons.mozilla.org/ru/firefox/addon/shikirip-cinema)
 
 Для тестирования из исходников же понадобятся следующие программы и компоненты:
 
