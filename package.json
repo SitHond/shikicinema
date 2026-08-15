@@ -1,6 +1,6 @@
 {
   "name": "shikirip-cinema",
-  "version": "0.9.16",
+  "version": "0.9.17",
   "description": "ShikiRIP Cinema fork: returns video player on Shikimori",
   "main": "src/shikicinema.js",
   "engines": {
