@@ -1,8 +1,31 @@
+@use 'src/scss/mixins' as *;
+
 .kind-selector {
     background-color: var(--ion-color-light);
     border-radius: .25rem;
+    overflow: hidden;
+
+    ion-segment {
+        @include media-breakpoint-down('sm') {
+            overflow-x: auto;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    }
 
     .segment-button-checked {
         --ion-color-base: var(--ion-color-primary);
+    }
+
+    .kind-selector__item {
+        @include media-breakpoint-down('sm') {
+            --padding-start: 0.5rem;
+            --padding-end: 0.5rem;
+            font-size: 0.8rem;
+            min-height: 2.5rem;
+        }
     }
 }

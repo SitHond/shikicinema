@@ -41,6 +41,7 @@ import { Comment } from '@app/shared/types/shikimori/comment';
 import { CommentsComponent } from '@app/modules/player/components/comments/comments.component';
 import { ControlPanelComponent } from '@app/modules/player/components/control-panel/control-panel.component';
 import { CvhClient } from '@app/shared/services';
+import { FooterComponent } from '@app/shared/components/footer/footer.component';
 import { FranchisePanelComponent } from '@app/modules/player/components/franchise-panel/franchise-panel.component';
 import { GetShikimoriPagePipe } from '@app/shared/pipes/get-shikimori-page/get-shikimori-page.pipe';
 import { PlayerComponent } from '@app/modules/player/components/player/player.component';
@@ -50,8 +51,6 @@ import { ShikimoriAnimeLinkPipe } from '@app/shared/pipes/shikimori-anime-link/s
 import { SidePanelComponent } from '@app/modules/player/components/side-panel/side-panel.component';
 import { SkeletonBlockComponent } from '@app/shared/components/skeleton-block/skeleton-block.component';
 import { SwipeDirective } from '@app/shared/directives/swipe.directive';
-import { ToUploaderPipe } from '@app/modules/player/pipes';
-import { UploaderComponent } from '@app/modules/player/components/uploader/uploader.component';
 import { UserCommentFormComponent } from '@app/modules/player/components/user-comment-form/user-comment-form.component';
 import { VideoInfoInterface } from '@app/modules/player/types';
 import { VideoKindEnum } from '@app/modules/player/types/video-kind.enum';
@@ -119,8 +118,6 @@ import { visitAnimePageAction } from '@app/modules/home/store/recent-animes/acti
         PlayerSelectorComponent,
         SkeletonBlockComponent,
         ControlPanelComponent,
-        UploaderComponent,
-        ToUploaderPipe,
         SwipeDirective,
         CommentsComponent,
         UserCommentFormComponent,
@@ -130,6 +127,7 @@ import { visitAnimePageAction } from '@app/modules/home/store/recent-animes/acti
         SidePanelComponent,
         IonText,
         IonContent,
+        FooterComponent,
     ],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -161,12 +159,11 @@ export class PlayerPage implements OnInit {
     readonly shikimoriDomain = this.store.selectSignal(selectShikimoriDomain);
 
     readonly isMediaMatch = toSignal(this.breakpointObserver.observe([
-        '(max-width: 1599px) and (max-resolution: 1dppx)',
-        '(max-width: 1399px) and (min-resolution: 2dppx)',
+        '(max-width: 1199.98px)',
     ]).pipe(map(({ matches }) => matches)));
 
     readonly isSmallScreen = computed(
-        () => this.playerMode() !== 'compact' && this.isMediaMatch() || this.playerMode() === 'full',
+        () => this.isMediaMatch() || this.playerMode() === 'full',
         { equal: isEq },
     );
 
@@ -342,6 +339,7 @@ export class PlayerPage implements OnInit {
         const prevVideo = this.currentVideo();
 
         const componentProps = {
+            animeId: this.animeIdQ,
             videos: this.videos,
             episodeVideos: this.episodeVideos,
             kindDisplayMode: this.playerKindDisplayMode,
@@ -353,9 +351,15 @@ export class PlayerPage implements OnInit {
         };
         const { VideoSelectorModalComponent } = await import('@app/modules/player/components/video-selector-modal');
 
+        const isSmall = this.isSmallScreen();
         const modal = await this.modalController.create({
             component: VideoSelectorModalComponent,
             componentProps,
+            ...isSmall ? {
+                breakpoints: [0, 0.65, 0.92],
+                initialBreakpoint: 0.92,
+                handle: true,
+            } : {},
         });
 
         modal.present();

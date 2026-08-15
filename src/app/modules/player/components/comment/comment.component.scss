@@ -15,7 +15,7 @@
     }
 
     &__avatar-wrap {
-        --shc-comment-avatar-size: 7vh;
+        --shc-comment-avatar-size: clamp(2rem, 7vh, 4rem);
 
         position: relative;
         overflow: hidden;
@@ -43,15 +43,37 @@
         @include media-breakpoint-down('lg') {
             font-size: .825rem;
         }
+
+        @include media-breakpoint-down('sm') {
+            gap: .5rem;
+            font-size: .8rem;
+        }
     }
 
     &__actions {
         display: flex;
-        align-items: baseline;
+        align-items: center;
+        gap: .35rem;
 
         @include media-breakpoint-up('lg') {
             gap: .5rem;
         }
+    }
+
+    &__source {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: .65rem;
+        font-weight: 700;
+        line-height: 1.6;
+        text-transform: lowercase;
+        color: #fff;
+        letter-spacing: .02em;
+
+        &--rip  { background-color: #27ae60; }
+        &--shiki { background-color: #2980b9; }
+        &--sync { background-color: #8e44ad; }
     }
 
     &__author {

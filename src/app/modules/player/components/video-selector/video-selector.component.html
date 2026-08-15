@@ -13,8 +13,11 @@
                 [selected]="selected()"
                 [videos]="videos() | filterByAuthor: author: defaultAuthorName()"
                 [isAvailableForAllEpisodes]="!(warnAvailability() | includes: author)"
+                [rating]="getRating(author)"
+                [isAuthenticated]="isAuthenticated()"
                 (toggleOpen)="onAuthorSectionToggle($event)"
                 (selectVideo)="onSelectionChange($event)"
+                (vote)="onVote(author, $event)"
             />
         } @empty {
             <div class="video-selector__empty">

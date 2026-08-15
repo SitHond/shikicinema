@@ -15,4 +15,5 @@ export interface Comment {
     readonly is_summary?: boolean;
     readonly can_be_edited?: boolean;
     readonly user?: UserBriefInfoInterface;
+    readonly type?: 'shiki' | 'rip' | 'sync';
 }

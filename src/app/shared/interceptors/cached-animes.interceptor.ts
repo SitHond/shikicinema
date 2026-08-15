@@ -14,6 +14,7 @@ import {
     tap,
     timeout,
 } from 'rxjs';
+
 import { Store } from '@ngrx/store';
 import { inject } from '@angular/core';
 
@@ -61,13 +62,6 @@ export const cachedAnimeInterceptor: HttpInterceptorFn = (request, next) => {
             switchMap(() => animeFromCache$),
             combineLatestWith(userRate$),
             take(1),
-            tap(([cached]) => {
-                if (cached) {
-                    console.groupCollapsed(`[Cache] Hit for anime id ${animeId}`);
-                    console.log('Result:', cached);
-                    console.groupEnd();
-                }
-            }),
             mergeMap(([anime, userRate]) => iif(
                 () => Boolean(anime?.id),
                 of(new HttpResponse({ body: { ...anime, user_rate: userRate } })),

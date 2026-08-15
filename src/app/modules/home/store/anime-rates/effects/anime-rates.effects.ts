@@ -45,7 +45,7 @@ export class AnimeRatesEffects {
 
     pageLoadSuccess$ = createEffect(() => this.actions$.pipe(
         ofType(pageLoadSuccessAction),
-        delay(500),
+        delay(100),
         map(
             ({ userId, rates, page }) => rates?.length < RATES_LIMIT
                 ? loadAllUserAnimeRatesSuccessAction()
