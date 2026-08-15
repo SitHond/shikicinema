@@ -29,7 +29,7 @@ const storeConfig: RootStoreConfig<AppStoreInterface> = {
         cacheLocalStorageSyncReducer,
         settingsLocalStorageSyncReducer,
         shikicinemaLocalStorageSyncReducer,
-        loggerMetaReducer,
+        ...(!environment.isProduction ? [loggerMetaReducer] : []),
         recentAnimesLocalStorageSyncReducer,
         shikimoriLocalStorageSyncReducer,
     ],

@@ -56,6 +56,7 @@ export class AppComponent implements OnInit {
 
     private readonly document = inject(DOCUMENT);
     private readonly store = inject(Store);
+
     private readonly renderer = inject(Renderer2);
     private readonly transloco = inject(TranslocoService);
     private readonly router = inject(Router);

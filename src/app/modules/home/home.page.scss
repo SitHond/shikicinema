@@ -21,5 +21,13 @@
         @include media-breakpoint-up('xl') {
             margin: 1.5rem 10rem;
         }
+
+        @include media-breakpoint-up('xxl') {
+            margin: 2rem 15rem;
+        }
+
+        @include media-breakpoint-up('xxxl') {
+            margin: 2rem 25rem;
+        }
     }
 }

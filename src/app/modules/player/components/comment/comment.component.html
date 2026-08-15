@@ -24,6 +24,10 @@
         </div>
 
         <div class="comment__actions">
+            @if (source()) {
+                <span class="comment__source comment__source--{{ source() }}">{{ source() }}</span>
+            }
+
             @if (comment()?.can_be_edited) {
                 <ion-button
                     [id]="`comment-${comment().id}-actions-trigger`"

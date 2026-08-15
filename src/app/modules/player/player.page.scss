@@ -8,11 +8,19 @@
     }
 
     &__title {
-        max-width: 50vw;
+        max-width: 80vw;
+        font-size: 1.25rem;
+
+        @include media-breakpoint-up('xl') {
+            max-width: 55vw;
+        }
 
         @include media-breakpoint-down('lg') {
-            max-width: 80vw;
-            font-size: 1rem;
+            font-size: 1.4rem;
+        }
+
+        @include media-breakpoint-down('sm') {
+            font-size: 1.35rem;
         }
     }
 
@@ -34,6 +42,7 @@
 
     &__player-selector {
         grid-area: selector;
+        overflow-y: auto;
     }
 
     &__comment-form {
@@ -59,12 +68,34 @@
         display: flex;
         flex-direction: column;
 
-        justify-content: center;
-
         row-gap: 1rem;
         margin-top: .5rem;
 
+        // На мобильном — плеер от края до края, padding только у текстовых блоков
         &--mobile {
+            row-gap: 0;
+            margin-top: 0;
+
+            .player-page__anime-info {
+                padding: 0.5rem 0.75rem 0;
+            }
+
+            .player-page__control-panel {
+                padding: 0.25rem 0.5rem;
+            }
+
+            .player-page__franchise {
+                margin-top: 0.5rem;
+            }
+
+            .player-page__comments {
+                padding: 0 0.5rem;
+            }
+
+            .player-page__comment-form {
+                padding: 0 0.5rem 0.75rem;
+            }
+
             .control-panel__episode-wrapper {
                 min-width: 3.125rem;
 
@@ -75,15 +106,16 @@
                     max-width: 3.125rem;
                 }
             }
-
-            @include media-breakpoint-up('md') {
-                margin-top: .75rem;
-                justify-content: unset;
-            }
         }
 
         &:not(.player-page__wrapper--mobile) {
             display: grid;
+            justify-content: start;
+            padding: 0.5rem 1rem;
+
+            .player-page__player {
+                align-self: start;
+            }
 
             grid-template:  "info     info"
                             "player   selector"
@@ -91,20 +123,39 @@
                             "franchise franchise"
                             "comments comments"
                             "comment-form comment-form";
-            grid-template-columns: 65vw 23.5rem;
-            grid-template-rows: auto calc(65vw * 9 / 16) auto;
 
-            @include media-breakpoint-down('xxl') {
-                column-gap: 1rem;
-            }
+            // player col = 100vw - padding lr(2rem) - sidebar(22rem) - gap(1rem)
+            grid-template-columns: minmax(0, 1fr) 22rem;
+            grid-template-rows: auto calc((100vw - 2rem - 22rem - 1rem) * 9 / 16) auto;
+            column-gap: 1rem;
 
             @include media-breakpoint-up('xxl') {
-                column-gap: 2.75rem;
+                padding: 0.5rem 2rem;
+                grid-template-columns: minmax(0, 1fr) 24rem;
+                // cap content at 1600px so player never exceeds ~648px height on 1080p
+                grid-template-rows: auto calc((min(100vw, 1600px) - 4rem - 24rem - 1.5rem) * 9 / 16) auto;
+                column-gap: 1.5rem;
+                max-width: 1600px;
+                margin-left: auto;
+                margin-right: auto;
             }
 
             @include media-breakpoint-up('xxxl') {
-                grid-template-columns: 70vw 23.5rem;
-                grid-template-rows: auto calc(70vw * 9 / 16) auto;
+                padding: 0.5rem 4rem;
+                grid-template-columns: minmax(0, 1fr) 28rem;
+                grid-template-rows: auto calc((min(100vw, 2000px) - 8rem - 28rem - 2rem) * 9 / 16) auto;
+                column-gap: 2rem;
+                max-width: 2000px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            @include media-breakpoint-up('x4k') {
+                padding: 0.5rem 6rem;
+                grid-template-columns: minmax(0, 1fr) 36rem;
+                grid-template-rows: auto calc((min(100vw, 2800px) - 12rem - 36rem - 3rem) * 9 / 16) auto;
+                column-gap: 3rem;
+                max-width: 2800px;
             }
         }
     }

@@ -4,13 +4,14 @@
     $inputMinHeight: 2rem;
 
     display: flex;
-
     gap: .5rem;
     align-items: center;
     justify-content: space-between;
 
-    @include media-breakpoint-down('md') {
-        justify-content: flex-start;
+    @include media-breakpoint-down('sm') {
+        flex-direction: column;
+        align-items: stretch;
+        gap: .25rem;
     }
 
     &__controls {
@@ -21,12 +22,22 @@
             width: 100%;
             justify-content: center;
         }
+
+        @include media-breakpoint-down('sm') {
+            justify-content: center;
+        }
     }
 
     &__btn {
         margin: 0;
         max-width: 5rem;
         align-self: center;
+
+        @include media-breakpoint-down('sm') {
+            --padding-start: .75rem;
+            --padding-end: .75rem;
+            min-height: 2.75rem;
+        }
     }
 
     &__episode-wrapper {
@@ -39,6 +50,11 @@
         --min-height: $inputMinHeight;
         --border-width: 0.125rem;
         --border-radius: 0.25rem;
+
+        @include media-breakpoint-down('sm') {
+            min-width: 3.5rem;
+            max-width: 3.5rem;
+        }
     }
 
     &__episode {
@@ -47,12 +63,13 @@
     }
 
     &__episode-selector {
-        min-width: 30vw;
+        min-width: 0;
         max-width: 50vw;
         flex-grow: 1;
 
-        @include media-breakpoint-down('md') {
-            max-width: 60vw;
+        @include media-breakpoint-down('sm') {
+            max-width: 100%;
+            width: 100%;
         }
 
         @include media-breakpoint-between('md', 'xl') {

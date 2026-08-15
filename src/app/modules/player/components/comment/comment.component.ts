@@ -4,6 +4,7 @@ import {
     HostBinding,
     Renderer2,
     ViewEncapsulation,
+    computed,
     inject,
     input,
     output,
@@ -48,6 +49,8 @@ export class CommentComponent {
     private readonly _renderer = inject(Renderer2);
 
     comment = input<Comment>();
+
+    readonly source = computed(() => this.comment()?.type ?? null);
 
     openReply = output<string>();
     toggleSpoiler = output<HTMLElement>();

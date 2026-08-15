@@ -18,6 +18,25 @@
                 }
             </ion-label>
 
+            @if (rating() || isAuthenticated()) {
+                <div class="author-accordion__rating" (click)="$event.stopPropagation()">
+                    <button
+                        class="author-accordion__vote"
+                        [class.author-accordion__vote--active]="rating()?.user_vote === 1"
+                        [disabled]="!isAuthenticated()"
+                        (click)="$event.stopPropagation(); vote.emit(1)">
+                        👍 {{ rating()?.up ?? 0 }}
+                    </button>
+                    <button
+                        class="author-accordion__vote"
+                        [class.author-accordion__vote--active]="rating()?.user_vote === -1"
+                        [disabled]="!isAuthenticated()"
+                        (click)="$event.stopPropagation(); vote.emit(-1)">
+                        👎 {{ rating()?.down ?? 0 }}
+                    </button>
+                </div>
+            }
+
             <div class="author-accordion__qualities">
                 @if (kindDisplayMode() !== 'off' && (videos() | hasQualities: VideoQualityEnum.DVD)) {
                     <div class="author-accordion__icon-wrap">

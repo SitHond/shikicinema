@@ -1,3 +1,5 @@
+@use 'src/scss/mixins' as *;
+
 .embed-page {
     display: block;
     height: 100%;
@@ -11,6 +13,11 @@
         flex-direction: column;
         row-gap: 0.5rem;
         padding: 0.5rem;
+
+        @include media-breakpoint-down('sm') {
+            padding: 0.25rem;
+            row-gap: 0.25rem;
+        }
     }
 
     &__player {
@@ -20,10 +27,15 @@
     &__selector {
         flex: 1;
         min-height: 0;
+        min-width: 0;
         overflow-y: auto;
     }
 
     &__control-panel {
         padding-bottom: 0.25rem;
+
+        @include media-breakpoint-down('sm') {
+            padding-bottom: 0.125rem;
+        }
     }
 }

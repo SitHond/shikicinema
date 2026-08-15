@@ -24,6 +24,7 @@
 
     <app-video-selector
         class="video-selector-modal__video-selector"
+        [animeId]="animeId()"
         [videos]="episodeVideos() | filterByKind: selectedKind()"
         [selected]="selectedVideo()"
         [kindDisplayMode]="kindDisplayMode()"

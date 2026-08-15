@@ -18,6 +18,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { UpperCasePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 
+import { AuthorRating } from '@app/core/services/dubbing-rating.service';
 import { GetColorForSelectablePipe } from '@app/shared/pipes/get-color-for-selectable/get-color-for-selectable.pipe';
 import { GetUrlDomainPipe } from '@app/shared/pipes/get-url-domain/get-url-domain.pipe';
 import { HasQualitiesPipe } from '@app/modules/player/pipes/has-qualities.pipe';
@@ -64,9 +65,12 @@ export class VideoSelectorItemComponent {
     kindDisplayMode = input.required<PlayerKindDisplayMode>();
     isAvailableForAllEpisodes = input<boolean>();
     defaultAuthorName = input<string>();
+    rating = input<AuthorRating | null>(null);
+    isAuthenticated = input<boolean>(false);
 
     toggleOpen = output<string>();
     selectVideo = output<VideoInfoInterface>();
+    vote = output<1 | -1>();
 
     onOpenVideoInOtherTab(video: VideoInfoInterface): void {
         // TODO: заменить логику для native-app

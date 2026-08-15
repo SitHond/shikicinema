@@ -109,11 +109,6 @@ export class PlayerEffects {
         )),
     ));
 
-    loadRelatedOnAnimeInfo$ = createEffect(() => this.actions$.pipe(
-        ofType(getAnimeInfoSuccessAction),
-        map(({ anime }) => getRelatedAnimesAction({ animeId: anime.id })),
-    ));
-
     getRelatedAnimes$ = createEffect(() => this.actions$.pipe(
         ofType(getRelatedAnimesAction),
         concatLatestFrom(({ animeId }) => this.store$.select(selectPlayerRelatedAnimes(animeId))),

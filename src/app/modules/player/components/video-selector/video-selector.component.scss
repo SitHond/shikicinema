@@ -1,7 +1,8 @@
 .video-selector {
     display: flex;
-    min-width: 23.5rem;
-    overflow: auto;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
     background-color: var(--ion-color-light);
     border-radius: .25rem;
 

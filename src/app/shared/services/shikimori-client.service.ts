@@ -35,6 +35,7 @@ import { AnimeRatesMetadataGQLResponse, UserAnimeRatesGQLResponse } from '@app/s
 import { FindAnimeQuery, UserAnimeRatesQuery } from '@app/shared/types/shikimori/queries';
 import { ResourceIdType } from '@app/shared/types';
 import { ShikimoriCredentials } from '@app/store/auth/types/auth-store.interface';
+import { UserImagesInterface } from '@app/shared/types/shikimori/user-images.interface';
 import { environment } from '@app-env/environment';
 import {
     mapAnimeRatesMetadataGQL,
@@ -124,7 +125,9 @@ export class ShikimoriClient {
     getCurrentUser(): Observable<UserBriefInfoInterface> {
         return this.shikimoriDomain$.pipe(
             take(1),
-            switchMap((domain) => this.http.get<UserBriefInfoInterface>(`${domain}/api/users/whoami`)),
+            switchMap((domain) => this.http.get<UserBriefInfoInterface>(`${domain}/api/users/whoami`).pipe(
+                map((user) => this.prefixUserUrls(user, domain)),
+            )),
         );
     }
 
@@ -138,7 +141,9 @@ export class ShikimoriClient {
     getUser(idOrUsername: ResourceIdType): Observable<UserInterface> {
         return this.shikimoriDomain$.pipe(
             take(1),
-            switchMap((domain) => this.http.get<UserInterface>(`${domain}/api/users/${idOrUsername}`)),
+            switchMap((domain) => this.http.get<UserInterface>(`${domain}/api/users/${idOrUsername}`).pipe(
+                map((user) => this.prefixUserUrls(user, domain)),
+            )),
         );
     }
 
@@ -162,7 +167,9 @@ export class ShikimoriClient {
     getUserBriefInfo(idOrUsername: ResourceIdType): Observable<UserBriefInfoInterface> {
         return this.shikimoriDomain$.pipe(
             take(1),
-            switchMap((domain) => this.http.get<UserBriefInfoInterface>(`${domain}/api/users/${idOrUsername}/info`)),
+            switchMap((domain) => this.http.get<UserBriefInfoInterface>(`${domain}/api/users/${idOrUsername}/info`).pipe(
+                map((user) => this.prefixUserUrls(user, domain)),
+            )),
         );
     }
 
@@ -302,6 +309,26 @@ export class ShikimoriClient {
         );
     }
 
+    private prefixUserUrls<T extends { avatar?: string; image?: UserImagesInterface; url?: string }>(user: T, domain: string): T {
+        const prefix = (url: string) => url && !/^https?:\/\//.test(url) ? `${domain}${url}` : url;
+
+        return {
+            ...user,
+            avatar: prefix(user.avatar),
+            url: prefix(user.url),
+            image: user.image ? {
+                ...user.image,
+                x160: prefix(user.image.x160),
+                x148: prefix(user.image.x148),
+                x80: prefix(user.image.x80),
+                x64: prefix(user.image.x64),
+                x48: prefix(user.image.x48),
+                x32: prefix((user.image as any).x32),
+                x16: prefix((user.image as any).x16),
+            } : user.image,
+        };
+    }
+
     private prefixAnimeImageUrls(anime: AnimeBriefInfoInterface, domain: string): AnimeBriefInfoInterface {
         if (!anime?.image) return anime;
 
@@ -431,7 +458,9 @@ export class ShikimoriClient {
 
         return this.shikimoriDomain$.pipe(
             take(1),
-            switchMap((domain) => this.http.get<Comment[]>(`${domain}/api/comments`, { params })),
+            switchMap((domain) => this.http.get<Comment[]>(`${domain}/api/comments`, { params }).pipe(
+                map((comments) => comments.map((c) => c.user ? { ...c, user: this.prefixUserUrls(c.user, domain) } : c)),
+            )),
         );
     }
 

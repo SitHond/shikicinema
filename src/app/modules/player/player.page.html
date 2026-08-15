@@ -1,4 +1,4 @@
-<ion-content [fullscreen]="true" class="page-content ion-padding"
+<ion-content [fullscreen]="true" class="page-content"
     appSwipe
     (appSwipeRight)="onOpenVideoSelectorModal()">
 
@@ -26,9 +26,6 @@
                 }
             </div>
 
-            <div class="common-info__video">
-                <app-uploader [uploader]="currentVideo()?.uploader | toUploader | async" />
-            </div>
         </div>
 
         <app-player class="player-page__player responsive-16by9"
@@ -117,4 +114,6 @@
             (cancelEdit)="onCancelCommentEdit()"
         />
     </div>
+
+    <app-footer />
 </ion-content>

@@ -22,6 +22,7 @@ import { FilterByKindPipe } from '@app/shared/pipes/filter-by-kind/filter-by-kin
 import { GetActiveKindsPipe } from '@app/shared/pipes/get-active-kinds/get-active-kinds.pipe';
 import { KindSelectorComponent } from '@app/modules/player/components/kind-selector/kind-selector.component';
 import { PlayerKindDisplayMode } from '@app/store/settings/types';
+import { ResourceIdType } from '@app/shared/types';
 import { VideoInfoInterface, VideoKindEnum } from '@app/modules/player/types';
 import { VideoSelectorComponent } from '@app/modules/player/components/video-selector/video-selector.component';
 
@@ -53,6 +54,7 @@ export class VideoSelectorModalComponent extends IonModal {
     private readonly _modalController = inject(ModalController);
 
     // TODO: перекидывание напрямую сигналов, а не их значений не выглядит хорошей идеей
+    public animeId: Signal<ResourceIdType>;
     public videos: Signal<VideoInfoInterface[]>;
     public episodeVideos: Signal<VideoInfoInterface[]>;
     public kindDisplayMode: Signal<PlayerKindDisplayMode>;

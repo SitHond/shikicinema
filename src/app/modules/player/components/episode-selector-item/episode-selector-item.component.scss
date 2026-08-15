@@ -1,3 +1,5 @@
+@use 'src/scss/mixins' as *;
+
 .episode-selector-item {
     // <-- for ionic ripple effect
     position: relative;
@@ -19,6 +21,13 @@
     font-size: 1.25rem;
     line-height: 1;
     cursor: pointer;
+
+    @include media-breakpoint-down('sm') {
+        width: 2rem;
+        height: 2rem;
+        font-size: 1rem;
+        border-radius: 0.2rem;
+    }
     transition:
         background-color 120ms ease,
         border-color 120ms ease,
