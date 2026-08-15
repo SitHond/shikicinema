@@ -19,7 +19,7 @@
             </ion-label>
 
             @if (rating() || isAuthenticated()) {
-                <div class="author-accordion__rating" (click)="$event.stopPropagation()">
+                <div class="author-accordion__rating">
                     <button
                         class="author-accordion__vote"
                         [class.author-accordion__vote--active]="rating()?.user_vote === 1"

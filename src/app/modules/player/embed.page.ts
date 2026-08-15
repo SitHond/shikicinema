@@ -20,7 +20,6 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 
 import { ControlPanelComponent } from '@app/modules/player/components/control-panel/control-panel.component';
 import { CvhClient } from '@app/shared/services';
-import { DiscordRpcService } from '@app/core/services/discord-rpc.service';
 import { PlayerComponent } from '@app/modules/player/components/player/player.component';
 import { PlayerSelectorComponent } from '@app/modules/player/components/player-selector';
 import { VideoInfoInterface } from '@app/modules/player/types';
@@ -66,7 +65,6 @@ import { updatePlayerPreferencesAction } from '@app/store/settings/actions/setti
     ],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [DiscordRpcService],
 })
 export class EmbedPage {
     @HostBinding('class.embed-page')
@@ -77,7 +75,6 @@ export class EmbedPage {
     private readonly actions$ = inject(Actions);
     private readonly destroyRef = inject(DestroyRef);
     private readonly cvhClient = inject(CvhClient);
-    private readonly _discordRpc = inject(DiscordRpcService);
 
     readonly animeId = input.required<string>();
     readonly episode = input.required<string>();

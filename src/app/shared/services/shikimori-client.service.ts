@@ -167,9 +167,11 @@ export class ShikimoriClient {
     getUserBriefInfo(idOrUsername: ResourceIdType): Observable<UserBriefInfoInterface> {
         return this.shikimoriDomain$.pipe(
             take(1),
-            switchMap((domain) => this.http.get<UserBriefInfoInterface>(`${domain}/api/users/${idOrUsername}/info`).pipe(
-                map((user) => this.prefixUserUrls(user, domain)),
-            )),
+            switchMap((domain) => this.http
+                .get<UserBriefInfoInterface>(`${domain}/api/users/${idOrUsername}/info`)
+                .pipe(
+                    map((user) => this.prefixUserUrls(user, domain)),
+                )),
         );
     }
 
@@ -309,7 +311,10 @@ export class ShikimoriClient {
         );
     }
 
-    private prefixUserUrls<T extends { avatar?: string; image?: UserImagesInterface; url?: string }>(user: T, domain: string): T {
+    private prefixUserUrls<T extends { avatar?: string; image?: UserImagesInterface; url?: string }>(
+        user: T,
+        domain: string,
+    ): T {
         const prefix = (url: string) => url && !/^https?:\/\//.test(url) ? `${domain}${url}` : url;
 
         return {
@@ -459,7 +464,9 @@ export class ShikimoriClient {
         return this.shikimoriDomain$.pipe(
             take(1),
             switchMap((domain) => this.http.get<Comment[]>(`${domain}/api/comments`, { params }).pipe(
-                map((comments) => comments.map((c) => c.user ? { ...c, user: this.prefixUserUrls(c.user, domain) } : c)),
+                map((comments) => comments.map(
+                    (c) => c.user ? { ...c, user: this.prefixUserUrls(c.user, domain) } : c,
+                )),
             )),
         );
     }
