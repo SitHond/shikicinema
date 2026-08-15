@@ -48,8 +48,7 @@
     ],
     "permissions": [
         "storage",
-        "tabs",
-        "nativeMessaging"
+        "tabs"
     ],
     "host_permissions": [
         "https://shikimori.rip/*",
