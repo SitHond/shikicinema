@@ -7,7 +7,7 @@ dotenv.config();
 const isProduction = process.env.NODE_ENV === 'production';
 
 function env(name: string, fallback = ''): string {
-    return process.env[name] ?? fallback;
+    return process.env[name] || fallback;
 }
 
 function uniqueUris(uris: string[]): string[] {

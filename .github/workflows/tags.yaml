@@ -49,6 +49,7 @@ jobs:
             envkey_SMARTHARD_API_URI: ${{ secrets.SMARTHARD_API_URI }}
             envkey_SMARTHARD_CLIENT_ID: ${{ secrets.SMARTHARD_CLIENT_ID }}
             envkey_SMARTHARD_CLIENT_SECRET: ${{ secrets.SMARTHARD_CLIENT_SECRET }}
+            envkey_SHIKIVIDEOS_PROXY_TOKEN: ${{ secrets.SHIKIVIDEOS_PROXY_TOKEN }}
 
       - name: Generate Angular Environment
         run: npm run set-env
