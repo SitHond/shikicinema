@@ -142,9 +142,19 @@ export class HeaderComponent {
     }
 
     async onChangeTheme(): Promise<void> {
-        const theme = this.theme() === 'dark' ? 'light' : 'dark';
+        const toggleMap: Record<string, string> = {
+            'dark': 'light',
+            'light': 'dark',
+            'shikimori-dark': 'shikimori-light',
+            'shikimori-light': 'shikimori-dark',
+        };
+        const theme = (toggleMap[this.theme()] ?? 'dark') as Parameters<typeof updateThemeAction>[0]['theme'];
 
         this.store.dispatch(updateThemeAction({ theme }));
+    }
+
+    isDarkTheme(): boolean {
+        return this.theme() === 'dark' || this.theme() === 'shikimori-dark';
     }
 
     onChangeLanguage(language: string): void {

@@ -75,6 +75,10 @@ const webpackConfig = {
                     from: `./extension-src/manifest.${manifestVersion}.json`,
                     to: 'manifest.json',
                     transform: (content, _) => processManifest(content),
+                },
+                {
+                    from: './extension-src/rules/',
+                    to: 'rules/',
                 }
             ]
         }),

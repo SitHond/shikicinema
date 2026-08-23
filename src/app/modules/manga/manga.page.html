@@ -48,9 +48,8 @@
                         <article class="manga-page__item">
                             <a
                                 class="manga-page__image-link"
-                                [routerLink]="['/external']"
-                                [queryParams]="{ link: remangaSearchLink(rate) }"
-                                [skipLocationChange]="true"
+                                [routerLink]="['/manga', rate.manga.id]"
+                                [state]="{ rate: rate }"
                             >
                                 <app-image-card
                                     class="manga-page__image responsive-9by13"
@@ -80,9 +79,8 @@
                                 class="manga-page__read-btn"
                                 size="small"
                                 fill="clear"
-                                [routerLink]="['/external']"
-                                [queryParams]="{ link: remangaSearchLink(rate) }"
-                                [skipLocationChange]="true"
+                                [routerLink]="['/manga', rate.manga.id]"
+                                [state]="{ rate: rate }"
                             >
                                 <ion-icon slot="start" name="library-outline" />
                                 {{ 'MANGA_MODULE.MANGA_PAGE.READ_ACTION' | transloco }}

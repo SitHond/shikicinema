@@ -1,0 +1,25 @@
+<ion-content [fullscreen]="true" class="manga-chapter-page__content page-content">
+    <div class="manga-chapter-page__topbar">
+        <ion-button fill="clear" size="small" [routerLink]="['/manga', mangaId]">
+            <ion-icon slot="start" name="arrow-back-outline" />
+            К главам
+        </ion-button>
+
+        <span class="manga-chapter-page__chapter-label">Том {{ volume }} Гл. {{ number }}</span>
+    </div>
+
+    @if (slug || chapterId) {
+        <app-chapter-reader
+            class="manga-chapter-page__reader"
+            [source]="source"
+            [chapterId]="chapterId"
+            [slug]="slug"
+            [volume]="volume"
+            [number]="number"
+            [isRead]="isRead()"
+            (markAsRead)="onMarkAsRead()"
+            (nextChapter)="onNextChapter()"
+            (prevChapter)="onPrevChapter()"
+        />
+    }
+</ion-content>

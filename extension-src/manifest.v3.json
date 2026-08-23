@@ -8,7 +8,7 @@
     },
     "description": "Adds an inline video player to Shikimori (rip/fi/net/moe). Browse your anime list, track episodes, switch between dubs and subs.",
     "content_security_policy": {
-        "extension_pages": "default-src 'self'; img-src *; frame-src *; font-src *; media-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src https://shikimori.rip https://shikimori.fi https://shikimori.net https://shikimori.moe https://ygg.shiki.rip https://api.sithond.com https://plapi.cdnvideohub.com ws://127.0.0.1:*; script-src 'self'"
+        "extension_pages": "default-src 'self'; img-src * data:; frame-src *; font-src *; media-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src https://shikimori.rip https://shikimori.fi https://shikimori.net https://shikimori.moe https://ygg.shiki.rip https://api.sithond.com https://api.cdnlibs.org https://plapi.cdnvideohub.com https://api.mangadex.org https://api.remanga.org https://readmanga.live wss://api.sithond.com ws://127.0.0.1:*; script-src 'self'"
     },
     "content_scripts": [
         {
@@ -48,8 +48,29 @@
     ],
     "permissions": [
         "storage",
-        "tabs"
+        "tabs",
+        "scripting",
+        "declarativeNetRequestWithHostAccess"
     ],
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "mangalib_referer",
+                "enabled": true,
+                "path": "rules/mangalib_referer.json"
+            },
+            {
+                "id": "remanga_referer",
+                "enabled": true,
+                "path": "rules/remanga_referer.json"
+            },
+            {
+                "id": "readmanga_referer",
+                "enabled": true,
+                "path": "rules/readmanga_referer.json"
+            }
+        ]
+    },
     "host_permissions": [
         "https://shikimori.rip/*",
         "https://shikimori.fi/*",
@@ -58,9 +79,19 @@
         "https://ygg.shiki.rip/*",
         "https://api.sithond.com/*",
 
-        "https://remanga.org/*",
-        "https://*.remanga.org/*",
+        "https://cdnlibs.org/*",
+        "https://*.cdnlibs.org/*",
         "https://plapi.cdnvideohub.com/*",
-        "http://127.0.0.1/*"
+        "http://127.0.0.1/*",
+
+        "https://api.mangadex.org/*",
+        "https://uploads.mangadex.org/*",
+
+        "https://api.remanga.org/*",
+        "https://remanga.org/*",
+        "https://img.remanga.org/*",
+
+        "https://readmanga.live/*",
+        "https://*.imgsmail.ru/*"
     ]
 }

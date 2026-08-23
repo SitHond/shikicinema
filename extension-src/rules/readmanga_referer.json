@@ -1,0 +1,31 @@
+[
+    {
+        "id": 3,
+        "priority": 1,
+        "action": {
+            "type": "modifyHeaders",
+            "requestHeaders": [
+                {
+                    "header": "Referer",
+                    "operation": "set",
+                    "value": "https://readmanga.live/"
+                }
+            ]
+        },
+        "condition": {
+            "requestDomains": [
+                "imgsmail.ru",
+                "i.imgsmail.ru",
+                "i1.imgsmail.ru",
+                "i2.imgsmail.ru",
+                "i3.imgsmail.ru",
+                "i4.imgsmail.ru",
+                "i5.imgsmail.ru",
+                "i6.imgsmail.ru",
+                "i7.imgsmail.ru",
+                "i8.imgsmail.ru",
+                "i9.imgsmail.ru"
+            ]
+        }
+    }
+]

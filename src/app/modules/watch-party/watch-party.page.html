@@ -1,0 +1,243 @@
+<ion-content [fullscreen]="true" class="watch-party-page__content page-content">
+
+    <div class="wp-page">
+
+        <!-- ── Header ──────────────────────────────────────────────────────── -->
+        <div class="wp-page__header">
+            <ion-icon class="wp-page__header-icon" name="tv-outline" />
+            <h1 class="wp-page__title">Watch Party</h1>
+            <p class="wp-page__subtitle">Смотрите аниме вместе в реальном времени</p>
+        </div>
+
+        <!-- ── Connecting spinner ─────────────────────────────────────────── -->
+        @if (wp.status() === 'connecting') {
+            <div class="wp-page__center">
+                <ion-spinner name="crescent" />
+                <ion-text color="medium">Подключение к серверу...</ion-text>
+            </div>
+        }
+
+        <!-- ── Error banner ───────────────────────────────────────────────── -->
+        @if (wp.error()) {
+            <div class="wp-page__error">
+                <ion-icon name="alert-circle-outline" />
+                <span>{{ wp.error() }}</span>
+            </div>
+        }
+
+        <!-- ── Гость (не залогинен) ──────────────────────────────────────── -->
+        @if (!wp.isLoggedIn()) {
+            <div class="wp-page__center">
+                <ion-icon name="person-outline" style="font-size:2.5rem;color:var(--ion-color-medium)" />
+                <ion-text color="medium" style="text-align:center;font-size:0.9rem">
+                    Войдите в аккаунт Shikimori,<br>чтобы участвовать в Watch Party
+                </ion-text>
+            </div>
+        }
+
+        <!-- ── Lobby (не в комнате) ───────────────────────────────────────── -->
+        @if (wp.isLoggedIn() && (wp.status() === 'lobby' || wp.status() === 'disconnected')) {
+            <div class="wp-page__lobby">
+
+                <div class="wp-card">
+                    <div class="wp-card__icon-wrap">
+                        <ion-icon name="add-circle-outline" />
+                    </div>
+                    <h2 class="wp-card__title">Создать комнату</h2>
+                    <p class="wp-card__desc">Пригласите друзей по ссылке или коду</p>
+                    <ion-button
+                        class="wp-card__btn"
+                        expand="block"
+                        (click)="onCreateRoom()"
+                        [disabled]="wp.status() === 'disconnected'"
+                    >
+                        <ion-icon slot="start" name="add-outline" />
+                        Создать
+                    </ion-button>
+                </div>
+
+                <div class="wp-divider">или</div>
+
+                <div class="wp-card">
+                    <div class="wp-card__icon-wrap">
+                        <ion-icon name="enter-outline" />
+                    </div>
+                    <h2 class="wp-card__title">Войти в комнату</h2>
+                    <p class="wp-card__desc">Введите код приглашения от друга</p>
+                    <div class="wp-card__input-row">
+                        <ion-input
+                            class="wp-code-input"
+                            fill="outline"
+                            placeholder="ABCD12"
+                            [maxlength]="8"
+                            [(ngModel)]="joinCode"
+                        />
+                        <ion-button
+                            (click)="onJoinRoom()"
+                            [disabled]="!joinCode() || wp.status() === 'disconnected'"
+                        >
+                            Войти
+                        </ion-button>
+                    </div>
+                </div>
+
+            </div>
+        }
+
+        <!-- ── В комнате ──────────────────────────────────────────────────── -->
+        @if (wp.isLoggedIn() && wp.status() === 'room') {
+            <div class="wp-room">
+
+                <!-- Room header -->
+                <div class="wp-room__topbar">
+                    <div class="wp-room__id-block">
+                        <span class="wp-room__id-label">Комната</span>
+                        <span class="wp-room__id">{{ roomIdVisible() ? wp.roomId() : '••••••••' }}</span>
+                        <ion-button fill="clear" size="small" color="medium" (click)="roomIdVisible.set(!roomIdVisible())">
+                            <ion-icon slot="icon-only" [name]="roomIdVisible() ? 'eye-outline' : 'eye-off-outline'" />
+                        </ion-button>
+                        @if (wp.isHost()) {
+                            <span class="wp-room__host-badge">Хост</span>
+                        }
+                    </div>
+                    <div class="wp-room__topbar-actions">
+                        <ion-button fill="outline" size="small" (click)="onCopyLink()">
+                            <ion-icon slot="start" name="link-outline" />
+                            Ссылка
+                        </ion-button>
+                        <ion-button fill="clear" size="small" color="danger" (click)="onLeaveRoom()">
+                            <ion-icon slot="icon-only" name="exit-outline" />
+                        </ion-button>
+                    </div>
+                </div>
+
+                <!-- Custom video player -->
+                @if (wp.videoState()?.animeId; as animeId) {
+                    <app-wp-video-player
+                        [animeId]="animeId"
+                        [episode]="wp.videoState()?.episode ?? 1"
+                        [vkId]="wp.videoState()?.vkId ?? null"
+                        [playing]="wp.videoState()?.playing ?? false"
+                        [seekTo]="seekTime()"
+                    />
+
+                    <!-- Source selector (host only) -->
+                    @if (wp.isHost() && availableSources().length > 1) {
+                        <div class="wp-sources">
+                            <div class="wp-sources__label">Озвучка:</div>
+                            <div class="wp-sources__list">
+                                @for (src of availableSources(); track src.vkId) {
+                                    <ion-button
+                                        size="small"
+                                        [fill]="src.vkId === wp.videoState()?.vkId ? 'solid' : 'outline'"
+                                        [color]="src.vkId === wp.videoState()?.vkId ? 'primary' : 'medium'"
+                                        (click)="onSelectSource(src.vkId)"
+                                    >
+                                        {{ src.voiceStudio || src.voiceType || 'Озвучка' }}
+                                    </ion-button>
+                                }
+                            </div>
+                        </div>
+                    }
+                } @else {
+                    <div class="wp-room__no-anime">
+                        <ion-icon name="film-outline" />
+                        <span>Хост ещё не выбрал аниме</span>
+                    </div>
+                }
+
+                <!-- Anime info + mark watched -->
+                @if (wp.videoState()?.animeId) {
+                    <div class="wp-now-playing">
+                        <div class="wp-now-playing__info">
+                            <span class="wp-now-playing__title">{{ wp.videoState()?.animeTitle ?? 'Аниме' }}</span>
+                            <span class="wp-now-playing__episode">Серия {{ wp.videoState()?.episode }}</span>
+                        </div>
+                        <ion-button
+                            size="small"
+                            [fill]="watchedState() === 'done' ? 'solid' : 'outline'"
+                            [color]="watchedState() === 'done' ? 'success' : 'medium'"
+                            [disabled]="watchedState() === 'loading'"
+                            (click)="markWatched()"
+                        >
+                            @if (watchedState() === 'loading') {
+                                <ion-spinner name="crescent" slot="start" style="width:1em;height:1em" />
+                            } @else {
+                                <ion-icon slot="start" [name]="watchedState() === 'done' ? 'checkmark-outline' : 'checkmark-circle-outline'" />
+                            }
+                            {{ watchedState() === 'done' ? 'Просмотрено' : 'Отметить' }}
+                        </ion-button>
+                    </div>
+                }
+
+                <!-- Participants -->
+                <div class="wp-room__section-title">
+                    <ion-icon name="people-outline" />
+                    Участники ({{ wp.participants().length }})
+                </div>
+
+                <div class="wp-room__participants">
+                    @for (p of wp.participants(); track p.id) {
+                        <div class="wp-participant" [class.wp-participant--host]="p.isHost">
+                            <div class="wp-participant__avatar">
+                                @if (avatars()[p.nickname]; as src) {
+                                    <img [src]="src" [alt]="p.nickname" />
+                                } @else {
+                                    {{ p.nickname.slice(0, 1).toUpperCase() }}
+                                }
+                            </div>
+                            <span class="wp-participant__name">{{ p.nickname }}</span>
+                            @if (p.isHost) {
+                                <ion-icon class="wp-participant__crown" name="star" color="warning" />
+                            }
+                            @if (wp.isHost() && !p.isHost) {
+                                <ion-button
+                                    class="wp-participant__kick"
+                                    fill="clear"
+                                    size="small"
+                                    color="medium"
+                                    (click)="onKick(p.id)"
+                                >
+                                    <ion-icon slot="icon-only" name="person-remove-outline" />
+                                </ion-button>
+                                <ion-button
+                                    class="wp-participant__kick"
+                                    fill="clear"
+                                    size="small"
+                                    color="danger"
+                                    (click)="onBan(p.id)"
+                                >
+                                    <ion-icon slot="icon-only" name="ban-outline" />
+                                </ion-button>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Host controls -->
+                @if (wp.isHost()) {
+                    <div class="wp-room__section-title">
+                        <ion-icon name="settings-outline" />
+                        Управление (только хост)
+                    </div>
+
+                    <div class="wp-host-controls">
+                        <ion-button expand="block" fill="outline" (click)="onBrowseAnime()">
+                            <ion-icon slot="start" name="film-outline" />
+                            {{ wp.videoState()?.animeId ? 'Сменить аниме' : 'Выбрать аниме для просмотра' }}
+                        </ion-button>
+                        @if (!wp.videoState()?.animeId) {
+                            <p class="wp-host-controls__hint">
+                                Перейдите к любому аниме и нажмите кнопку
+                                <strong>«Watch Party»</strong> в плеере — аниме появится у всех участников.
+                            </p>
+                        }
+                    </div>
+                }
+
+            </div>
+        }
+
+    </div>
+
+</ion-content>

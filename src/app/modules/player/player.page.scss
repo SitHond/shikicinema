@@ -36,6 +36,13 @@
         }
     }
 
+    &__wp-btn {
+        flex-shrink: 0;
+        margin-left: 0.5rem;
+        --border-radius: 999px;
+        font-size: 0.72rem;
+    }
+
     &__player {
         grid-area: player;
     }

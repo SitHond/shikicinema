@@ -1,0 +1,93 @@
+@use 'src/scss/mixins' as *;
+
+.chapter-reader {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    background: #0a0a0a;
+
+    &__loading,
+    &__error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        flex: 1;
+        padding: 2rem;
+        color: var(--ion-color-medium);
+    }
+
+    // ── Viewer ─────────────────────────────────────────────────────────────
+    &__viewer {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    &__page {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        pointer-events: none;
+        // subtle fade-in when source changes
+        animation: page-fadein 0.18s ease;
+    }
+
+    &__spinner-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 2;
+    }
+
+    // ── Controls ───────────────────────────────────────────────────────────
+    &__controls {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.375rem 0.625rem;
+        background: var(--ion-toolbar-background, var(--ion-color-step-50));
+        border-top: 1px solid var(--ion-color-step-100);
+        flex-shrink: 0;
+        min-height: 2.75rem;
+        flex-wrap: wrap;
+    }
+
+    &__counter {
+        font-size: 0.875rem;
+        font-variant-numeric: tabular-nums;
+        padding: 0 0.5rem;
+        color: var(--ion-color-medium);
+        min-width: 4rem;
+        text-align: center;
+    }
+
+    &__mark-btn {
+        margin-left: auto;
+    }
+
+    &__next-chapter-btn {
+        margin-left: 0.25rem;
+    }
+}
+
+@keyframes page-fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

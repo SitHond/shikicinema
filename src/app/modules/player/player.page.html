@@ -26,6 +26,19 @@
                 }
             </div>
 
+            @if (wp.status() === 'room' && wp.isHost()) {
+                <ion-button
+                    class="player-page__wp-btn"
+                    size="small"
+                    fill="outline"
+                    color="primary"
+                    (click)="onShareToWatchParty()"
+                >
+                    <ion-icon slot="start" name="tv-outline" />
+                    Watch Party · {{ wp.roomId() }}
+                </ion-button>
+            }
+
         </div>
 
         <app-player class="player-page__player responsive-16by9"

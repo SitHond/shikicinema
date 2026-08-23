@@ -1,0 +1,152 @@
+<ion-content [fullscreen]="true" class="manga-detail-page__content page-content">
+
+    <div class="manga-detail-page__header">
+        <ion-button fill="clear" size="small" [routerLink]="['/manga']">
+            <ion-icon slot="start" name="arrow-back-outline" />
+            Манга
+        </ion-button>
+    </div>
+
+    <!-- Skeleton while loading rate -->
+    @if (isLoadingRate()) {
+        <div class="manga-detail-page__skeleton-header">
+            <app-skeleton-block class="manga-detail-page__skeleton-cover" height="10.5rem" width="7.5rem" borderRadius="0.375rem" />
+            <div class="manga-detail-page__skeleton-info">
+                <app-skeleton-block height="1.5rem" width="85%" borderRadius="0.25rem" />
+                <app-skeleton-block height="1rem" width="40%" borderRadius="0.25rem" />
+                <app-skeleton-block height="0.75rem" width="60%" borderRadius="0.25rem" />
+            </div>
+        </div>
+    }
+
+    <!-- Hero info block -->
+    @if (!isLoadingRate() && rate()) {
+        <div class="manga-detail-page__info">
+            @if (coverUrl()) {
+                <img
+                    class="manga-detail-page__cover"
+                    [src]="coverUrl()"
+                    [alt]="mangaName()"
+                    loading="lazy"
+                    referrerpolicy="unsafe-url"
+                />
+            } @else {
+                <div class="manga-detail-page__cover manga-detail-page__cover--placeholder"></div>
+            }
+            <div class="manga-detail-page__meta">
+                <h1 class="manga-detail-page__title">{{ mangaName() }}</h1>
+
+                <div class="manga-detail-page__badges">
+                    @if (rate()!.manga.kind) {
+                        <span class="manga-detail-page__badge">{{ rate()!.manga.kind | uppercase }}</span>
+                    }
+                    @if (activeTitle()?.rating) {
+                        <span class="manga-detail-page__badge manga-detail-page__badge--rating">
+                            ★ {{ activeTitle()!.rating!.slice(0, 4) }}
+                        </span>
+                    }
+                    @if (sourceLabel()) {
+                        <span class="manga-detail-page__badge manga-detail-page__badge--source">{{ sourceLabel() }}</span>
+                    }
+                </div>
+
+                <p class="manga-detail-page__progress">
+                    Прочитано: <strong>{{ readChaptersCount() }}</strong>
+                    @if (totalChapters()) {
+                        &nbsp;/ {{ totalChapters() }} гл.
+                    }
+                </p>
+
+                @if (totalChapters()) {
+                    <div class="manga-detail-page__progress-bar-wrap">
+                        <ion-progress-bar
+                            type="determinate"
+                            [value]="readChaptersCount() / totalChapters()"
+                        />
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (!isLoadingRate() && !rate()) {
+        <div class="manga-detail-page__message">
+            <ion-text color="medium">Манга не найдена в вашем списке.</ion-text>
+        </div>
+    }
+
+    <!-- Chapters skeletons -->
+    @if (isLoadingChapters()) {
+        <div class="manga-detail-page__chapters">
+            @for (_ of 10 | repeat; track $index) {
+                <div class="manga-detail-page__chapter-skeleton">
+                    <app-skeleton-block height="2.75rem" width="100%" borderRadius="0" />
+                </div>
+            }
+        </div>
+    }
+
+    @if (noSourceResult()) {
+        <div class="manga-detail-page__no-source">
+            <ion-text color="medium" class="manga-detail-page__no-source-text">
+                Источник не найден автоматически. Вставьте ссылку на страницу манги с MangaLib:
+            </ion-text>
+            <div class="manga-detail-page__manual-url">
+                <ion-input
+                    type="url"
+                    placeholder="https://mangalib.me/ru/manga/..."
+                    [value]="manualUrlInput()"
+                    [disabled]="manualUrlLoading()"
+                    (ionInput)="manualUrlInput.set($any($event.target).value)"
+                    (keyup.enter)="onSubmitManualUrl()"
+                />
+                <ion-button [disabled]="manualUrlLoading()" (click)="onSubmitManualUrl()">
+                    @if (manualUrlLoading()) {
+                        <ion-icon slot="icon-only" name="reload-outline" class="manga-detail-page__spin" />
+                    } @else {
+                        <ion-icon slot="icon-only" name="arrow-forward-outline" />
+                    }
+                </ion-button>
+            </div>
+            @if (manualUrlError()) {
+                <ion-text color="danger" class="manga-detail-page__manual-url-error">
+                    {{ manualUrlError() }}
+                </ion-text>
+            }
+        </div>
+    }
+
+    @if (!isLoadingChapters() && chapters().length) {
+        <div class="manga-detail-page__chapters-header">
+            <ion-text class="manga-detail-page__chapters-title">
+                Главы ({{ chapters().length }})
+            </ion-text>
+        </div>
+
+        <div class="manga-detail-page__chapters">
+            @for (chapter of chapters(); track chapter.id) {
+                <a
+                    class="manga-detail-page__chapter"
+                    [class.manga-detail-page__chapter--read]="isChapterRead(chapter)"
+                    [routerLink]="['/manga', mangaId, 'chapter', chapter.id]"
+                    [state]="{
+                        rateId: rate()?.id,
+                        chapters: readChaptersCount(),
+                        chapterIndex: chapter.index,
+                        source: activeTitle()!.source,
+                        chapterId: chapter.id,
+                        slug: activeTitle()!.slug,
+                        volume: chapter.volume,
+                        number: chapter.number
+                    }"
+                >
+                    <span class="manga-detail-page__chapter-label">{{ chapterLabel(chapter) }}</span>
+                    @if (isChapterRead(chapter)) {
+                        <ion-icon class="manga-detail-page__chapter-icon" name="checkmark-circle" color="success" />
+                    }
+                </a>
+            }
+        </div>
+    }
+
+</ion-content>

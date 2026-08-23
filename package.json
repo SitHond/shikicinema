@@ -70,6 +70,7 @@
     "@ngrx/store": "^21.0.1",
     "date-fns": "^4.1.0",
     "deep-object-diff": "^1.1.9",
+    "hls.js": "^1.7.1",
     "ionicons": "^8.0.13",
     "ngrx-store-localstorage": "^20.1.0",
     "ngx-scrollbar": "^19.1.3",

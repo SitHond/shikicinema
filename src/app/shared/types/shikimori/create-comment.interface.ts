@@ -17,4 +17,5 @@ export interface CreateComment {
 
     /** технический флаг для шикимори, не использовать */
     frontend?: boolean;
+
 }

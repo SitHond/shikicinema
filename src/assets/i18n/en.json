@@ -74,7 +74,9 @@
                 "SUPPORT": "Support",
                 "THEME_TOGGLE": {
                     "LIGHT": "Light theme",
-                    "DARK": "Dark theme"
+                    "DARK": "Dark theme",
+                    "SHIKIMORI-DARK": "Shikimori (dark)",
+                    "SHIKIMORI-LIGHT": "Shikimori (light)"
                 },
                 "LANGUAGE": "Language",
                 "EXIT": "Exit"
@@ -164,7 +166,12 @@
                 "PLACEHOLDER": "Enter your comment",
                 "SEND_SUCCESS": "Comment sent",
                 "SEND_FAILURE": "Failed to send comment",
-                "EDIT_CANCEL_BTN": "Cancel edit"
+                "EDIT_CANCEL_BTN": "Cancel edit",
+                "TAB_WRITE": "Write",
+                "TAB_PREVIEW": "Preview",
+                "SEND_BTN": "Send",
+                "LOGIN_BTN": "Sign in",
+                "LINK_INSERT": "Insert"
             },
             "COMMENT_ACTIONS": {
                 "EDIT": "Edit",
@@ -257,7 +264,9 @@
                         "OPTIONS": {
                             "LIGHT": "Light",
                             "DARK": "Dark",
-                            "CUSTOM": "Custom"
+                            "CUSTOM": "Custom",
+                            "SHIKIMORI_DARK": "Shikimori Dark",
+                            "SHIKIMORI_LIGHT": "Shikimori Light"
                         }
                     },
                     "CUSTOM_THEME": {
@@ -329,7 +338,9 @@
                 "STORAGE": {
                     "TITLE": "Storage",
                     "INFO": "{{ used }} (cached {{ cached }}) of {{ total }}",
-                    "CLEAR_CACHE_BTN": "Clear cache"
+                    "CLEAR_CACHE_BTN": "Clear cache",
+                    "MANGA_CACHE_INFO": "Manga cache: {{ count }} pages ({{ size }})",
+                    "CLEAR_MANGA_CACHE_BTN": "Clear manga cache"
                 }
             }
         }

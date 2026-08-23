@@ -106,6 +106,7 @@ export class AppComponent implements OnInit {
 
     initTheme(): void {
         const darkThemeClass = 'ion-palette-dark';
+        const shikimoriThemeClass = 'shikimori-theme';
         const userCustomStyleId = 'user-custom-theme';
         const headEl = this.document.head;
 
@@ -116,11 +117,21 @@ export class AppComponent implements OnInit {
             distinctUntilChanged(),
             tap(async ([theme, isCustomThemeDisabled]) => {
                 const customTheme = await firstValueFrom(this.store.select(selectCustomTheme));
+                const htmlEl = this.document.documentElement;
 
-                if (!theme || theme === 'dark' || theme === 'custom') {
-                    this.renderer.addClass(this.document.documentElement, darkThemeClass);
+                if (theme === 'shikimori-dark') {
+                    this.renderer.addClass(htmlEl, darkThemeClass);
+                    this.renderer.addClass(htmlEl, shikimoriThemeClass);
+                } else if (theme === 'shikimori-light') {
+                    this.renderer.removeClass(htmlEl, darkThemeClass);
+                    this.renderer.addClass(htmlEl, shikimoriThemeClass);
                 } else {
-                    this.renderer.removeClass(this.document.documentElement, darkThemeClass);
+                    this.renderer.removeClass(htmlEl, shikimoriThemeClass);
+                    if (!theme || theme === 'dark' || theme === 'custom') {
+                        this.renderer.addClass(htmlEl, darkThemeClass);
+                    } else {
+                        this.renderer.removeClass(htmlEl, darkThemeClass);
+                    }
                 }
 
                 if (theme === 'custom' && !isCustomThemeDisabled) {

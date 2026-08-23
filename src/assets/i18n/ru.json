@@ -74,7 +74,9 @@
                 "SUPPORT": "Поддержка",
                 "THEME_TOGGLE": {
                     "LIGHT": "Светлая тема",
-                    "DARK": "Тёмная тема"
+                    "DARK": "Тёмная тема",
+                    "SHIKIMORI-DARK": "Shikimori (тёмная)",
+                    "SHIKIMORI-LIGHT": "Shikimori (светлая)"
                 },
                 "LANGUAGE": "Язык",
                 "EXIT": "Выход"
@@ -169,7 +171,12 @@
                 "PLACEHOLDER": "Введите свой комментарий",
                 "SEND_SUCCESS": "Комментарий отправлен",
                 "SEND_FAILURE": "Не удалось отправить комментарий",
-                "EDIT_CANCEL_BTN": "Отменить редактирование"
+                "EDIT_CANCEL_BTN": "Отменить редактирование",
+                "TAB_WRITE": "Написать",
+                "TAB_PREVIEW": "Предпросмотр",
+                "SEND_BTN": "Отправить",
+                "LOGIN_BTN": "Войти",
+                "LINK_INSERT": "Вставить"
             },
             "COMMENT_ACTIONS": {
                 "EDIT": "Редактировать",
@@ -262,7 +269,9 @@
                         "OPTIONS": {
                             "LIGHT": "Светлая",
                             "DARK": "Тёмная",
-                            "CUSTOM": "Пользовательская"
+                            "CUSTOM": "Пользовательская",
+                            "SHIKIMORI_DARK": "Shikimori тёмная",
+                            "SHIKIMORI_LIGHT": "Shikimori светлая"
                         }
                     },
                     "CUSTOM_THEME": {
@@ -334,7 +343,9 @@
                 "STORAGE": {
                     "TITLE": "Хранилище",
                     "INFO": "{{ used }} (кэшировано {{ cached }}) из {{ total }}",
-                    "CLEAR_CACHE_BTN": "Очистить Кэш"
+                    "CLEAR_CACHE_BTN": "Очистить Кэш",
+                    "MANGA_CACHE_INFO": "Кэш манги: {{ count }} стр. ({{ size }})",
+                    "CLEAR_MANGA_CACHE_BTN": "Очистить кэш манги"
                 }
             }
         }

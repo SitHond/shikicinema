@@ -9,6 +9,7 @@ import {
     ViewEncapsulation,
     computed,
     inject,
+    signal,
 } from '@angular/core';
 import {
     FormControl,
@@ -44,6 +45,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DEFAULT_ANIME_STATUS_ORDER } from '@app/shared/config/default-anime-status-order.config';
 import { DEFAULT_SHIKIMORI_DOMAIN_TOKEN, SHIKIMORI_DOMAINS } from '@app/core/providers/shikimori-domain';
 import { GetShikimoriPagePipe } from '@app/shared/pipes/get-shikimori-page/get-shikimori-page.pipe';
+import { MangaImageCacheService } from '@app/modules/manga/services/manga-image-cache.service';
 import { PersistenceService } from '@app/shared/services/persistence.service';
 import { PlayerKindDisplayMode } from '@app/store/settings/types/player-kind-display-mode.type';
 import { PlayerModeType } from '@app/store/settings/types/player-mode.type';
@@ -151,9 +153,13 @@ export class SettingsPage implements OnInit {
     readonly filterPlayerDomainsCtrl = this.settingsForm?.get('filterPlayerDomains');
     readonly addFilterDomainCtrl = new FormControl('', [urlValidator()]);
 
+    private readonly mangaImageCache = inject(MangaImageCacheService);
+
     readonly localStorageLimit = this.persistenceService.getMaxByxes();
     readonly localStorageUsage$ = new BehaviorSubject(this.persistenceService.getUsedBytes());
     readonly localStorageCache$ = new BehaviorSubject(this.persistenceService.getCacheBytes());
+    readonly mangaCacheBytes = signal(0);
+    readonly mangaCacheCount = signal(0);
 
     initPageTitle(): void {
         this.transloco.selectTranslate<string>('SETTINGS_MODULE.SETTINGS_PAGE.PAGE_TITLE')
@@ -197,6 +203,14 @@ export class SettingsPage implements OnInit {
         this.initPageTitle();
         this.initForm();
         this.initSettingsAutoUpdate();
+        this.loadMangaCacheStats();
+    }
+
+    private loadMangaCacheStats(): void {
+        this.mangaImageCache.getStats().then(({ count, bytes }) => {
+            this.mangaCacheBytes.set(bytes);
+            this.mangaCacheCount.set(count);
+        });
     }
 
     shikimoriLogin(): void {
@@ -210,6 +224,13 @@ export class SettingsPage implements OnInit {
     clearCache(): void {
         this.store.dispatch(resetCacheAction());
         this.localStorageCache$.next(this.persistenceService.getCacheBytes());
+    }
+
+    clearMangaCache(): void {
+        this.mangaImageCache.clear().then(() => {
+            this.mangaCacheBytes.set(0);
+            this.mangaCacheCount.set(0);
+        });
     }
 
     goToLastPage(): void {

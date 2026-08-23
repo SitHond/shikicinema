@@ -1,0 +1,67 @@
+@if (isLoading()) {
+    <div class="chapter-reader__loading">
+        <ion-spinner name="crescent" />
+    </div>
+}
+
+@if (hasError()) {
+    <div class="chapter-reader__error">
+        <ion-text color="danger">Не удалось загрузить страницы главы.</ion-text>
+    </div>
+}
+
+@if (!isLoading() && !hasError() && currentPage()) {
+    <div class="chapter-reader__viewer" tabindex="0" (click)="next()" (keyup.enter)="next()">
+
+        @if (isImageLoading()) {
+            <div class="chapter-reader__spinner-overlay">
+                <ion-spinner name="crescent" />
+            </div>
+        }
+
+        @if (currentImageUrl()) {
+            <img
+                class="chapter-reader__page"
+                [src]="currentImageUrl()"
+                [alt]="'Страница ' + (currentIndex() + 1)"
+                draggable="false"
+            />
+        }
+    </div>
+
+    <div class="chapter-reader__controls">
+        <ion-button fill="clear" size="small" [disabled]="isFirst()" (click)="prev()">
+            <ion-icon slot="icon-only" name="chevron-back-outline" />
+        </ion-button>
+
+        <span class="chapter-reader__counter">{{ currentIndex() + 1 }}&thinsp;/&thinsp;{{ total() }}</span>
+
+        <ion-button fill="clear" size="small" [disabled]="isLast()" (click)="next()">
+            <ion-icon slot="icon-only" name="chevron-forward-outline" />
+        </ion-button>
+
+        @if (isLast() && !isRead()) {
+            <ion-button
+                class="chapter-reader__mark-btn"
+                size="small"
+                color="success"
+                (click)="markAsRead.emit()"
+            >
+                <ion-icon slot="start" name="checkmark-outline" />
+                Отметить прочитанной
+            </ion-button>
+        }
+
+        @if (isLast()) {
+            <ion-button
+                class="chapter-reader__next-chapter-btn"
+                size="small"
+                fill="outline"
+                (click)="nextChapter.emit()"
+            >
+                Следующая глава
+                <ion-icon slot="end" name="arrow-forward-outline" />
+            </ion-button>
+        }
+    </div>
+}

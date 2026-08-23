@@ -1,0 +1,98 @@
+<div class="wp-player">
+
+    <!-- Video element -->
+    <video
+        #videoEl
+        class="wp-player__video"
+        [class.wp-player__video--hidden]="state() !== 'ready'"
+        preload="metadata"
+        (timeupdate)="onVideoTimeUpdate()"
+        (loadedmetadata)="onVideoLoaded()"
+        (error)="onVideoError()"
+    ></video>
+
+    <!-- Loading -->
+    @if (state() === 'loading' || state() === 'idle') {
+        <div class="wp-player__overlay wp-player__overlay--center">
+            <ion-spinner name="crescent" />
+            <ion-text color="medium">Загрузка потока...</ion-text>
+        </div>
+    }
+
+    <!-- Error -->
+    @if (state() === 'error') {
+        <div class="wp-player__overlay wp-player__overlay--center">
+            <ion-icon name="alert-circle-outline" color="danger" />
+            <ion-text color="medium">{{ errorMessage() || 'Ошибка загрузки' }}</ion-text>
+        </div>
+    }
+
+    <!-- Controls -->
+    @if (state() === 'ready') {
+        <div class="wp-player__controls">
+
+            <!-- Seek bar -->
+            <div class="wp-player__seek">
+                <input
+                    class="wp-player__range"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    [value]="progressPct()"
+                    (input)="onSeekBarInput($event)"
+                    (change)="onSeekBarChange($event)"
+                />
+            </div>
+
+            <div class="wp-player__bottom">
+                <!-- Prev episode (host only) -->
+                @if (wp.isHost()) {
+                    <ion-button fill="clear" size="small" color="light"
+                        [disabled]="(episode() ?? 1) <= 1"
+                        (click)="prevEpisode()">
+                        <ion-icon slot="icon-only" name="play-skip-back-outline" />
+                    </ion-button>
+                }
+
+                <!-- Play/Pause -->
+                <ion-button fill="clear" size="small" color="light" (click)="togglePlay()">
+                    <ion-icon slot="icon-only" [name]="isVideoPaused() ? 'play-outline' : 'pause-outline'" />
+                </ion-button>
+
+                <!-- Next episode (host only) -->
+                @if (wp.isHost()) {
+                    <ion-button fill="clear" size="small" color="light" (click)="nextEpisode()">
+                        <ion-icon slot="icon-only" name="play-skip-forward-outline" />
+                    </ion-button>
+                }
+
+                <!-- Time -->
+                <span class="wp-player__time">{{ formattedTime() }}</span>
+
+                <!-- Volume -->
+                <div class="wp-player__volume">
+                    <ion-icon name="volume-medium-outline" color="light" />
+                    <input
+                        class="wp-player__range wp-player__range--volume"
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        [value]="volume()"
+                        (input)="onVolumeChange($event)"
+                    />
+                </div>
+
+                <div class="wp-player__spacer"></div>
+
+                <!-- Fullscreen -->
+                <ion-button fill="clear" size="small" color="light" (click)="toggleFullscreen()">
+                    <ion-icon slot="icon-only" name="expand-outline" />
+                </ion-button>
+            </div>
+
+        </div>
+    }
+
+</div>

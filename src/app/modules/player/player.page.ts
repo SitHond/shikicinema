@@ -17,7 +17,9 @@ import {
     viewChild,
 } from '@angular/core';
 import {
+    IonButton,
     IonContent,
+    IonIcon,
     IonText,
     ModalController,
     Platform,
@@ -54,6 +56,7 @@ import { SwipeDirective } from '@app/shared/directives/swipe.directive';
 import { UserCommentFormComponent } from '@app/modules/player/components/user-comment-form/user-comment-form.component';
 import { VideoInfoInterface } from '@app/modules/player/types';
 import { VideoKindEnum } from '@app/modules/player/types/video-kind.enum';
+import { WatchPartyService } from '@app/modules/watch-party/watch-party.service';
 import { authShikimoriAction } from '@app/store/auth/actions/auth.actions';
 import {
     changeCurrentAnimeAction,
@@ -127,6 +130,8 @@ import { visitAnimePageAction } from '@app/modules/home/store/recent-animes/acti
         SidePanelComponent,
         IonText,
         IonContent,
+        IonButton,
+        IonIcon,
         FooterComponent,
     ],
     encapsulation: ViewEncapsulation.None,
@@ -146,6 +151,8 @@ export class PlayerPage implements OnInit {
     private readonly modalController = inject(ModalController);
     private readonly destroyRef = inject(DestroyRef);
     private readonly cvhClient = inject(CvhClient);
+
+    readonly wp = inject(WatchPartyService);
 
     readonly animeId = input.required<string>();
     readonly episode = input.required<string>();
@@ -481,5 +488,14 @@ export class PlayerPage implements OnInit {
 
     setDomainFilters(isEnabled: boolean): void {
         this.isDomainFilterOn.set(isEnabled);
+    }
+
+    onShareToWatchParty(): void {
+        const id = this.animeId();
+        const ep = Number(this.episode()) || 1;
+        const CVH_BASE = 'https://cdnvideohub.com/video/';
+        const videoUrl = this.currentVideo()?.url ?? '';
+        const vkId = videoUrl.startsWith(CVH_BASE) ? videoUrl.slice(CVH_BASE.length) : undefined;
+        this.wp.shareAnime(id, ep, this.animeName(), `#/player/${id}/${ep}`, vkId);
     }
 }

@@ -383,6 +383,18 @@ export class ShikimoriClient {
         );
     }
 
+    getMangaExternalLinks(mangaId: ResourceIdType): Observable<{ kind: string; url: string }[]> {
+        return this.shikimoriDomain$.pipe(
+            take(1),
+            switchMap((domain) =>
+                this.http.get<{ external_links: { kind: string; url: string }[] }>(
+                    `${domain}/api/mangas/${mangaId}`,
+                ),
+            ),
+            map((res) => res.external_links ?? []),
+        );
+    }
+
     getTopics(
         animeId: ResourceIdType,
         episode?: ResourceIdType,

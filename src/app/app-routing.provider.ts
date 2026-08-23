@@ -39,6 +39,10 @@ const routes: Routes = [
         loadChildren: () => import('./modules/support/support.routes').then((s) => s.SUPPORT_ROUTES),
     },
     {
+        path: 'watch-party',
+        loadChildren: () => import('./modules/watch-party/watch-party.routes').then((w) => w.WATCH_PARTY_ROUTES),
+    },
+    {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',

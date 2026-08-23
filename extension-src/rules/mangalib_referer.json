@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "priority": 1,
+        "action": {
+            "type": "modifyHeaders",
+            "requestHeaders": [
+                {
+                    "header": "Referer",
+                    "operation": "set",
+                    "value": "https://mangalib.me/"
+                }
+            ]
+        },
+        "condition": {
+            "requestDomains": [
+                "img1.cdnlibs.org",
+                "img2.cdnlibs.org",
+                "img3.cdnlibs.org",
+                "img4.cdnlibs.org",
+                "img5.cdnlibs.org",
+                "cover.cdnlibs.org"
+            ]
+        }
+    }
+]

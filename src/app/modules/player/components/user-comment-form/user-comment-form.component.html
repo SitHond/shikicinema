@@ -1,66 +1,129 @@
 @if (isEditMode()) {
-    <div class="user-comment-form__edit">
-        <div class="user-comment-form__edit-wrap">
-            <div class="user-comment-form__edit-comment">
-                <img
-                    class="user-comment-form__edit-user"
-                    [src]="editComment().user.image.x64 || editComment().user.avatar"
-                    [alt]="editComment().user.name">
-
-                <span
-                    class="user-comment-form__edit-text text-ellipsis"
-                    tabindex="0"
-                    (click)="onHighlightEditComment()"
-                    (keydown.enter)="onHighlightEditComment()"
-                    (keydown.space)="onHighlightEditComment()"
-                    [innerHTML]="editComment() | processShikimoriHtml">
-                </span>
-            </div>
-
-            <ion-icon
-                class="user-comment-form__edit-cancel shc-interactive"
-                name="close-outline"
-                color="danger"
+    <div class="ucf-edit-banner">
+        <div class="ucf-edit-banner__inner">
+            <img
+                class="ucf-edit-banner__avatar"
+                [src]="editComment().user.image.x64 || editComment().user.avatar"
+                [alt]="editComment().user.name">
+            <span
+                class="ucf-edit-banner__text text-ellipsis"
                 tabindex="0"
-                [title]="'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.EDIT_CANCEL_BTN' | transloco"
-                (click)="onCancelEdit()"
-                (keydown.enter)="onCancelEdit()"
-                (keydown.space)="onCancelEdit()"
-            />
+                (click)="onHighlightEditComment()"
+                (keydown.enter)="onHighlightEditComment()"
+                (keydown.space)="onHighlightEditComment()"
+                [innerHTML]="editComment() | processShikimoriHtml">
+            </span>
         </div>
+        <ion-icon
+            class="ucf-edit-banner__cancel shc-interactive"
+            name="close-outline"
+            color="danger"
+            tabindex="0"
+            [title]="'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.EDIT_CANCEL_BTN' | transloco"
+            (click)="onCancelEdit()"
+            (keydown.enter)="onCancelEdit()"
+            (keydown.space)="onCancelEdit()"
+        />
     </div>
 }
 
-<ion-textarea
-    labelPlacement="floating"
-    fill="outline"
-    [autoGrow]="true"
-    [formControl]="comment"
-    [label]="'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.LABEL' | transloco"
-    [placeholder]="'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.PLACEHOLDER' | transloco"
->
-    @if (isAuthorized()) {
-        <ion-button
+<div class="ucf-toolbar">
+    <div class="ucf-toolbar__groups">
+        <div class="ucf-toolbar__group">
+            <button class="ucf-tb-btn" type="button" title="Жирный" (click)="wrap('[b]','[/b]')"><b>B</b></button>
+            <button class="ucf-tb-btn ucf-tb-btn--italic" type="button" title="Курсив" (click)="wrap('[i]','[/i]')"><i>I</i></button>
+            <button class="ucf-tb-btn ucf-tb-btn--underline" type="button" title="Подчёркнутый" (click)="wrap('[u]','[/u]')">U</button>
+            <button class="ucf-tb-btn ucf-tb-btn--strike" type="button" title="Зачёркнутый" (click)="wrap('[s]','[/s]')">S</button>
+        </div>
+
+        <div class="ucf-toolbar__sep"></div>
+
+        <div class="ucf-toolbar__group">
+            <button class="ucf-tb-btn ucf-tb-btn--mono" type="button" title="Код" (click)="wrap('[code]','[/code]','код')">&lt;/&gt;</button>
+            <button class="ucf-tb-btn" type="button" title="Ссылка" (click)="openLinkPanel()">
+                <ion-icon name="link-outline" aria-hidden="true" />
+            </button>
+            <button class="ucf-tb-btn" type="button" title="Изображение" (click)="wrap('[img]','[/img]','https://')">
+                <ion-icon name="image-outline" aria-hidden="true" />
+            </button>
+        </div>
+
+        <div class="ucf-toolbar__sep"></div>
+
+        <div class="ucf-toolbar__group">
+            <button class="ucf-tb-btn" type="button" title="Заголовок" (click)="wrap('[h3]','[/h3]')"><b>H</b></button>
+            <button class="ucf-tb-btn ucf-tb-btn--quote" type="button" title="Цитата" (click)="wrap('[quote]','[/quote]')">❝</button>
+            <button class="ucf-tb-btn ucf-tb-btn--mono" type="button" title="Блок-спойлер" (click)="wrap('[spoiler=Спойлер]','[/spoiler]')">[sp]</button>
+            <button class="ucf-tb-btn ucf-tb-btn--mono" type="button" title="Инлайн-спойлер" (click)="wrap('||','||')">||</button>
+            <button class="ucf-tb-btn" type="button" title="Список" (click)="wrap('[list]\n[*]','\n[/list]','пункт')">
+                <ion-icon name="list-outline" aria-hidden="true" />
+            </button>
+        </div>
+    </div>
+
+    <div class="ucf-toolbar__tabs">
+        <button
+            class="ucf-tab"
             type="button"
-            fill="clear"
-            slot="end"
-            aria-label="send"
-            (click)="isEditMode()
-                ? onSendEdited(comment.value)
-                : onSend(comment.value)"
-            [disabled]="comment.invalid || !isAuthorized()"
-        >
-            <ion-icon slot="icon-only" name="send" aria-hidden="true" />
-        </ion-button>
-    } @else {
-        <ion-button
+            [class.ucf-tab--active]="mode() === 'write'"
+            (click)="setMode('write')"
+        >{{ 'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.TAB_WRITE' | transloco }}</button>
+        <button
+            class="ucf-tab"
             type="button"
-            fill="clear"
-            slot="end"
-            aria-label="login"
-            (click)="onLogin()"
+            [class.ucf-tab--active]="mode() === 'preview'"
+            (click)="setMode('preview')"
+        >{{ 'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.TAB_PREVIEW' | transloco }}</button>
+    </div>
+</div>
+
+@if (showLinkPanel()) {
+    <div class="ucf-link-panel">
+        <input
+            class="ucf-link-panel__input"
+            type="url"
+            placeholder="https://..."
+            [(ngModel)]="linkHref"
+            (keydown.enter)="confirmLink()"
+            (keydown.escape)="cancelLink()"
+           
         >
-            <ion-icon slot="icon-only" name="log-in-outline" aria-hidden="true" />
-        </ion-button>
+        <button class="ucf-link-panel__confirm" type="button" (click)="confirmLink()">
+            {{ 'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.LINK_INSERT' | transloco }}
+        </button>
+        <button class="ucf-link-panel__cancel" type="button" (click)="cancelLink()">
+            <ion-icon name="close-outline" aria-hidden="true" />
+        </button>
+    </div>
+}
+
+<div class="ucf-content">
+    @if (mode() === 'write') {
+        <textarea
+            #textareaRef
+            class="ucf-textarea"
+            [formControl]="comment"
+            [placeholder]="'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.PLACEHOLDER' | transloco"
+            rows="4"
+        ></textarea>
     }
-</ion-textarea>
+    @if (mode() === 'preview') {
+        <div class="ucf-preview" [innerHTML]="preview()"></div>
+    }
+</div>
+
+<div class="ucf-footer">
+    @if (isAuthorized()) {
+        <button
+            class="ucf-footer__send"
+            type="button"
+            (click)="isEditMode() ? onSendEdited(comment.value) : onSend(comment.value)"
+            [disabled]="comment.invalid"
+        >{{ 'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.SEND_BTN' | transloco }}</button>
+    } @else {
+        <button class="ucf-footer__login" type="button" (click)="onLogin()">
+            <ion-icon name="log-in-outline" aria-hidden="true" />
+            {{ 'PLAYER_MODULE.PLAYER_PAGE.USER_COMMENT_FORM.LOGIN_BTN' | transloco }}
+        </button>
+    }
+</div>

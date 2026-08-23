@@ -38,6 +38,12 @@
                 <ion-select-option value="custom">
                     {{ 'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.GENERAL.THEME.OPTIONS.CUSTOM' | transloco }}
                 </ion-select-option>
+                <ion-select-option value="shikimori-dark">
+                    {{ 'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.GENERAL.THEME.OPTIONS.SHIKIMORI_DARK' | transloco }}
+                </ion-select-option>
+                <ion-select-option value="shikimori-light">
+                    {{ 'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.GENERAL.THEME.OPTIONS.SHIKIMORI_LIGHT' | transloco }}
+                </ion-select-option>
             </ion-select>
 
             @if (themeCtrl?.value === 'custom') {
@@ -237,6 +243,23 @@
                 (click)="clearCache()">
                 <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
             </ion-button>
+
+            @if (mangaCacheCount() > 0) {
+                <div class="storage__used-info">
+                    <span class="storage__text">
+                        {{ 'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.STORAGE.MANGA_CACHE_INFO' | transloco: {
+                            count: mangaCacheCount(),
+                            size: mangaCacheBytes() | toHumanReadableBytes,
+                        } }}
+                    </span>
+                </div>
+                <ion-button
+                    color="medium"
+                    [title]="'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.STORAGE.CLEAR_MANGA_CACHE_BTN' | transloco"
+                    (click)="clearMangaCache()">
+                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                </ion-button>
+            }
         </app-settings-group>
     </form>
 

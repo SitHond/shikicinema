@@ -74,7 +74,9 @@
                 "SUPPORT": "Підтримка",
                 "THEME_TOGGLE": {
                     "LIGHT": "Світла тема",
-                    "DARK": "Темна тема"
+                    "DARK": "Темна тема",
+                    "SHIKIMORI-DARK": "Shikimori (темна)",
+                    "SHIKIMORI-LIGHT": "Shikimori (світла)"
                 },
                 "LANGUAGE": "Мова",
                 "EXIT": "Вихід"
@@ -145,7 +147,12 @@
                 "PLACEHOLDER": "Введіть ваш коментар",
                 "SEND_SUCCESS": "Коментар відправлено",
                 "SEND_FAILURE": "Не вдалося відправити коментар",
-                "EDIT_CANCEL_BTN": "Скасувати редагування"
+                "EDIT_CANCEL_BTN": "Скасувати редагування",
+                "TAB_WRITE": "Написати",
+                "TAB_PREVIEW": "Попередній перегляд",
+                "SEND_BTN": "Надіслати",
+                "LOGIN_BTN": "Увійти",
+                "LINK_INSERT": "Вставити"
             },
             "COMMENT_ACTIONS": {
                 "EDIT": "Редагувати",
@@ -234,7 +241,9 @@
                         "OPTIONS": {
                             "LIGHT": "Світла",
                             "DARK": "Темна",
-                            "CUSTOM": "Користувальницька"
+                            "CUSTOM": "Користувальницька",
+                            "SHIKIMORI_DARK": "Shikimori темна",
+                            "SHIKIMORI_LIGHT": "Shikimori світла"
                         }
                     },
                     "CUSTOM_THEME": {
@@ -306,7 +315,9 @@
                 "STORAGE": {
                     "TITLE": "Сховище",
                     "INFO": "{{ used }} (кешовано {{ cached }}) з {{ total }}",
-                    "CLEAR_CACHE_BTN": "Очистити Кеш"
+                    "CLEAR_CACHE_BTN": "Очистити Кеш",
+                    "MANGA_CACHE_INFO": "Кеш манґи: {{ count }} стор. ({{ size }})",
+                    "CLEAR_MANGA_CACHE_BTN": "Очистити кеш манґи"
                 }
             }
         }

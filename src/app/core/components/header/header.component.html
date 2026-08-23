@@ -150,6 +150,19 @@
 
             <ion-item
                 class="menu-item"
+                [routerLink]="['watch-party']"
+            >
+                <ion-icon
+                    class="menu-item__icon"
+                    icon="tv-outline"
+                ></ion-icon>
+                <ion-text class="menu-item__label menu-item__label--with-icon">
+                    Watch Party
+                </ion-text>
+            </ion-item>
+
+            <ion-item
+                class="menu-item"
                 [routerLink]="['settings']"
             >
                 <ion-icon
@@ -193,7 +206,7 @@
                     <ion-toggle
                         labelPlacement="end"
                         justify="start"
-                        [checked]="theme() === 'dark'"
+                        [checked]="isDarkTheme()"
                         (ionChange)="onChangeTheme()"
                     >
                         {{ 'GLOBAL.HEADER.TOOLBAR_MENU.THEME_TOGGLE.' + (theme() | uppercase) | transloco }}
@@ -243,6 +256,19 @@
 
             <ion-item
                 class="menu-item"
+                [routerLink]="['watch-party']"
+            >
+                <ion-icon
+                    class="menu-item__icon"
+                    icon="tv-outline"
+                ></ion-icon>
+                <ion-text class="menu-item__label menu-item__label--with-icon">
+                    Watch Party
+                </ion-text>
+            </ion-item>
+
+            <ion-item
+                class="menu-item"
                 [routerLink]="['settings']"
             >
                 <ion-icon
@@ -285,7 +311,7 @@
                 <ion-toggle
                     labelPlacement="end"
                     justify="start"
-                    [checked]="theme() === 'dark'"
+                    [checked]="isDarkTheme()"
                     (ionChange)="onChangeTheme()"
                 >
                     {{ 'GLOBAL.HEADER.TOOLBAR_MENU.THEME_TOGGLE.' + (theme() | uppercase) | transloco }}

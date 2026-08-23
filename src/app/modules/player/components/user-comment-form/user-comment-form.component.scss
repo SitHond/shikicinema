@@ -1,63 +1,319 @@
 @use 'src/scss/mixins' as *;
 
 .user-comment-form {
-    --shc-edit-comment-wrap-background-color: var(--ion-color-step-300, var(--ion-background-color-step-300, #b3b3b3));
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 
-    &__edit {
+    --ucf-border: 1px solid var(--ion-color-step-150, #333);
+    --ucf-radius: .375rem;
+    --ucf-btn-color: var(--ion-color-step-700, #aaa);
+    --ucf-btn-hover: var(--ion-text-color, #fff);
+}
+
+// ─── Edit banner ──────────────────────────────────────────────────────────────
+
+.ucf-edit-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+
+    background: var(--ion-color-step-100, #222);
+    border: var(--ucf-border);
+    border-bottom: none;
+    border-radius: var(--ucf-radius) var(--ucf-radius) 0 0;
+    padding: .25rem .5rem;
+
+    &__inner {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        gap: .4rem;
+        min-width: 0;
     }
 
-    &__edit-wrap {
-        display: inline-flex;
-        align-items: center;
-        gap: .25rem;
-
-        background-color: var(--shc-edit-comment-wrap-background-color);
-        border-top-left-radius: .125rem;
-        border-top-right-radius: .125rem;
-        padding: .125rem;
-        margin-right: 1rem;
+    &__avatar {
+        border-radius: 50%;
+        width: 1.25rem;
+        height: 1.25rem;
+        flex-shrink: 0;
     }
 
-    &__edit-comment {
-        display: inline-flex;
-        align-items: center;
-        gap: .25rem;
-    }
-
-    &__edit-text {
-        display: flex;
-
-        cursor: pointer;
-        user-select: none;
-
-        padding: .25rem;
-
-        max-width: 8rem;
-        max-height: 1.4rem;
-        word-break: break-all;
-
+    &__text {
         font-size: .75rem;
-        line-height: 1rem;
+        cursor: pointer;
+        color: var(--ion-color-step-700, #aaa);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 12rem;
 
-        @include media-breakpoint-up('lg') {
-            max-width: 16rem;
+        * { pointer-events: none; }
+    }
+
+    &__cancel {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+}
+
+// ─── Toolbar ──────────────────────────────────────────────────────────────────
+
+.ucf-toolbar {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    flex-wrap: wrap;
+
+    background: var(--ion-color-step-100, #1e1e1e);
+    border: var(--ucf-border);
+    border-bottom: none;
+    border-top-left-radius: var(--ucf-radius);
+    border-top-right-radius: var(--ucf-radius);
+    padding: .25rem .375rem;
+
+    .ucf-edit-banner + & {
+        border-radius: 0;
+    }
+
+    &__groups {
+        display: flex;
+        align-items: center;
+        gap: .125rem;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+    &__group {
+        display: flex;
+        align-items: center;
+    }
+
+    &__sep {
+        width: 1px;
+        height: 1.125rem;
+        background: var(--ion-color-step-200, #444);
+        margin: 0 .25rem;
+    }
+
+    &__tabs {
+        display: flex;
+        gap: .125rem;
+        margin-left: auto;
+    }
+}
+
+// toolbar button
+.ucf-tb-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: .25rem;
+    color: var(--ucf-btn-color);
+    cursor: pointer;
+    font-size: .875rem;
+    height: 1.625rem;
+    min-width: 1.625rem;
+    padding: 0 .25rem;
+    transition: background-color .1s, color .1s;
+
+    ion-icon { font-size: 1rem; }
+
+    &:hover {
+        background: var(--ion-color-step-200, #333);
+        color: var(--ucf-btn-hover);
+    }
+
+    &:active { opacity: .7; }
+
+    &--mono { font-family: monospace; font-size: .8rem; }
+    &--italic { font-style: italic; }
+    &--underline { text-decoration: underline; }
+    &--strike { text-decoration: line-through; }
+    &--quote { font-size: 1.1rem; line-height: 1; }
+}
+
+// mode tab
+.ucf-tab {
+    background: none;
+    border: none;
+    border-radius: .25rem;
+    color: var(--ucf-btn-color);
+    cursor: pointer;
+    font-size: .75rem;
+    padding: .2rem .5rem;
+    transition: background-color .1s, color .1s;
+    white-space: nowrap;
+
+    &:hover { background: var(--ion-color-step-200, #333); color: var(--ucf-btn-hover); }
+
+    &--active {
+        background: var(--ion-color-step-200, #333);
+        color: var(--ion-text-color, #fff);
+    }
+}
+
+// ─── Link panel ───────────────────────────────────────────────────────────────
+
+.ucf-link-panel {
+    display: flex;
+    align-items: center;
+    gap: .375rem;
+
+    background: var(--ion-color-step-100, #1e1e1e);
+    border: var(--ucf-border);
+    border-bottom: none;
+    padding: .375rem .5rem;
+
+    &__input {
+        flex: 1;
+        background: var(--ion-color-step-50, #161616);
+        border: 1px solid var(--ion-color-step-250, #555);
+        border-radius: .25rem;
+        color: var(--ion-text-color, #fff);
+        font-size: .8rem;
+        height: 1.75rem;
+        outline: none;
+        padding: 0 .5rem;
+
+        &:focus { border-color: var(--ion-color-primary); }
+    }
+
+    &__confirm {
+        background: var(--ion-color-primary);
+        border: none;
+        border-radius: .25rem;
+        color: var(--ion-color-primary-contrast, #fff);
+        cursor: pointer;
+        font-size: .75rem;
+        height: 1.75rem;
+        padding: 0 .75rem;
+        white-space: nowrap;
+
+        &:hover { opacity: .85; }
+    }
+
+    &__cancel {
+        align-items: center;
+        background: none;
+        border: none;
+        color: var(--ion-color-medium);
+        cursor: pointer;
+        display: flex;
+        font-size: 1rem;
+        padding: .125rem;
+
+        &:hover { color: var(--ion-color-danger); }
+    }
+}
+
+// ─── Content area ─────────────────────────────────────────────────────────────
+
+.ucf-content {
+    border: var(--ucf-border);
+    border-bottom: none;
+    min-height: 5rem;
+}
+
+.ucf-textarea {
+    background: var(--ion-background-color, #121212);
+    border: none;
+    color: var(--ion-text-color, #fff);
+    display: block;
+    font-family: inherit;
+    font-size: .875rem;
+    line-height: 1.5;
+    outline: none;
+    padding: .625rem .75rem;
+    resize: vertical;
+    width: 100%;
+    min-height: 5rem;
+    box-sizing: border-box;
+
+    &::placeholder { color: var(--ion-color-step-500, #888); }
+}
+
+.ucf-preview {
+    background: var(--ion-background-color, #121212);
+    color: var(--ion-text-color, #fff);
+    font-size: .875rem;
+    line-height: 1.5;
+    min-height: 5rem;
+    padding: .625rem .75rem;
+
+    // inherited BBcode styles from shikimori.scss
+    .shc-code {
+        background: var(--ion-color-step-100, #222);
+        border-radius: .2rem;
+        font-family: monospace;
+        padding: .1em .3em;
+    }
+
+    .shc-heading { margin: .5rem 0 .25rem; }
+
+    .shc-preview-img {
+        max-width: 100%;
+        border-radius: .25rem;
+    }
+
+    .shc-list {
+        margin: .25rem 0 .25rem 1.25rem;
+        padding: 0;
+    }
+
+    // re-use global shc-quote / shc-inline-spoiler / shc-block-spoiler styles
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
+.ucf-footer {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+
+    background: var(--ion-color-step-100, #1e1e1e);
+    border: var(--ucf-border);
+    border-bottom-left-radius: var(--ucf-radius);
+    border-bottom-right-radius: var(--ucf-radius);
+    padding: .375rem .5rem;
+
+    &__send {
+        background: none;
+        border: 1px solid var(--ion-color-step-300, #555);
+        border-radius: .25rem;
+        color: var(--ion-text-color, #fff);
+        cursor: pointer;
+        font-size: .8rem;
+        padding: .25rem .875rem;
+        transition: background-color .1s, border-color .1s;
+
+        &:hover:not(:disabled) {
+            background: var(--ion-color-step-200, #333);
+            border-color: var(--ion-color-step-500, #888);
         }
 
-        * {
-            pointer-events: none;
+        &:disabled {
+            cursor: not-allowed;
+            opacity: .4;
         }
     }
 
-    &__edit-user {
-        border-radius: 100%;
-        width: 1.5rem;
-        height: 1.5rem;
-    }
+    &__login {
+        align-items: center;
+        background: none;
+        border: 1px solid var(--ion-color-primary);
+        border-radius: .25rem;
+        color: var(--ion-color-primary);
+        cursor: pointer;
+        display: flex;
+        font-size: .8rem;
+        gap: .25rem;
+        padding: .25rem .875rem;
 
-    &__edit-cancel {
-        font-size: 1.5rem;
+        ion-icon { font-size: 1rem; }
+
+        &:hover { background: rgba(var(--ion-color-primary-rgb), .1); }
     }
 }

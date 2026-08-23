@@ -1,0 +1,240 @@
+// ── Shikimori Theme ─────────────────────────────────────────────────────────
+// Matches the visual design of shikimori.rip (dark and light variants).
+// Applied when `html` carries the `.shikimori-theme` class.
+
+html.shikimori-theme {
+    // ── Shared primary colour ─────────────────────────────────────────────
+    --ion-color-primary:              #388bfd;
+    --ion-color-primary-rgb:          56, 139, 253;
+    --ion-color-primary-contrast:     #ffffff;
+    --ion-color-primary-contrast-rgb: 255, 255, 255;
+    --ion-color-primary-shade:        #2f79de;
+    --ion-color-primary-tint:         #4e97fd;
+
+    // Success / warning / danger – keep Ionic defaults but slightly adapted
+    --ion-color-success:              #3fb950;
+    --ion-color-success-rgb:          63, 185, 80;
+    --ion-color-success-contrast:     #000;
+    --ion-color-success-shade:        #38a247;
+    --ion-color-success-tint:         #52c162;
+
+    --ion-color-warning:              #e3b341;
+    --ion-color-warning-rgb:          227, 179, 65;
+    --ion-color-warning-contrast:     #000;
+    --ion-color-warning-shade:        #c99d39;
+    --ion-color-warning-tint:         #e6bb54;
+
+    --ion-color-danger:               #f85149;
+    --ion-color-danger-rgb:           248, 81, 73;
+    --ion-color-danger-contrast:      #000;
+    --ion-color-danger-shade:         #da4741;
+    --ion-color-danger-tint:          #f9625b;
+}
+
+
+// ── Shikimori Dark ───────────────────────────────────────────────────────────
+html.shikimori-theme.ion-palette-dark {
+    // Colour-scale overrides (text/secondary/medium/dark/light)
+    --ion-color-secondary:              #54aeff;
+    --ion-color-secondary-rgb:          84, 174, 255;
+    --ion-color-secondary-contrast:     #000;
+    --ion-color-secondary-shade:        #4a99e0;
+    --ion-color-secondary-tint:         #65b6ff;
+
+    --ion-color-medium:                 #768390;
+    --ion-color-medium-rgb:             118, 131, 144;
+    --ion-color-medium-contrast:        #000;
+    --ion-color-medium-shade:           #677380;
+    --ion-color-medium-tint:            #848f9b;
+
+    --ion-color-light:                  #22272e;
+    --ion-color-light-rgb:              34, 39, 46;
+    --ion-color-light-contrast:         #cdd9e5;
+    --ion-color-light-shade:            #1e2228;
+    --ion-color-light-tint:             #2d333b;
+
+    --ion-color-dark:                   #cdd9e5;
+    --ion-color-dark-rgb:               205, 217, 229;
+    --ion-color-dark-contrast:          #000;
+    --ion-color-dark-shade:             #b5c0ca;
+    --ion-color-dark-tint:              #d2dde8;
+}
+
+html.shikimori-theme.ion-palette-dark.md,
+html.shikimori-theme.ion-palette-dark.ios {
+    // ── Background & text ─────────────────────────────────────────────────
+    --ion-background-color:     #0d1117;
+    --ion-background-color-rgb: 13, 17, 23;
+    --ion-text-color:           #e6edf3;
+    --ion-text-color-rgb:       230, 237, 243;
+
+    // ── Background steps (bg → text, 19 steps of ≈11.4 each) ─────────────
+    --ion-background-color-step-50:  #161b22;
+    --ion-background-color-step-100: #1c2128;
+    --ion-background-color-step-150: #21262d;
+    --ion-background-color-step-200: #292f38;
+    --ion-background-color-step-250: #30363d;
+    --ion-background-color-step-300: #3d444d;
+    --ion-background-color-step-350: #464e58;
+    --ion-background-color-step-400: #525a66;
+    --ion-background-color-step-450: #5d6673;
+    --ion-background-color-step-500: #6a7280;
+    --ion-background-color-step-550: #77808d;
+    --ion-background-color-step-600: #838d9a;
+    --ion-background-color-step-650: #8f9aa8;
+    --ion-background-color-step-700: #9ba7b5;
+    --ion-background-color-step-750: #a7b3c2;
+    --ion-background-color-step-800: #b4c0cf;
+    --ion-background-color-step-850: #c0cddc;
+    --ion-background-color-step-900: #ccdae9;
+    --ion-background-color-step-950: #d9e6f6;
+
+    // ── Text steps (text → bg) ────────────────────────────────────────────
+    --ion-text-color-step-50:  #d8e5f1;
+    --ion-text-color-step-100: #c9d7e4;
+    --ion-text-color-step-150: #bac9d7;
+    --ion-text-color-step-200: #abbcca;
+    --ion-text-color-step-250: #9caebd;
+    --ion-text-color-step-300: #8da0b0;
+    --ion-text-color-step-350: #7e93a3;
+    --ion-text-color-step-400: #6f8596;
+    --ion-text-color-step-450: #607889;
+    --ion-text-color-step-500: #516a7c;
+    --ion-text-color-step-550: #425c6f;
+    --ion-text-color-step-600: #334f62;
+    --ion-text-color-step-650: #244155;
+    --ion-text-color-step-700: #153448;
+    --ion-text-color-step-750: #11263b;
+    --ion-text-color-step-800: #0f1e2e;
+    --ion-text-color-step-850: #0d1822;
+    --ion-text-color-step-900: #0c131b;
+    --ion-text-color-step-950: #0b0f15;
+
+    // ── ion-color-step-* (legacy, used by custom app SCSS) ───────────────
+    // step-N ≈ bg + N/1000 * (text - bg)
+    --ion-color-step-50:  #181c22;
+    --ion-color-step-100: #22272e;
+    --ion-color-step-150: #2d333b;
+    --ion-color-step-200: #383f48;
+    --ion-color-step-250: #434c55;
+    --ion-color-step-300: #4e5863;
+    --ion-color-step-500: #7a8490;
+    --ion-color-step-700: #a6b0bc;
+
+    // ── Surfaces ──────────────────────────────────────────────────────────
+    --ion-item-background:     #0d1117;
+    --ion-card-background:     #161b22;
+    --ion-toolbar-background:  #161b22;
+    --ion-tab-bar-background:  #161b22;
+    --ion-modal-background:    #161b22;
+
+    // Shikimori spoiler variable
+    --shc-shikimori-inline-spoiler-color-rgb: 56, 68, 82;
+    --shc-smiley-background-color: transparent;
+}
+
+
+// ── Shikimori Light ──────────────────────────────────────────────────────────
+html.shikimori-theme:not(.ion-palette-dark) {
+    --ion-color-primary:              #0969da;
+    --ion-color-primary-rgb:          9, 105, 218;
+    --ion-color-primary-contrast:     #ffffff;
+    --ion-color-primary-contrast-rgb: 255, 255, 255;
+    --ion-color-primary-shade:        #0858bc;
+    --ion-color-primary-tint:         #218bff;
+
+    --ion-color-secondary:              #0550ae;
+    --ion-color-secondary-rgb:          5, 80, 174;
+    --ion-color-secondary-contrast:     #fff;
+    --ion-color-secondary-shade:        #044799;
+    --ion-color-secondary-tint:         #1e62c0;
+
+    --ion-color-medium:                 #636c76;
+    --ion-color-medium-rgb:             99, 108, 118;
+    --ion-color-medium-contrast:        #fff;
+    --ion-color-medium-shade:           #575f68;
+    --ion-color-medium-tint:            #737b84;
+
+    --ion-color-light:                  #eaeef2;
+    --ion-color-light-rgb:              234, 238, 242;
+    --ion-color-light-contrast:         #24292f;
+    --ion-color-light-shade:            #ced4da;
+    --ion-color-light-tint:             #f2f5f9;
+
+    --ion-color-dark:                   #24292f;
+    --ion-color-dark-rgb:               36, 41, 47;
+    --ion-color-dark-contrast:          #fff;
+    --ion-color-dark-shade:             #1c2127;
+    --ion-color-dark-tint:              #3a3f46;
+}
+
+html.shikimori-theme:not(.ion-palette-dark).md,
+html.shikimori-theme:not(.ion-palette-dark).ios {
+    --ion-background-color:     #ffffff;
+    --ion-background-color-rgb: 255, 255, 255;
+    --ion-text-color:           #1f2328;
+    --ion-text-color-rgb:       31, 35, 40;
+
+    // ── Background steps (white → text) ───────────────────────────────────
+    --ion-background-color-step-50:  #f6f8fa;
+    --ion-background-color-step-100: #eaeef2;
+    --ion-background-color-step-150: #dde3ea;
+    --ion-background-color-step-200: #d0d7de;
+    --ion-background-color-step-250: #c4cdd5;
+    --ion-background-color-step-300: #b7c2cb;
+    --ion-background-color-step-350: #aab7c2;
+    --ion-background-color-step-400: #9dadb9;
+    --ion-background-color-step-450: #90a2b0;
+    --ion-background-color-step-500: #8498a7;
+    --ion-background-color-step-550: #778e9e;
+    --ion-background-color-step-600: #6b8395;
+    --ion-background-color-step-650: #5e798c;
+    --ion-background-color-step-700: #526f83;
+    --ion-background-color-step-750: #45647a;
+    --ion-background-color-step-800: #395a71;
+    --ion-background-color-step-850: #2c5068;
+    --ion-background-color-step-900: #20455f;
+    --ion-background-color-step-950: #133b56;
+
+    --ion-text-color-step-50:  #2c3138;
+    --ion-text-color-step-100: #393f46;
+    --ion-text-color-step-150: #464d54;
+    --ion-text-color-step-200: #535b62;
+    --ion-text-color-step-250: #606870;
+    --ion-text-color-step-300: #6d767e;
+    --ion-text-color-step-350: #7a838c;
+    --ion-text-color-step-400: #87919a;
+    --ion-text-color-step-450: #949ea8;
+    --ion-text-color-step-500: #a1abb6;
+    --ion-text-color-step-550: #aeb9c4;
+    --ion-text-color-step-600: #bbc6d2;
+    --ion-text-color-step-650: #c8d4e0;
+    --ion-text-color-step-700: #d5e1ee;
+    --ion-text-color-step-750: #e2eff5;  /* lighter */
+    --ion-text-color-step-800: #eff3f7;
+    --ion-text-color-step-850: #f4f7fa;
+    --ion-text-color-step-900: #f9fafb;
+    --ion-text-color-step-950: #fcfdfe;
+
+    // ── ion-color-step-* ─────────────────────────────────────────────────
+    --ion-color-step-50:  #f4f6f8;
+    --ion-color-step-100: #eaedf1;
+    --ion-color-step-150: #dfe3e9;
+    --ion-color-step-200: #d4dae1;
+    --ion-color-step-250: #c9d1da;
+    --ion-color-step-300: #bec7d3;
+    --ion-color-step-500: #8498a7;
+    --ion-color-step-700: #4a5760;
+
+    // ── Surfaces ──────────────────────────────────────────────────────────
+    --ion-item-background:     #ffffff;
+    --ion-card-background:     #ffffff;
+    --ion-toolbar-background:  #24292f;   /* dark nav bar, shikimori style */
+    --ion-toolbar-color:       #f0f6fc;
+    --ion-tab-bar-background:  #f6f8fa;
+    --ion-modal-background:    #ffffff;
+
+    --shc-shikimori-inline-spoiler-color-rgb: 163, 181, 199;
+    --shc-smiley-background-color: #eaeef2;
+    --shc-shikimori-icons-color: #1f2328;
+}
