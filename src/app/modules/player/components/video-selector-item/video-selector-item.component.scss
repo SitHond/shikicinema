@@ -32,6 +32,17 @@
         }
     }
 
+    .author-episode-count {
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        font-variant-numeric: tabular-nums;
+        color: var(--ion-color-medium);
+        background: rgba(var(--ion-color-medium-rgb), 0.12);
+        border-radius: 0.75rem;
+        padding: 0.1rem 0.45rem;
+        line-height: 1.4;
+    }
+
     &__rating {
         display: flex;
         align-items: center;

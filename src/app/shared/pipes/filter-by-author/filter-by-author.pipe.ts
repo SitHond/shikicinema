@@ -1,6 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 import { VideoInfoInterface } from '@app/modules/player/types';
+import { cleanAuthorName } from '@app/shared/utils/clean-author-name.function';
+import { normalizeAuthorKey } from '@app/shared/utils/normalize-author-key.function';
 
 @Pipe({
     name: 'filterByAuthor',
@@ -9,8 +11,12 @@ import { VideoInfoInterface } from '@app/modules/player/types';
 })
 export class FilterByAuthorPipe implements PipeTransform {
     transform(videos: VideoInfoInterface[], targetAuthor: string, defaultAuthor: string): VideoInfoInterface[] {
-        return videos?.filter(({ author }) => targetAuthor && targetAuthor !== defaultAuthor
-            ? author?.includes(targetAuthor)
-            : author === defaultAuthor || !author);
+        if (!targetAuthor || targetAuthor === defaultAuthor) {
+            return videos?.filter(({ author }) => author === defaultAuthor || !author);
+        }
+        const targetKey = normalizeAuthorKey(targetAuthor);
+        return videos?.filter(({ author }) =>
+            normalizeAuthorKey(cleanAuthorName(author ?? '', '')) === targetKey,
+        );
     }
 }

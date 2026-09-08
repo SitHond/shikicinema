@@ -4,7 +4,7 @@ import {
     HttpParams,
 } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, of } from 'rxjs';
+import { Observable, combineLatest, forkJoin, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import {
     catchError,
@@ -44,7 +44,7 @@ import {
     mapUserRatesGQLQuery,
     toShikimoriCredentials,
 } from '@app/shared/types/shikimori/mappers';
-import { selectShikimoriDomain } from '@app/store/shikimori/selectors';
+import { selectShikimoriCurrentUserId, selectShikimoriDomain } from '@app/store/shikimori/selectors';
 import { setPaginationToParams } from '@app/shared/types/shikimori/helpers';
 
 
@@ -480,6 +480,30 @@ export class ShikimoriClient {
                     (c) => c.user ? { ...c, user: this.prefixUserUrls(c.user, domain) } : c,
                 )),
             )),
+        );
+    }
+
+    getUnreadCount(): Observable<{ messages: number; news: number; notifications: number }> {
+        return this.shikimoriDomain$.pipe(
+            take(1),
+            switchMap((domain) =>
+                this.http.get<{ messages: number; news: number; notifications: number }>(
+                    `${domain}/api/messages/unread_count`,
+                ),
+            ),
+        );
+    }
+
+    sendMessage(toId: ResourceIdType, body: string): Observable<{ id: number }> {
+        return combineLatest([
+            this.shikimoriDomain$.pipe(take(1)),
+            this.store.select(selectShikimoriCurrentUserId).pipe(take(1)),
+        ]).pipe(
+            switchMap(([domain, fromId]) =>
+                this.http.post<{ id: number }>(`${domain}/api/messages`, {
+                    message: { body, kind: 'Private', from_id: fromId, to_id: toId },
+                }),
+            ),
         );
     }
 

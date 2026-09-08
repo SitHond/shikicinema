@@ -117,6 +117,11 @@
     text-transform: uppercase;
 }
 
+.wp-text-input {
+    flex: 1;
+    font-size: 1rem;
+}
+
 .wp-divider {
     text-align: center;
     font-size: 0.75rem;
@@ -407,6 +412,20 @@
         display: flex;
         gap: 0.375rem;
         flex-wrap: wrap;
+    }
+}
+
+// ── Invite via DM ─────────────────────────────────────────────────────────────
+
+.wp-invite {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    &__hint {
+        margin: 0;
+        font-size: 0.78rem;
+        color: var(--ion-color-medium);
     }
 }
 

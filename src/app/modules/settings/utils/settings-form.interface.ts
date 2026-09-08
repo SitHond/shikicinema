@@ -10,4 +10,7 @@ export interface SettingsFormInterface {
     shikimoriDomain: string;
     isUserAnimeStatusReorder: boolean;
     userAnimeStatusOrder: string[];
+    showAdultContent: boolean;
+    discordRpc: boolean;
+    showEpisodeCount: boolean;
 }

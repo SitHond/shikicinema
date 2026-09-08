@@ -27,6 +27,11 @@ export const findVideosFailureAction = createAction(
     '[Player] Find failure videos',
 );
 
+export const findVideosRestrictedAction = createAction(
+    '[Player] Find videos restricted',
+    props<{ animeId: string }>(),
+);
+
 export const getAnimeInfoAction = createAction(
     '[Player] Get anime info',
     props<{ animeId: string }>(),

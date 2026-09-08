@@ -51,9 +51,11 @@ import { PlayerKindDisplayMode } from '@app/store/settings/types/player-kind-dis
 import { PlayerModeType } from '@app/store/settings/types/player-mode.type';
 import { ProfileInfoComponent } from '@app/modules/settings/components/profile-info/profile-info.component';
 import { SettingsGroupComponent } from '@app/modules/settings/components/settings-group/settings-group.component';
+import { ShikicinemaApiService } from '@app/shared/services/shikicinema-api.service';
 import { ThemeSettingsType } from '@app/store/settings/types/theme-settings.type';
 import { ToHumanReadableBytesPipe } from '@app/shared/pipes/to-human-readable-bytes/to-human-readable-bytes.pipe';
 import { authShikimoriAction, logoutShikimoriAction } from '@app/store/auth/actions/auth.actions';
+import { environment } from '@app-env/environment';
 import { getDomain } from '@app/shared/utils/get-domain.function';
 import { mapAnimeStatusOrderToFormArray, mapSettinsFormToState } from '@app/modules/settings/utils';
 import { resetCacheAction } from '@app/store/cache/actions';
@@ -61,6 +63,7 @@ import { selectIsAuthenticated } from '@app/store/auth/selectors/auth.selectors'
 import { selectLastVisitedPage, selectSettings } from '@app/store/settings/selectors/settings.selectors';
 import {
     selectShikimoriCurrentUserAvatarHiRes,
+    selectShikimoriCurrentUserId,
     selectShikimoriCurrentUserNickname,
     selectShikimoriDomain,
 } from '@app/store/shikimori/selectors/shikimori.selectors';
@@ -114,6 +117,7 @@ export class SettingsPage implements OnInit {
     private readonly router = inject(Router);
     private readonly destroyRef = inject(DestroyRef);
     private readonly defaultShikimoriDomain = inject(DEFAULT_SHIKIMORI_DOMAIN_TOKEN);
+    private readonly shikicinemaApi = inject(ShikicinemaApiService);
 
     readonly settings = this.store.selectSignal(selectSettings);
     readonly lastVisitedPage = this.store.selectSignal(selectLastVisitedPage);
@@ -121,6 +125,7 @@ export class SettingsPage implements OnInit {
     readonly isShikimoriAuthenticated = this.store.selectSignal(selectIsAuthenticated);
     readonly shikimoriAvatarImg = this.store.selectSignal(selectShikimoriCurrentUserAvatarHiRes);
     readonly shikimoriNickname = this.store.selectSignal(selectShikimoriCurrentUserNickname);
+    readonly shikimoriUserId = this.store.selectSignal(selectShikimoriCurrentUserId);
 
     readonly hasLastVisitedPage = computed(() => {
         const page = this.lastVisitedPage();
@@ -142,6 +147,9 @@ export class SettingsPage implements OnInit {
         useCustomAnimeStatusOrder: new FormControl<boolean>(false),
         userAnimeStatusOrder: mapAnimeStatusOrderToFormArray(DEFAULT_ANIME_STATUS_ORDER),
         filterPlayerDomains: new FormControl([]),
+        showAdultContent: new FormControl<boolean>(false),
+        discordRpc: new FormControl<boolean>(false),
+        showEpisodeCount: new FormControl<boolean>(false),
     });
 
     readonly themeCtrl = this.settingsForm?.get('theme');
@@ -153,6 +161,8 @@ export class SettingsPage implements OnInit {
     readonly filterPlayerDomainsCtrl = this.settingsForm?.get('filterPlayerDomains');
     readonly addFilterDomainCtrl = new FormControl('', [urlValidator()]);
 
+    readonly collectStatsCtrl = new FormControl<boolean>(false);
+
     private readonly mangaImageCache = inject(MangaImageCacheService);
 
     readonly localStorageLimit = this.persistenceService.getMaxByxes();
@@ -160,6 +170,25 @@ export class SettingsPage implements OnInit {
     readonly localStorageCache$ = new BehaviorSubject(this.persistenceService.getCacheBytes());
     readonly mangaCacheBytes = signal(0);
     readonly mangaCacheCount = signal(0);
+
+    readonly scEpisodes = signal(0);
+    readonly statsCardUrl = computed(() => {
+        const nick = this.shikimoriNickname();
+        if (!nick) return null;
+        const uid = this.shikimoriUserId();
+        const idParam = uid ? `&shiki_id=${uid}` : '';
+        return `https://sithond.com/stats/${encodeURIComponent(nick)}?sc_episodes=${this.scEpisodes()}${idParam}`;
+    });
+
+    private readonly _imgCacheBust = Date.now();
+    readonly statsCardImgUrl = computed(() => {
+        const nick = this.shikimoriNickname();
+        if (!nick) return null;
+        const uid = this.shikimoriUserId();
+        const idParam = uid ? `&shiki_id=${uid}` : '';
+        const base = `${environment.smarthard.apiURI}/api/stats-card/${encodeURIComponent(nick)}`;
+        return `${base}?sc_episodes=${this.scEpisodes()}${idParam}&_t=${this._imgCacheBust}`;
+    });
 
     initPageTitle(): void {
         this.transloco.selectTranslate<string>('SETTINGS_MODULE.SETTINGS_PAGE.PAGE_TITLE')
@@ -204,6 +233,26 @@ export class SettingsPage implements OnInit {
         this.initForm();
         this.initSettingsAutoUpdate();
         this.loadMangaCacheStats();
+        try {
+            this.scEpisodes.set(parseInt(localStorage.getItem('sc_episodes') || '0', 10) || 0);
+            const stored = localStorage.getItem('sc_collect_stats');
+            if (stored !== null) this.collectStatsCtrl.setValue(stored === 'true', { emitEvent: false });
+        } catch (_err: unknown) {
+            return;
+        }
+
+        this.collectStatsCtrl.valueChanges.pipe(
+            takeUntilDestroyed(this.destroyRef),
+        ).subscribe((allow) => {
+            try {
+                localStorage.setItem('sc_collect_stats', String(allow));
+            } catch (_err: unknown) {
+                return;
+            }
+            if (this.isShikimoriAuthenticated()) {
+                this.shikicinemaApi.setWatchCollection(!!allow).subscribe();
+            }
+        });
     }
 
     private loadMangaCacheStats(): void {
@@ -258,6 +307,20 @@ export class SettingsPage implements OnInit {
             this.filterPlayerDomainsCtrl.setValue(newFilters);
             this.addFilterDomainCtrl.reset();
         }
+    }
+
+    goToStats(): void {
+        this.router.navigate(['/stats']);
+    }
+
+    openStatsCard(): void {
+        const url = this.statsCardUrl();
+        if (url) window.open(url, '_blank');
+    }
+
+    copyStatsCardUrl(): void {
+        const url = this.statsCardUrl();
+        if (url) navigator.clipboard.writeText(url).catch((_err: unknown) => undefined);
     }
 
     deleteDomainFilter(domain: string): void {

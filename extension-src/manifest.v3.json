@@ -6,9 +6,9 @@
         "64": "assets/icon64.png",
         "128": "assets/icon128.png"
     },
-    "description": "Adds an inline video player to Shikimori (rip/fi/net/moe). Browse your anime list, track episodes, switch between dubs and subs.",
+    "description": "Adds an inline video player to Shikimori (rip/fi/net/moe/mov). Browse your anime list, track episodes, switch between dubs and subs.",
     "content_security_policy": {
-        "extension_pages": "default-src 'self'; img-src * data:; frame-src *; font-src *; media-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src https://shikimori.rip https://shikimori.fi https://shikimori.net https://shikimori.moe https://ygg.shiki.rip https://api.sithond.com https://api.cdnlibs.org https://plapi.cdnvideohub.com https://api.mangadex.org https://api.remanga.org https://readmanga.live wss://api.sithond.com ws://127.0.0.1:*; script-src 'self'"
+        "extension_pages": "default-src 'self'; img-src * data:; frame-src *; font-src *; media-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src https://shikimori.rip https://shikimori.fi https://shikimori.net https://shikimori.moe https://shikimori.mov https://ygg.shiki.rip https://api.sithond.com https://api.cdnlibs.org https://plapi.cdnvideohub.com https://api.mangadex.org https://api.remanga.org https://readmanga.live https://kodikplayer.com https://kodik.info https://kodik.biz https://kodik.cc https://rutube.ru https://*.rutube.ru https://api.aniskip.com https://cloud.solodcdn.com https://*.solodcdn.com wss://api.sithond.com ws://127.0.0.1:*; script-src 'self'"
     },
     "content_scripts": [
         {
@@ -17,6 +17,7 @@
                 "*://shikimori.fi/*",
                 "*://shikimori.net/*",
                 "*://shikimori.moe/*",
+                "*://shikimori.mov/*",
                 "*://ygg.shiki.rip/*"
             ],
             "js": [
@@ -42,6 +43,7 @@
                 "*://shikimori.fi/*",
                 "*://shikimori.net/*",
                 "*://shikimori.moe/*",
+                "*://shikimori.mov/*",
                 "*://ygg.shiki.rip/*"
             ]
         }
@@ -68,6 +70,16 @@
                 "id": "readmanga_referer",
                 "enabled": true,
                 "path": "rules/readmanga_referer.json"
+            },
+            {
+                "id": "kodik_referer",
+                "enabled": true,
+                "path": "rules/kodik_referer.json"
+            },
+            {
+                "id": "rutube_referer",
+                "enabled": true,
+                "path": "rules/rutube_referer.json"
             }
         ]
     },
@@ -76,6 +88,7 @@
         "https://shikimori.fi/*",
         "https://shikimori.net/*",
         "https://shikimori.moe/*",
+        "https://shikimori.mov/*",
         "https://ygg.shiki.rip/*",
         "https://api.sithond.com/*",
 
@@ -92,6 +105,15 @@
         "https://img.remanga.org/*",
 
         "https://readmanga.live/*",
-        "https://*.imgsmail.ru/*"
+        "https://*.imgsmail.ru/*",
+        "https://kodikplayer.com/*",
+        "https://kodik.info/*",
+        "https://kodik.biz/*",
+        "https://kodik.cc/*",
+        "https://rutube.ru/*",
+        "https://*.rutube.ru/*",
+        "https://api.aniskip.com/*",
+        "https://cloud.solodcdn.com/*",
+        "https://*.solodcdn.com/*"
     ]
 }

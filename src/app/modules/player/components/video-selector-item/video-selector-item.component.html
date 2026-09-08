@@ -16,6 +16,10 @@
                         [tippyProps]="{ placement: 'bottom' }"
                     />
                 }
+
+                @if (showEpisodeCount() && episodeCount() !== null) {
+                    <span class="author-episode-count">{{ episodeCount() }} ep</span>
+                }
             </ion-label>
 
             @if (rating() || isAuthenticated()) {

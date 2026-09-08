@@ -29,6 +29,7 @@ import {
     selectKindPreferencesByAnime,
     selectPlayerKindDisplayMode,
     selectPreferencesToggle,
+    selectShowEpisodeCount,
 } from '@app/store/settings/selectors/settings.selectors';
 
 @Component({
@@ -54,6 +55,7 @@ export class PlayerSelectorComponent {
 
     readonly playerKindDisplayMode = this.store.selectSignal(selectPlayerKindDisplayMode);
     readonly domainFilters = this.store.selectSignal(selectDomainFilters);
+    readonly showEpisodeCount = this.store.selectSignal(selectShowEpisodeCount);
 
     readonly animeId = input.required<ResourceIdType>();
     readonly kind = input<VideoKindEnum>();

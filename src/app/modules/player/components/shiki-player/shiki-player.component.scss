@@ -1,0 +1,367 @@
+.vp {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: inherit;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+
+    &__video {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+    }
+
+    // ── Spinner ─────────────────────────────────────────────────────────────────
+    &__spinner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    &__spinner-ring {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(255,255,255,.2);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: vp-spin .8s linear infinite;
+    }
+
+    // ── Error overlay ────────────────────────────────────────────────────────────
+    &__error {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        pointer-events: none;
+        color: rgba(255,255,255,.75);
+        font-size: 14px;
+        text-align: center;
+
+        ion-icon {
+            font-size: 36px;
+            color: rgba(255,100,100,.9);
+        }
+    }
+
+    // ── Play burst indicator ─────────────────────────────────────────────────────
+    &__burst {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(1);
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        animation: vp-burst .5s ease-out forwards;
+
+        ion-icon {
+            font-size: 32px;
+            color: #fff;
+        }
+    }
+
+    // ── Skip opening / ending button ────────────────────────────────────────────
+    &__skip-btn {
+        position: absolute;
+        bottom: 72px;
+        right: 16px;
+        display: flex;
+        align-items: center;
+
+        &[hidden] { display: none !important; }
+        gap: 6px;
+        padding: 8px 16px;
+        border: 2px solid rgba(255,255,255,.8);
+        border-radius: 6px;
+        background: rgba(0,0,0,.55);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+        transition: background .15s ease, border-color .15s ease;
+
+        ion-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        &:hover {
+            background: rgba(255,255,255,.2);
+            border-color: #fff;
+        }
+    }
+
+    // ── Controls overlay ─────────────────────────────────────────────────────────
+    &__controls {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,.75) 60%);
+        padding: 32px 12px 10px;
+        opacity: 0;
+        transition: opacity .2s ease;
+        cursor: default;
+    }
+
+    &--controls-visible &__controls {
+        opacity: 1;
+    }
+
+    // ── Progress bar ─────────────────────────────────────────────────────────────
+    &__progress {
+        padding: 8px 0 4px;
+        cursor: pointer;
+
+        &:hover .vp__progress-thumb {
+            transform: translateX(-50%) scale(1);
+        }
+    }
+
+    &__progress-track {
+        position: relative;
+        height: 4px;
+        background: rgba(255,255,255,.25);
+        border-radius: 2px;
+        overflow: visible;
+    }
+
+    &__progress-buffered {
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        background: rgba(255,255,255,.35);
+        border-radius: 2px;
+        pointer-events: none;
+        transition: width .3s linear;
+    }
+
+    &__progress-played {
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        background: #e53935;
+        border-radius: 2px;
+        pointer-events: none;
+        transition: width .1s linear;
+    }
+
+    &__progress-thumb {
+        position: absolute;
+        top: 50%;
+        width: 14px;
+        height: 14px;
+        background: #e53935;
+        border-radius: 50%;
+        transform: translateX(-50%) scale(0);
+        transition: transform .15s ease;
+        pointer-events: none;
+        box-shadow: 0 0 4px rgba(0,0,0,.6);
+    }
+
+    // ── Bottom bar ───────────────────────────────────────────────────────────────
+    &__bar {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    &__spacer { flex: 1; }
+
+    &__btn {
+        background: none;
+        border: none;
+        color: #fff;
+        padding: 6px 8px;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .15s;
+        flex-shrink: 0;
+
+        ion-icon { font-size: 20px; }
+
+        &:hover { background: rgba(255,255,255,.15); }
+
+        &--text {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .02em;
+            min-width: 36px;
+        }
+
+        &--active {
+            color: #f97316;
+        }
+
+        &--skip {
+            position: relative;
+            padding: 4px 6px;
+        }
+    }
+
+    &__skip-label {
+        position: absolute;
+        bottom: 2px;
+        font-size: 9px;
+        line-height: 1;
+        font-weight: 700;
+    }
+
+    &__time {
+        font-size: 12px;
+        color: rgba(255,255,255,.9);
+        white-space: nowrap;
+        margin: 0 4px;
+    }
+
+    // ── Volume ───────────────────────────────────────────────────────────────────
+    &__volume-wrap {
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+
+    &__volume-slider {
+        width: 0;
+        overflow: hidden;
+        transition: width .2s ease;
+        display: flex;
+        align-items: center;
+
+        &--visible {
+            width: 72px;
+            margin-left: 4px;
+        }
+    }
+
+    &__volume-bar {
+        position: relative;
+        flex: 1;
+        height: 4px;
+        background: rgba(255,255,255,.3);
+        border-radius: 2px;
+        cursor: pointer;
+
+        &:hover .vp__volume-thumb { transform: translateX(-50%) scale(1); }
+    }
+
+    &__volume-fill {
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        background: #fff;
+        border-radius: 2px;
+        pointer-events: none;
+    }
+
+    &__volume-thumb {
+        position: absolute;
+        top: 50%;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 50%;
+        transform: translateX(-50%) scale(0);
+        transition: transform .15s ease;
+        pointer-events: none;
+    }
+
+    // ── Quality menu ─────────────────────────────────────────────────────────────
+    &__quality-wrap {
+        position: relative;
+    }
+
+    &__quality-menu {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        right: 0;
+        background: rgba(20,20,20,.95);
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 8px;
+        overflow: hidden;
+        min-width: 72px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    }
+
+    &__quality-item {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,.8);
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 13px;
+        text-align: center;
+        transition: background .1s;
+
+        &:hover { background: rgba(255,255,255,.1); color: #fff; }
+        &--active { color: #e53935; font-weight: 600; }
+    }
+
+    // ── Speed menu ───────────────────────────────────────────────────────────────
+    &__speed-wrap {
+        position: relative;
+    }
+
+    &__speed-menu {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        right: 0;
+        background: rgba(20,20,20,.95);
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 8px;
+        overflow: hidden;
+        min-width: 80px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    }
+
+    &__speed-item {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,.8);
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 13px;
+        text-align: center;
+        transition: background .1s;
+
+        &:hover { background: rgba(255,255,255,.1); color: #fff; }
+        &--active { color: #e53935; font-weight: 600; }
+    }
+
+    // ── Fullscreen adjustments ───────────────────────────────────────────────────
+    &--fullscreen {
+        border-radius: 0;
+    }
+
+    // ── Animations ───────────────────────────────────────────────────────────────
+    @keyframes vp-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes vp-burst {
+        0%   { transform: translate(-50%, -50%) scale(.8); opacity: 1; }
+        100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+    }
+}

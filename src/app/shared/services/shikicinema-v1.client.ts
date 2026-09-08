@@ -33,6 +33,14 @@ export class ShikicinemaV1Client {
         );
     }
 
+    findVideosV1(animeId: string): Observable<ShikivideosInterface[]> {
+        return this.http
+            .get<{ items: ShikivideosInterface[] }>(`${this.baseUri}/v1/anime/${animeId}/videos`, {
+                params: new HttpParams().set('providers', 'all'),
+            })
+            .pipe(map((res) => res.items));
+    }
+
     getUploadToken(shikimoriToken: string, shikimoriDomain: string) {
         const url = `${this.baseUri}/oauth/token`;
         const params = new HttpParams()

@@ -2,9 +2,13 @@
     <div class="embed-page__wrapper">
         <app-player class="embed-page__player responsive-16by9"
             [showNextEpisodeAt]="nextEpisodeAt() !== null"
-            [source]="resolvedSource()"
-            [urlType]="currentVideo()?.urlType"
+            [source]="resolvedSource()?.url ?? null"
+            [urlType]="resolvedSource()?.urlType ?? currentVideo()?.urlType"
+            [streams]="resolvedSource()?.streams"
+            [timingKey]="timingKey()"
             [nextEpisodeAt]="nextEpisodeAt()"
+            (play)="onPlayerPlay()"
+            (pause)="onPlayerPause()"
         />
 
         <app-player-selector

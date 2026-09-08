@@ -120,7 +120,35 @@ export class BbToHtmlPipe implements PipeTransform {
         return parsed;
     }
 
+    private _sanitizeHtml(html: string): string {
+        const dom = new DOMParser().parseFromString(html, 'text/html');
+
+        // Strip all inline event handlers from every element
+        const allEls = dom.body.querySelectorAll('*');
+        for (const el of Array.from(allEls)) {
+            for (const attr of Array.from(el.attributes)) {
+                if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+            }
+        }
+
+        for (const a of Array.from(dom.querySelectorAll('a[href]'))) {
+            const href = a.getAttribute('href') ?? '';
+            if (!/^https?:\/\//i.test(href) && !href.startsWith('#')) {
+                a.removeAttribute('href');
+            }
+        }
+
+        for (const img of Array.from(dom.querySelectorAll('img[src]'))) {
+            const src = img.getAttribute('src') ?? '';
+            if (!/^https?:\/\//i.test(src) && !src.startsWith('/')) {
+                img.removeAttribute('src');
+            }
+        }
+
+        return dom.body.innerHTML;
+    }
+
     transform(comment: Comment): SafeHtml {
-        return this._sanitizer.bypassSecurityTrustHtml(this._parseBb(comment));
+        return this._sanitizer.bypassSecurityTrustHtml(this._sanitizeHtml(this._parseBb(comment)));
     }
 }

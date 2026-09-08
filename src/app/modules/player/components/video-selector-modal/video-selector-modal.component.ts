@@ -5,6 +5,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    signal,
 } from '@angular/core';
 import {
     IonButton,
@@ -64,6 +65,7 @@ export class VideoSelectorModalComponent extends IonModal {
     public isDomainFilterOn: WritableSignal<boolean>;
     public selectedKind: WritableSignal<VideoKindEnum>;
     public selectedVideo: WritableSignal<VideoInfoInterface>;
+    public showEpisodeCount: Signal<boolean> = signal(false);
 
     onKindChange(kind: VideoKindEnum): void {
         this.selectedKind.set(kind);

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, shareReplay, tap } from 'rxjs/operators';
 
 import { CvhPlaylistResponse, CvhSources, CvhVideoResponse } from '@app/shared/types/cvh';
 
@@ -13,6 +13,8 @@ const EMPTY_PLAYLIST: CvhPlaylistResponse = { items: [] };
 })
 export class CvhClient {
     private http = inject(HttpClient);
+    private readonly urlCache = new Map<string, string | null>();
+    private readonly pendingRequests = new Map<string, Observable<string | null>>();
 
     findAnimes(shikimoriId: string): Observable<CvhPlaylistResponse> {
         const params = new HttpParams()
@@ -26,12 +28,25 @@ export class CvhClient {
     }
 
     resolveVideoUrl(vkId: string): Observable<string | null> {
-        return this.http
+        if (this.urlCache.has(vkId)) {
+            return of(this.urlCache.get(vkId)!);
+        }
+        if (this.pendingRequests.has(vkId)) {
+            return this.pendingRequests.get(vkId)!;
+        }
+        const req$ = this.http
             .get<CvhVideoResponse>(`${CVH_API}/video/${vkId}`)
             .pipe(
                 map(({ sources }) => this.getBestUrl(sources)),
-                catchError(() => of(null)),
+                catchError(() => of(null as string | null)),
+                tap((url) => {
+                    this.urlCache.set(vkId, url);
+                    this.pendingRequests.delete(vkId);
+                }),
+                shareReplay(1),
             );
+        this.pendingRequests.set(vkId, req$);
+        return req$;
     }
 
     private getBestUrl(sources: CvhSources): string | null {

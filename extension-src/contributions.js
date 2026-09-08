@@ -14,7 +14,7 @@ function hasAppendedCotributions(htmlEl) {
 }
 
 async function getContributionsCount(uploader) {
-    return await fetch(`${SHIKIVIDEOS_API}/contributions?uploader=${uploader}`)
+    return await fetch(`${SHIKIVIDEOS_API}/contributions?uploader=${encodeURIComponent(uploader)}`)
         .then(res => res.json())
         .then((contributions) => contributions && contributions.count)
         .catch(() => 0);

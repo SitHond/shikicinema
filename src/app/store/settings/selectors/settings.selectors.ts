@@ -91,6 +91,21 @@ export const selectDomainFilters = createSelector(
     (state) => state.filterPlayerDomains,
 );
 
+export const selectShowAdultContent = createSelector(
+    selectSettings,
+    (state) => state.showAdultContent ?? false,
+);
+
+export const selectDiscordRpc = createSelector(
+    selectSettings,
+    (state) => state.discordRpc ?? false,
+);
+
+export const selectShowEpisodeCount = createSelector(
+    selectSettings,
+    (state) => state.showEpisodeCount ?? false,
+);
+
 export const selectAnimeStatusOrder = createSelector(
     selectSettings,
     ({ useCustomAnimeStatusOrder, userAnimeStatusOrder }) => (useCustomAnimeStatusOrder

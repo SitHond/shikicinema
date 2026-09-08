@@ -11,6 +11,7 @@ import {
     changeCurrentEpisodeAction,
     deleteCommentSuccessAction,
     editCommentSuccessAction,
+    findVideosRestrictedAction,
     getAnimeInfoSuccessAction,
     getCommentsSuccessAction,
     getRelatedAnimesSuccessAction,
@@ -31,6 +32,7 @@ const initialState: PlayerStoreInterface = {
     animeInfo: {},
     relatedAnimes: {},
     comments: {},
+    restrictedAnimes: {},
 };
 
 export const playerReducer = createReducer(initialState,
@@ -55,6 +57,20 @@ export const playerReducer = createReducer(initialState,
             videos: {
                 ...state.videos,
                 [animeId]: [...state.videos[animeId] || [], ...videos],
+            },
+            restrictedAnimes: {
+                ...state.restrictedAnimes,
+                [animeId]: false,
+            },
+        }),
+    ),
+    on(
+        findVideosRestrictedAction,
+        (state, { animeId }) => ({
+            ...state,
+            restrictedAnimes: {
+                ...state.restrictedAnimes,
+                [animeId]: true,
             },
         }),
     ),

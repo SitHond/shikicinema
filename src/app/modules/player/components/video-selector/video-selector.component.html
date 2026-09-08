@@ -15,6 +15,8 @@
                 [isAvailableForAllEpisodes]="!(warnAvailability() | includes: author)"
                 [rating]="getRating(author)"
                 [isAuthenticated]="isAuthenticated()"
+                [episodeCount]="getEpisodeCount(author)"
+                [showEpisodeCount]="showEpisodeCount()"
                 (toggleOpen)="onAuthorSectionToggle($event)"
                 (selectVideo)="onSelectionChange($event)"
                 (vote)="onVote(author, $event)"

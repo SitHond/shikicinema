@@ -21,11 +21,13 @@ import {
 } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { switchMap } from 'rxjs';
+import { catchError, of, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CvhClient } from '@app/shared/services/cvh-client.service';
 import { CvhPlaylistItem } from '@app/shared/types/cvh';
+import { KODIK_URL_RE } from '@app/shared/services/shikicinema-api.service';
+import { ShikicinemaV1Client } from '@app/shared/services/shikicinema-v1.client';
 import { ShikimoriClient } from '@app/shared/services/shikimori-client.service';
 import { UserRateTargetEnum } from '@app/shared/types/shikimori/user-rate-target.enum';
 import { WatchPartyService } from '@app/modules/watch-party/watch-party.service';
@@ -48,12 +50,15 @@ export class WatchPartyPage implements OnInit {
     private readonly router = inject(Router);
     private readonly toast = inject(ToastController);
     private readonly cvh = inject(CvhClient);
+    private readonly shikicinemaV1 = inject(ShikicinemaV1Client);
     private readonly shikimori = inject(ShikimoriClient);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
 
     readonly joinCode = signal('');
     readonly roomIdVisible = signal(false);
+    readonly inviteNickname = signal('');
+    readonly inviteSending = signal(false);
     readonly seekTime = signal<number | null>(null);
     readonly availableSources = signal<CvhPlaylistItem[]>([]);
     readonly sourcesLoading = signal(false);
@@ -82,12 +87,31 @@ export class WatchPartyPage implements OnInit {
             const state = this.wp.videoState();
             if (!this.wp.isHost() || !state?.animeId || state.episode === null) return;
             this.sourcesLoading.set(true);
-            this.cvh.findAnimes(state.animeId).subscribe((playlist) => {
+            this.cvh.findAnimes(state.animeId).pipe(
+                catchError(() => of({ items: [] })),
+            ).subscribe((playlist) => {
                 const sources = playlist.items.filter((i) => i.episode === state.episode && i.season === 1);
                 this.availableSources.set(sources);
                 this.sourcesLoading.set(false);
-                if (!state.vkId && sources.length > 0) {
+
+                if (state.vkId || state.kodikUrl) return;
+
+                if (sources.length > 0) {
+                    // CVH источник найден — используем его
                     this.wp.selectSource(sources[0].vkId);
+                } else {
+                    // CVH не нашёл — ищем Kodik через ShikivideosAPI
+                    this.shikicinemaV1.findVideosV1(state.animeId).pipe(
+                        catchError(() => of([])),
+                        takeUntilDestroyed(this.destroyRef),
+                    ).subscribe((videos) => {
+                        const kodik = videos.find((v) =>
+                            v.episode === state.episode &&
+                            v.url_type !== 'video' &&
+                            KODIK_URL_RE.test(v.url ?? ''),
+                        );
+                        if (kodik?.url) this.wp.selectKodikSource(kodik.url);
+                    });
                 }
             });
         });
@@ -161,6 +185,39 @@ export class WatchPartyPage implements OnInit {
 
     onBan(participantId: string): void {
         this.wp.banParticipant(participantId);
+    }
+
+    onSendInvite(): void {
+        const nick = this.inviteNickname().trim();
+        if (!nick || this.inviteSending()) return;
+
+        const roomId = this.wp.roomId();
+        const link = this.inviteLink();
+        if (!roomId) return;
+
+        this.inviteSending.set(true);
+        const body = `Привет! Приглашаю тебя в Watch Party на ShikiRIP Cinema.\n\n` +
+            `Код комнаты: [b]${roomId}[/b]\nСсылка: ${link}`;
+        this.shikimori.getUserBriefInfo(nick).pipe(
+            switchMap((user) => this.shikimori.sendMessage(user.id, body)),
+            catchError(() => of(null)),
+        ).subscribe(async (result) => {
+            this.inviteSending.set(false);
+            if (result && 'id' in result) {
+                this.inviteNickname.set('');
+                const t = await this.toast.create({
+                    message: `Приглашение отправлено пользователю ${nick}!`,
+                    duration: 2000, color: 'success', position: 'bottom',
+                });
+                await t.present();
+            } else if (result === null) {
+                const t = await this.toast.create({
+                    message: `Не удалось найти «${nick}» или отправить сообщение`,
+                    duration: 2500, color: 'danger', position: 'bottom',
+                });
+                await t.present();
+            }
+        });
     }
 
     onOpenAnime(): void {

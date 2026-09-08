@@ -1,0 +1,182 @@
+@use 'src/scss/mixins' as *;
+
+.stats-page {
+    .page-content {
+        --padding-top: 1rem;
+    }
+
+    &__loading,
+    &__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 3rem 1rem;
+        text-align: center;
+        color: var(--ion-color-medium);
+    }
+
+    &__empty-icon {
+        font-size: 3rem;
+        opacity: .5;
+    }
+
+    &__tiles {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: .75rem;
+        margin-bottom: 1.5rem;
+
+        @include media-breakpoint-up('md') {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    &__section {
+        background: var(--ion-background-color-step-50);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    &__section-title {
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--ion-color-medium);
+        margin-bottom: .75rem;
+    }
+}
+
+// ── Summary tile ─────────────────────────────────────────────────────────────
+
+.stats-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem .5rem;
+    background: var(--ion-background-color-step-50);
+    border-radius: 12px;
+    text-align: center;
+
+    &__value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1.1;
+        color: var(--ion-color-primary);
+    }
+
+    &__label {
+        font-size: .7rem;
+        color: var(--ion-color-medium);
+        margin-top: .25rem;
+    }
+}
+
+// ── Bar chart ─────────────────────────────────────────────────────────────────
+
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 140px;
+
+    &--short {
+        height: 100px;
+    }
+
+    &__col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+    }
+
+    &__val {
+        font-size: .6rem;
+        color: var(--ion-color-medium);
+        height: 14px;
+        line-height: 14px;
+    }
+
+    &__track {
+        flex: 1;
+        width: 100%;
+        display: flex;
+        align-items: flex-end;
+        padding: 0 1px;
+    }
+
+    &__bar {
+        width: 100%;
+        min-height: 2px;
+        background: var(--ion-color-primary);
+        border-radius: 3px 3px 0 0;
+        transition: height .3s ease;
+    }
+
+    &__label {
+        font-size: .6rem;
+        color: var(--ion-color-medium);
+        margin-top: 4px;
+        white-space: nowrap;
+    }
+}
+
+// ── Donut chart ───────────────────────────────────────────────────────────────
+
+.donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.donut {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    flex: 1;
+    min-width: 0;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .8rem;
+    }
+
+    &__dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    &__name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__pct {
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    &__count {
+        color: var(--ion-color-medium);
+        font-size: .75rem;
+        flex-shrink: 0;
+    }
+}

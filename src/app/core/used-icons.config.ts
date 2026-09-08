@@ -39,6 +39,7 @@ export {
     checkmarkCircleOutline,
     expandOutline,
     volumeMediumOutline,
+    volumeMuteOutline,
     contractOutline,
     linkOutline,
     imageOutline,
@@ -58,4 +59,10 @@ export {
     star,
     alertCircleOutline,
     reloadOutline,
+    flagOutline,
+    copyOutline,
+    statsChartOutline,
+    mailOutline,
+    phonePortraitOutline,
+    shareSocialOutline,
 } from 'ionicons/icons';

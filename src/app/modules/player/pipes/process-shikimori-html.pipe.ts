@@ -37,17 +37,32 @@ export class ProcessShikimoriHtmlPipe implements PipeTransform {
     private _preprocess(html: string): string {
         const { body: processedHtml } = new DOMParser().parseFromString(html, 'text/html');
 
-        // смайликам добавляем в src домен шикимори
-        for (const smiley of Array.from(processedHtml.querySelectorAll('img.smiley'))) {
-            const src = smiley.getAttribute('src');
+        // всем img с относительным src добавляем домен шикимори
+        for (const img of Array.from(processedHtml.querySelectorAll('img'))) {
+            const src = img.getAttribute('src');
 
-            smiley.setAttribute('src', `${this.SHIKIMORI_URL()}${src}`);
+            if (src && !src.startsWith('http') && !src.startsWith('data:')) {
+                const normalized = src.startsWith('/') ? src : `/${src}`;
+                img.setAttribute('src', `${this.SHIKIMORI_URL()}${normalized}`);
+            }
         }
 
         // вставки с видео заменяем с картинок на iframe'ы
         for (const video of Array.from(processedHtml.querySelectorAll('.video-link'))) {
             const parent = video.parentElement;
-            const src = new URL(video.getAttribute('data-href'));
+            let src: URL;
+
+            try {
+                src = new URL(video.getAttribute('data-href') ?? '');
+            } catch {
+                video.remove();
+                continue;
+            }
+
+            if (!['https:', 'http:'].includes(src.protocol)) {
+                video.remove();
+                continue;
+            }
 
             src.searchParams.delete('autoplay');
             src.searchParams.delete('autostart');
@@ -57,6 +72,19 @@ export class ProcessShikimoriHtmlPipe implements PipeTransform {
                 `<iframe class="shc-iframe" src="${src.toString()}" allowfullscreen></iframe>`,
             );
             video.remove();
+        }
+
+        // Strip all inline event handlers from every element
+        for (const el of Array.from(processedHtml.querySelectorAll('*'))) {
+            for (const attr of Array.from(el.attributes)) {
+                if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+            }
+        }
+
+        // Strip javascript: hrefs
+        for (const a of Array.from(processedHtml.querySelectorAll('a[href]'))) {
+            const href = a.getAttribute('href') ?? '';
+            if (/^javascript:/i.test(href)) a.removeAttribute('href');
         }
 
         return processedHtml.innerHTML;

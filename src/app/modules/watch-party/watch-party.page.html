@@ -111,12 +111,38 @@
                     </div>
                 </div>
 
+                <!-- Invite via DM -->
+                <div class="wp-invite">
+                    <div class="wp-card__input-row">
+                        <ion-input
+                            class="wp-text-input"
+                            fill="outline"
+                            placeholder="Ник на Shikimori"
+                            [maxlength]="64"
+                            [(ngModel)]="inviteNickname"
+                        />
+                        <ion-button
+                            [disabled]="!inviteNickname() || inviteSending()"
+                            (click)="onSendInvite()"
+                        >
+                            @if (inviteSending()) {
+                                <ion-spinner name="crescent" slot="start" style="width:1em;height:1em" />
+                            } @else {
+                                <ion-icon slot="start" name="mail-outline" />
+                            }
+                            Пригласить
+                        </ion-button>
+                    </div>
+                    <p class="wp-invite__hint">Отправить приглашение через личное сообщение Shikimori</p>
+                </div>
+
                 <!-- Custom video player -->
                 @if (wp.videoState()?.animeId; as animeId) {
                     <app-wp-video-player
                         [animeId]="animeId"
                         [episode]="wp.videoState()?.episode ?? 1"
                         [vkId]="wp.videoState()?.vkId ?? null"
+                        [kodikUrl]="wp.videoState()?.kodikUrl ?? null"
                         [playing]="wp.videoState()?.playing ?? false"
                         [seekTo]="seekTime()"
                     />

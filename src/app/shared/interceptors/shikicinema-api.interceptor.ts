@@ -46,7 +46,6 @@ export const shikicinemaApiInterceptor: HttpInterceptorFn = (request, next) => {
     const store = inject(Store);
 
     const isShikicinemaApi = request?.url?.startsWith(environment.smarthard.apiURI);
-    const isPostRequest = request?.method === 'POST';
 
     function refreshShikimoriTokens(request: HttpRequest<unknown>, next: HttpHandlerFn) {
         const {
@@ -84,8 +83,7 @@ export const shikicinemaApiInterceptor: HttpInterceptorFn = (request, next) => {
         );
     }
 
-    // пропускаем запросы не для загрузки видео
-    if (!isShikicinemaApi || !isPostRequest) {
+    if (!isShikicinemaApi) {
         return next(request);
     }
 

@@ -17,9 +17,9 @@ import {
     tap,
 } from 'rxjs/operators';
 import { concatLatestFrom } from '@ngrx/operators';
-import { merge, of, switchMap } from 'rxjs';
+import { of, switchMap } from 'rxjs';
 
-import { CvhClient, KodikClient, ShikicinemaV1Client, ShikimoriClient } from '@app/shared/services';
+import { ShikicinemaV1Client, ShikimoriClient } from '@app/shared/services';
 import { UserAnimeRate } from '@app/shared/types/shikimori/user-anime-rate';
 import { UserRateStatusType } from '@app/shared/types/shikimori/user-rate-status.type';
 import { UserRateTargetEnum } from '@app/shared/types/shikimori';
@@ -32,6 +32,7 @@ import {
     editCommentFailureAction,
     editCommentSuccessAction,
     findVideosAction,
+    findVideosRestrictedAction,
     getAnimeInfoAction,
     getAnimeInfoFailureAction,
     getAnimeInfoSuccessAction,
@@ -54,16 +55,14 @@ import {
     watchAnimeFailureAction,
     watchAnimeSuccessAction,
 } from '@app/modules/player/store/actions';
-import { cvhVideoMapper } from '@app/shared/types/cvh';
 import { getMaxEpisode, toUserRatesUpdate } from '@app/modules/player/utils';
-import { kodikVideoMapper } from '@app/shared/types/kodik/mappers';
 import {
     selectPlayerAnime,
     selectPlayerComments,
     selectPlayerRelatedAnimes,
     selectPlayerTopic,
     selectPlayerUserRate,
-    selectPlayerVideos,
+    selectPlayerVideosLoadNeeded,
 } from '@app/modules/player/store/selectors/player.selectors';
 import { selectShikimoriCurrentUser } from '@app/store/shikimori/selectors/shikimori.selectors';
 import { shikicinemaVideoMapper } from '@app/shared/types/shikicinema/v1';
@@ -76,26 +75,22 @@ export class PlayerEffects {
     private readonly actions$ = inject(Actions);
     private readonly store$ = inject(Store);
     private readonly shikimori = inject(ShikimoriClient);
-    private readonly kodik = inject(KodikClient);
-    private readonly cvh = inject(CvhClient);
     private readonly toast = inject(ToastController);
     private readonly translate = inject(TranslocoService);
     private readonly shikivideos = inject(ShikicinemaV1Client);
 
     findVideos$ = createEffect(() => this.actions$.pipe(
         ofType(findVideosAction),
-        concatLatestFrom(({ animeId }) => this.store$.select(selectPlayerVideos(animeId))),
-        filter(([, videos]) => !videos?.length),
-        switchMap(
-            ([{ animeId }]) => merge(
-                this.shikivideos.findAnimes(animeId).pipe(toVideoInfo(shikicinemaVideoMapper)),
-                this.kodik.findAnimes(animeId).pipe(toVideoInfo(kodikVideoMapper)),
-                this.cvh.findAnimes(animeId).pipe(toVideoInfo(cvhVideoMapper)),
-            ).pipe(
-                /* accumulating videos into storage */
-                map((videos) => addVideosAction({ animeId, videos })),
+        concatLatestFrom(({ animeId }) => this.store$.select(selectPlayerVideosLoadNeeded(animeId))),
+        filter(([, needsLoad]) => needsLoad),
+        switchMap(([{ animeId }]) => this.shikivideos.findVideosV1(animeId).pipe(
+            toVideoInfo(shikicinemaVideoMapper),
+            map((videos) => addVideosAction({ animeId, videos })),
+            catchError((err) => err?.status === 403
+                ? of(findVideosRestrictedAction({ animeId }))
+                : of(addVideosAction({ animeId, videos: [] })),
             ),
-        ),
+        )),
     ));
 
     getAnimeInfo$ = createEffect(() => this.actions$.pipe(
