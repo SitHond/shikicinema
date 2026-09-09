@@ -29,6 +29,7 @@ import { ResourceIdType } from '@app/shared/types';
 import { VideoInfoInterface } from '@app/modules/player/types';
 import { VideoSelectorItemComponent } from '@app/modules/player/components/video-selector-item';
 import { cleanAuthorName } from '@app/shared/utils/clean-author-name.function';
+import { normalizeAuthorKey } from '@app/shared/utils/normalize-author-key.function';
 
 
 @Component({
@@ -63,9 +64,11 @@ export class VideoSelectorComponent {
     animeId = input<ResourceIdType>();
     selected = input<VideoInfoInterface>();
     videos = input<VideoInfoInterface[]>();
+    allVideos = input<VideoInfoInterface[]>([]);
     kindDisplayMode = input<PlayerKindDisplayMode>();
     warnAvailability = input<string[]>([]);
     hasUnfilteredVideos = input<boolean>(false);
+    showEpisodeCount = input<boolean>(false);
 
     selection = output<VideoInfoInterface>();
     disableFilters = output<void>();
@@ -83,16 +86,39 @@ export class VideoSelectorComponent {
         { initialValue: new Map<string, AuthorRating>() },
     );
 
-    readonly openedAuthors = computed(() => [...this._openedByDefaultAuthors])
+    readonly openedAuthors = computed(() => [...this._openedByDefaultAuthors]);
+
+    readonly authorEpisodeCounts = computed(() => {
+        const all = this.allVideos();
+        const defaultName = this.defaultAuthorName();
+        const episodesByAuthor = new Map<string, Set<number>>();
+        for (const v of all ?? []) {
+            const key = normalizeAuthorKey(cleanAuthorName(v.author, defaultName));
+            if (!episodesByAuthor.has(key)) episodesByAuthor.set(key, new Set<number>());
+            episodesByAuthor.get(key).add(v.episode);
+        }
+        const result = new Map<string, number>();
+        episodesByAuthor.forEach((set, key) => result.set(key, set.size));
+        return result;
+    });
 
     readonly authors = computed(() => {
         const defaultAuthorName = this.defaultAuthorName();
-        const authors = this.videos()
-            ?.map(({ author }) => author)
-            ?.map((author) => cleanAuthorName(author, defaultAuthorName))
-            ?.sort();
+        const cleaned = this.videos()
+            ?.map(({ author }) => cleanAuthorName(author, defaultAuthorName)) ?? [];
 
-        return new Set(authors);
+        // First occurrence of each normalized key becomes the canonical display name.
+        const canonMap = new Map<string, string>();
+        for (const a of cleaned) {
+            const key = normalizeAuthorKey(a);
+            if (!canonMap.has(key)) canonMap.set(key, a);
+        }
+
+        const canonicals = cleaned
+            .map((a) => canonMap.get(normalizeAuthorKey(a))!)
+            .sort();
+
+        return new Set(canonicals);
     });
 
     constructor() {
@@ -107,6 +133,11 @@ export class VideoSelectorComponent {
                 }
             },
         })
+    }
+
+    getEpisodeCount(author: string): number | null {
+        const key = normalizeAuthorKey(author);
+        return this.authorEpisodeCounts().get(key) ?? null;
     }
 
     getRating(author: string): AuthorRating | null {

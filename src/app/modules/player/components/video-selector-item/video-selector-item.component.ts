@@ -67,6 +67,8 @@ export class VideoSelectorItemComponent {
     defaultAuthorName = input<string>();
     rating = input<AuthorRating | null>(null);
     isAuthenticated = input<boolean>(false);
+    episodeCount = input<number | null>(null);
+    showEpisodeCount = input<boolean>(false);
 
     toggleOpen = output<string>();
     selectVideo = output<VideoInfoInterface>();

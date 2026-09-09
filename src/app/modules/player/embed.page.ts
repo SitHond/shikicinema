@@ -12,14 +12,16 @@ import {
     signal,
 } from '@angular/core';
 import { IonContent } from '@ionic/angular/standalone';
+import { Observable, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { catchError, switchMap, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 import { ControlPanelComponent } from '@app/modules/player/components/control-panel/control-panel.component';
 import { CvhClient } from '@app/shared/services';
+import { DiscordPresenceService } from '@app/shared/services/discord-presence.service';
+import { KODIK_URL_RE, ResolvedStream, ShikicinemaApiService } from '@app/shared/services/shikicinema-api.service';
 import { PlayerComponent } from '@app/modules/player/components/player/player.component';
 import { PlayerSelectorComponent } from '@app/modules/player/components/player-selector';
 import { VideoInfoInterface } from '@app/modules/player/types';
@@ -75,6 +77,8 @@ export class EmbedPage {
     private readonly actions$ = inject(Actions);
     private readonly destroyRef = inject(DestroyRef);
     private readonly cvhClient = inject(CvhClient);
+    private readonly shikicinemaApi = inject(ShikicinemaApiService);
+    readonly discord = inject(DiscordPresenceService);
 
     readonly animeId = input.required<string>();
     readonly episode = input.required<string>();
@@ -118,8 +122,8 @@ export class EmbedPage {
 
     readonly resolvedSource = toSignal(
         toObservable(this.currentVideo).pipe(
-            switchMap((video) => {
-                if (!video?.url) return of(null as string | null);
+            switchMap((video): Observable<ResolvedStream | null> => {
+                if (!video?.url) return of(null);
 
                 const CVH_BASE = 'https://cdnvideohub.com/video/';
 
@@ -127,15 +131,30 @@ export class EmbedPage {
                     const vkId = video.url.slice(CVH_BASE.length);
 
                     return this.cvhClient.resolveVideoUrl(vkId).pipe(
-                        catchError(() => of(null as string | null)),
+                        map((url) => ({ url, urlType: 'video' as const })),
+                        catchError(() => of({ url: null, urlType: 'video' as const })),
                     );
                 }
 
-                return of(video.url);
+                if (KODIK_URL_RE.test(video.url)) {
+                    return this.shikicinemaApi.resolveKodikToStream(video.url);
+                }
+
+                if (/rutube\.ru\//.test(video.url)) {
+                    return this.shikicinemaApi.resolveRutubeToStream(video.url);
+                }
+
+                return of({ url: video.url, urlType: video.urlType ?? 'iframe' });
             }),
         ),
-        { initialValue: null as string | null },
+        { initialValue: null as ResolvedStream | null },
     );
+
+    readonly timingKey = computed(() => {
+        const video = this.currentVideo();
+        if (!video) return null;
+        return `${this.animeId()}:${this.episodeQ()}:${video.author}:${video.kind}`;
+    });
 
     readonly animeChangeEffect = effect(() => {
         const animeId = this.animeIdQ();
@@ -153,7 +172,26 @@ export class EmbedPage {
             this.store.dispatch(changeCurrentAnimeAction({ animeId: anime.id }));
             this.store.dispatch(changeCurrentEpisodeAction({ episode }));
         }
+        this.discord.clear();
     });
+
+    onPlayerPlay(): void {
+        const anime = this.anime();
+        if (!anime) return;
+        this.discord.play({
+            animeId: anime.id,
+            animeName: anime.name,
+            animeNameRu: anime.russian || undefined,
+            episode: this.episodeQ(),
+            totalEpisodes: this.maxEpisode() || undefined,
+            posterPath: anime.image?.original || undefined,
+            startedAt: Date.now(),
+        });
+    }
+
+    onPlayerPause(): void {
+        this.discord.pause();
+    }
 
     constructor() {
         this.actions$.pipe(

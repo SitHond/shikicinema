@@ -1,4 +1,4 @@
-import AuthStoreInterface from '@app/store/auth/types/auth-store.interface';
+import AuthStoreInterface, { ShikimoriCredentials } from '@app/store/auth/types/auth-store.interface';
 import { Actions, ofType } from '@ngrx/effects';
 import {
     HttpErrorResponse,
@@ -18,11 +18,8 @@ import {
 } from '@app/store/auth/actions/auth.actions';
 import {
     catchError,
-    exhaustMap,
     filter,
     first,
-    map,
-    skip,
     switchMap,
     tap,
 } from 'rxjs/operators';
@@ -34,10 +31,7 @@ import {
 } from '@app/store/shikicinema/actions/get-upload-token.action';
 import { inject } from '@angular/core';
 import { isFreshToken } from '@app/shared/utils/is-fresh-token.function';
-import {
-    selectShikicinemaTokenProcessing,
-    selectShikicinemaUploadToken,
-} from '@app/store/shikicinema/selectors/shikicinema.selectors';
+import { selectShikimoriDomain } from '@app/store/shikimori/selectors';
 import { throwError } from 'rxjs';
 
 export const shikicinemaApiInterceptor: HttpInterceptorFn = (request, next) => {
@@ -46,7 +40,33 @@ export const shikicinemaApiInterceptor: HttpInterceptorFn = (request, next) => {
     const store = inject(Store);
 
     const isShikicinemaApi = request?.url?.startsWith(environment.smarthard.apiURI);
-    const isPostRequest = request?.method === 'POST';
+    const isTokenRequest = request?.url?.includes('/oauth/token');
+
+    function waitForUploadToken(
+        shikimoriToken: ShikimoriCredentials,
+        request: HttpRequest<unknown>,
+        next: HttpHandlerFn,
+    ) {
+        return store.select(selectShikimoriDomain).pipe(
+            filter(Boolean),
+            first(),
+            tap((shikimoriDomain) =>
+                store.dispatch(getUploadTokenAction({ shikimoriToken, shikimoriDomain }))),
+            switchMap(() => actions$.pipe(
+                ofType(getUploadTokenSuccessAction, getUploadTokenFailureAction),
+                first(),
+            )),
+            switchMap((tokenAction) => {
+                if (tokenAction.type !== getUploadTokenSuccessAction.type) {
+                    return throwError(() => new Error('Failed to obtain upload token'));
+                }
+                const success = tokenAction as ReturnType<typeof getUploadTokenSuccessAction>;
+                const req = attachAccessToken(request, success.uploadToken.access_token);
+
+                return next(req);
+            }),
+        );
+    }
 
     function refreshShikimoriTokens(request: HttpRequest<unknown>, next: HttpHandlerFn) {
         const {
@@ -61,60 +81,35 @@ export const shikicinemaApiInterceptor: HttpInterceptorFn = (request, next) => {
             store.dispatch(authShikimoriAction());
         }
 
-        // ждём новые токены Шикимори для обновления upload token и повторяем запрос
-        const domain: string =
-            persistenceService.getItem<{ shikimoriDomain: string }>('shikimori')?.shikimoriDomain || '';
-
         return actions$.pipe(
             ofType(
                 authShikimoriSuccessAction,
                 authShikimoriRefreshSuccessAction,
             ),
-            tap(({ credentials: shikimoriToken }) =>
-                store.dispatch(getUploadTokenAction({ shikimoriToken, shikimoriDomain: domain }))),
-            switchMap(() => store.select(selectShikicinemaTokenProcessing).pipe(
-                skip(1),
-                filter((isProcessing) => !isProcessing),
-            )),
-            switchMap(() => store.select(selectShikicinemaUploadToken).pipe(
-                filter(({ access_token: token, expires }) => isFreshToken(token, expires)),
-            )),
-            map((uploadToken) => attachAccessToken(request, uploadToken.access_token)),
-            exhaustMap(next),
+            first(),
+            switchMap(({ credentials: shikimoriToken }) =>
+                waitForUploadToken(shikimoriToken, request, next),
+            ),
         );
     }
 
-    // пропускаем запросы не для загрузки видео
-    if (!isShikicinemaApi || !isPostRequest) {
+    if (!isShikicinemaApi || isTokenRequest) {
         return next(request);
     }
 
     const { uploadToken } = persistenceService.getItem<ShikicinemaStoreInterface>('shikicinema');
     const shikimoriToken = persistenceService.getItem<AuthStoreInterface>('auth');
-    const shikimoriDomain: string =
-        persistenceService.getItem<{ shikimoriDomain: string }>('shikimori')?.shikimoriDomain || '';
 
     if (isFreshToken(uploadToken?.access_token, uploadToken?.expires)) {
         // если есть свежий upload token прикрепляем
         request = attachAccessToken(request, uploadToken.access_token);
-    } else if (isFreshToken(shikimoriToken?.shikimoriBearerToken, shikimoriToken?.accessExpireTimeMs)) {
-        // если нет, но есть свежий токен Шикимори, то обновляем и прикрепляем
-        store.dispatch(getUploadTokenAction({ shikimoriToken, shikimoriDomain }));
-
-        return actions$.pipe(
-            ofType(getUploadTokenSuccessAction, getUploadTokenFailureAction),
-            first(),
-            switchMap((action) => {
-                if (action.type === getUploadTokenSuccessAction.type) {
-                    const successAction = action as ReturnType<typeof getUploadTokenSuccessAction>;
-                    const req = attachAccessToken(request, successAction.uploadToken.access_token);
-
-                    return next(req);
-                }
-
-                // upload token не получен (токен Шикимори отозван/истёк) — обновляем Шикимори
-                return refreshShikimoriTokens(request, next);
-            }),
+    } else if (
+        request.method === 'POST' &&
+        isFreshToken(shikimoriToken?.shikimoriBearerToken, shikimoriToken?.accessExpireTimeMs)
+    ) {
+        // pre-fetch upload token только для POST (загрузка видео)
+        return waitForUploadToken(shikimoriToken, request, next).pipe(
+            catchError(() => refreshShikimoriTokens(request, next)),
         );
     }
 
@@ -128,4 +123,3 @@ export const shikicinemaApiInterceptor: HttpInterceptorFn = (request, next) => {
         }),
     );
 };
-

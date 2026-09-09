@@ -1,0 +1,112 @@
+<ion-content [fullscreen]="true" class="ion-padding page-content">
+
+    @if (isLoading()) {
+        <div class="stats-page__loading">
+            <ion-spinner name="crescent" />
+            <span>Загружаем статистику…</span>
+        </div>
+    } @else if (error() === 'collection_disabled') {
+        <div class="stats-page__empty">
+            <ion-icon name="bar-chart-outline" class="stats-page__empty-icon" />
+            <p>Сбор статистики отключён.</p>
+            <p>Включите его в <strong>Настройках → Статистика просмотров</strong>.</p>
+            <ion-button fill="outline" (click)="goBack()">Перейти в настройки</ion-button>
+        </div>
+    } @else if (error()) {
+        <div class="stats-page__empty">
+            <ion-icon name="alert-circle-outline" class="stats-page__empty-icon" />
+            <p>Не удалось загрузить статистику.</p>
+            <ion-button fill="outline" (click)="goBack()">Назад</ion-button>
+        </div>
+    } @else if (stats()) {
+
+        <!-- Summary tiles -->
+        <div class="stats-page__tiles">
+            <div class="stats-tile">
+                <span class="stats-tile__value">{{ summary()!.total_episodes }}</span>
+                <span class="stats-tile__label">серий просмотрено</span>
+            </div>
+            <div class="stats-tile">
+                <span class="stats-tile__value">{{ summary()!.total_anime }}</span>
+                <span class="stats-tile__label">аниме</span>
+            </div>
+            <div class="stats-tile">
+                <span class="stats-tile__value">{{ summary()!.watch_hours }}</span>
+                <span class="stats-tile__label">часов</span>
+            </div>
+            @if (firstWatchedYear()) {
+                <div class="stats-tile">
+                    <span class="stats-tile__value">{{ firstWatchedYear() }}</span>
+                    <span class="stats-tile__label">первый просмотр</span>
+                </div>
+            }
+        </div>
+
+        <!-- Monthly bar chart -->
+        <div class="stats-page__section">
+            <h3 class="stats-page__section-title">Серии по месяцам</h3>
+            <div class="bar-chart">
+                @for (bar of monthBars(); track bar.label) {
+                    <div class="bar-chart__col">
+                        <span class="bar-chart__val">{{ bar.value || '' }}</span>
+                        <div class="bar-chart__track">
+                            <div class="bar-chart__bar" [style.height.%]="bar.pct"></div>
+                        </div>
+                        <span class="bar-chart__label">{{ bar.label }}</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Weekday bar chart -->
+        <div class="stats-page__section">
+            <h3 class="stats-page__section-title">Активность по дням недели</h3>
+            <div class="bar-chart bar-chart--short">
+                @for (bar of dowBars(); track bar.label) {
+                    <div class="bar-chart__col">
+                        <span class="bar-chart__val">{{ bar.value || '' }}</span>
+                        <div class="bar-chart__track">
+                            <div class="bar-chart__bar" [style.height.%]="bar.pct"></div>
+                        </div>
+                        <span class="bar-chart__label">{{ bar.label }}</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Provider donut chart -->
+        @if (pieSlices().length) {
+            <div class="stats-page__section">
+                <h3 class="stats-page__section-title">Источники видео</h3>
+                <div class="donut-wrap">
+                    <svg class="donut" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="var(--ion-color-step-100)" stroke-width="18" />
+                        @for (slice of pieSlices(); track slice.provider) {
+                            <circle
+                                cx="50" cy="50" r="40"
+                                fill="none"
+                                [attr.stroke]="slice.color"
+                                stroke-width="18"
+                                [attr.stroke-dasharray]="(slice.pct / 100) * circumference + ' ' + circumference"
+                                [attr.stroke-dashoffset]="-slice.offset"
+                                transform="rotate(-90 50 50)"
+                            />
+                        }
+                    </svg>
+                    <div class="donut-legend">
+                        @for (slice of pieSlices(); track slice.provider) {
+                            <div class="donut-legend__item">
+                                <span class="donut-legend__dot" [style.background]="slice.color"></span>
+                                <span class="donut-legend__name">{{ providerLabel(slice.provider) }}</span>
+                                <span class="donut-legend__pct">{{ slice.pct | number:'1.0-0' }}%</span>
+                                <span class="donut-legend__count">({{ slice.count }})</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+    }
+
+</ion-content>

@@ -6,7 +6,7 @@
         "64": "assets/icon64.png",
         "128": "assets/icon128.png"
     },
-    "description": "Adds an inline video player to Shikimori (rip/fi/net/moe). Browse your anime list, track episodes, switch between dubs and subs.",
+    "description": "Adds an inline video player to Shikimori (rip/fi/net/moe/mov). Browse your anime list, track episodes, switch between dubs and subs.",
     "content_security_policy": "default-src 'self'; img-src *; frame-src *; font-src *; media-src *; style-src 'unsafe-inline' https://*.googleapis.com; connect-src *; script-src 'self'",
     "browser_specific_settings": {
         "gecko": {
@@ -25,6 +25,7 @@
                 "*://shikimori.fi/*",
                 "*://shikimori.net/*",
                 "*://shikimori.moe/*",
+                "*://shikimori.mov/*",
                 "*://ygg.shiki.rip/*"
             ],
             "js": [
@@ -45,22 +46,33 @@
     "web_accessible_resources": [
         "assets/*.png",
         "index.html",
-        "styles.css",
-        "*.js"
+        "styles.css"
     ],
     "permissions": [
         "https://shikimori.rip/*",
         "https://shikimori.fi/*",
         "https://shikimori.net/*",
         "https://shikimori.moe/*",
+        "https://shikimori.mov/*",
         "https://ygg.shiki.rip/*",
         "https://api.sithond.com/*",
 
         "https://remanga.org/*",
         "https://*.remanga.org/*",
         "https://plapi.cdnvideohub.com/*",
+        "https://kodikplayer.com/*",
+        "https://kodik.info/*",
+        "https://kodik.biz/*",
+        "https://kodik.cc/*",
+        "https://rutube.ru/*",
+        "https://*.rutube.ru/*",
+        "https://api.aniskip.com/*",
+        "https://cloud.solodcdn.com/*",
+        "https://*.solodcdn.com/*",
         "http://127.0.0.1/*",
         "storage",
-        "tabs"
+        "tabs",
+        "webRequest",
+        "webRequestBlocking"
     ]
 }

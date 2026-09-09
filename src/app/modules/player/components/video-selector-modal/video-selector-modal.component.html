@@ -26,10 +26,12 @@
         class="video-selector-modal__video-selector"
         [animeId]="animeId()"
         [videos]="episodeVideos() | filterByKind: selectedKind()"
+        [allVideos]="videos() | filterByKind: selectedKind()"
         [selected]="selectedVideo()"
         [kindDisplayMode]="kindDisplayMode()"
         [warnAvailability]="videos() | authorAvailabilityWarning: lastAiredEpisode()"
         [hasUnfilteredVideos]="hasUnfilteredVideos()"
+        [showEpisodeCount]="showEpisodeCount()"
         (selection)="onVideoChange($event)"
         (disableFilters)="onToggleDomainFilters()"
     />

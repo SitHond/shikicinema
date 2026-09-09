@@ -9,10 +9,12 @@
     class="player-selector__video-selector"
     [animeId]="animeId()"
     [videos]="episodeVideos() | filterByKind: kind()"
+    [allVideos]="videos() | filterByKind: kind()"
     [selected]="selectedVideo()"
     [kindDisplayMode]="playerKindDisplayMode()"
     [warnAvailability]="availability()"
     [hasUnfilteredVideos]="hasUnfilteredVideos()"
+    [showEpisodeCount]="showEpisodeCount()"
     (selection)="onVideoChange($event)"
     (disableFilters)="onDisableDomainFilters()"
 />

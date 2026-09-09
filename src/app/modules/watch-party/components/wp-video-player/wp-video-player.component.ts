@@ -18,11 +18,12 @@ import {
 } from '@angular/core';
 import { IonButton, IonIcon, IonSpinner, IonText } from '@ionic/angular/standalone';
 import { catchError } from 'rxjs/operators';
-import { of, switchMap } from 'rxjs';
+import { of, switchMap, throwError } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CvhClient } from '@app/shared/services/cvh-client.service';
 import { CvhPlaylistResponse } from '@app/shared/types/cvh';
+import { ShikicinemaApiService } from '@app/shared/services/shikicinema-api.service';
 import { WatchPartyService } from '@app/modules/watch-party/watch-party.service';
 
 type PlayerState = 'idle' | 'loading' | 'ready' | 'error';
@@ -38,12 +39,14 @@ type PlayerState = 'idle' | 'loading' | 'ready' | 'error';
 })
 export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy {
     private readonly cvh = inject(CvhClient);
+    private readonly shikicinemaApi = inject(ShikicinemaApiService);
     readonly wp = inject(WatchPartyService);
     private readonly destroyRef = inject(DestroyRef);
 
     readonly animeId = input<string | null>(null);
     readonly episode = input<number | null>(null);
     readonly vkId = input<string | null>(null);
+    readonly kodikUrl = input<string | null>(null);
     readonly playing = input(false);
     readonly seekTo = input<number | null>(null);
 
@@ -51,6 +54,7 @@ export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestr
 
     private readonly videoEl = viewChild<ElementRef<HTMLVideoElement>>('videoEl');
     private hls: Hls | null = null;
+    private hlsActive = false;
 
     readonly state = signal<PlayerState>('idle');
     readonly errorMessage = signal<string | null>(null);
@@ -73,7 +77,7 @@ export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if ((changes['vkId'] || changes['animeId'] || changes['episode']) && this.videoEl()) {
+        if ((changes['vkId'] || changes['kodikUrl'] || changes['animeId'] || changes['episode']) && this.videoEl()) {
             this.loadStream();
         }
         if (changes['playing'] && !changes['playing'].firstChange) {
@@ -96,10 +100,15 @@ export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     onVideoLoaded(): void {
+        if (this.hlsActive) return;
         const v = this.videoEl()?.nativeElement;
         if (v) this.duration.set(v.duration);
         this.state.set('ready');
-        if (this.playing()) v?.play();
+        if (this.playing()) {
+            void v?.play()?.catch((e: Error) => {
+                if (e.name !== 'AbortError') throw e;
+            });
+        }
     }
 
     onVideoError(): void {
@@ -164,8 +173,11 @@ export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestr
     private applyPlayState(playing: boolean): void {
         const v = this.videoEl()?.nativeElement;
         if (!v || this.state() !== 'ready') return;
-        if (playing && v.paused) void v.play();
-        else if (!playing && !v.paused) v.pause();
+        if (playing && v.paused) {
+            void v.play()?.catch((e: Error) => {
+                if (e.name !== 'AbortError') throw e;
+            });
+        } else if (!playing && !v.paused) v.pause();
     }
 
     private applySeek(time: number): void {
@@ -175,10 +187,37 @@ export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestr
 
     private loadStream(): void {
         const vkId = this.vkId();
+        const kodikUrl = this.kodikUrl();
         const id = this.animeId();
         const ep = this.episode();
 
-        // If vkId is provided directly — use it (host picked specific source)
+        // Kodik source — resolve via our proxy
+        if (kodikUrl) {
+            this.state.set('loading');
+            this.errorMessage.set(null);
+            this.destroyHls();
+            this.shikicinemaApi.resolveKodikStream(kodikUrl).pipe(
+                switchMap((resp) => {
+                    if (!resp.ok) return throwError(() => new Error('Kodik: не удалось получить поток'));
+                    const streams = resp.streams;
+                    const url = streams
+                        ? ['1080', '720', '480', '360'].map((q) => streams[q]).find(Boolean) ?? resp.streamUrl
+                        : resp.streamUrl;
+                    return of(url);
+                }),
+                catchError((err) => {
+                    this.state.set('error');
+                    this.errorMessage.set(err.message || 'Kodik: источник недоступен');
+                    return of(null as string | null);
+                }),
+                takeUntilDestroyed(this.destroyRef),
+            ).subscribe((url) => {
+                if (url) this.attachStream(url);
+            });
+            return;
+        }
+
+        // CVH source — use vkId directly
         if (vkId) {
             this.state.set('loading');
             this.errorMessage.set(null);
@@ -196,6 +235,7 @@ export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestr
             return;
         }
 
+        // Auto-find from CVH by animeId+episode
         if (!id || ep === null) return;
 
         this.state.set('loading');
@@ -225,12 +265,18 @@ export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestr
 
         if (url.includes('.m3u8')) {
             if (Hls.isSupported()) {
-                this.hls = new Hls();
+                this.hlsActive = true;
+                this.hls = new Hls({ enableWorker: true, lowLatencyMode: false });
                 this.hls.loadSource(url);
                 this.hls.attachMedia(v);
                 this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (v.duration) this.duration.set(v.duration);
                     this.state.set('ready');
-                    if (this.playing()) void v.play();
+                    if (this.playing()) {
+                        void v.play()?.catch((e: Error) => {
+                            if (e.name !== 'AbortError') throw e;
+                        });
+                    }
                 });
                 this.hls.on(Hls.Events.ERROR, (_, data) => {
                     if (data.fatal) {
@@ -239,17 +285,21 @@ export class WpVideoPlayerComponent implements AfterViewInit, OnChanges, OnDestr
                     }
                 });
             } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
+                this.hlsActive = false;
                 v.src = url;
             } else {
+                this.hlsActive = false;
                 this.state.set('error');
                 this.errorMessage.set('HLS не поддерживается');
             }
         } else {
+            this.hlsActive = false;
             v.src = url;
         }
     }
 
     private destroyHls(): void {
+        this.hlsActive = false;
         this.hls?.destroy();
         this.hls = null;
         const v = this.videoEl()?.nativeElement;

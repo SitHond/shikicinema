@@ -14,7 +14,17 @@ export const selectPlayerVideos = (animeId: ResourceIdType) => createSelector(
 
 export const selectPlayerVideosLoading = (animeId: ResourceIdType) => createSelector(
     selectPlayer,
-    ({ videos }) => !videos[animeId],
+    ({ videos, restrictedAnimes }) => !videos[animeId] && !restrictedAnimes?.[animeId],
+);
+
+export const selectPlayerVideosLoadNeeded = (animeId: ResourceIdType) => createSelector(
+    selectPlayer,
+    ({ videos, restrictedAnimes }) => !videos[animeId] && !restrictedAnimes?.[animeId],
+);
+
+export const selectPlayerIsContentRestricted = (animeId: ResourceIdType) => createSelector(
+    selectPlayer,
+    ({ restrictedAnimes }) => restrictedAnimes?.[animeId] ?? false,
 );
 
 export const selectPlayerAnime = (animeId: ResourceIdType) => createSelector(

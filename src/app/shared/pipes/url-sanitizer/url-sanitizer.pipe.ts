@@ -12,6 +12,10 @@ export class UrlSanitizerPipe implements PipeTransform {
     transform(url: string | URL): SafeUrl {
         const asString = url instanceof URL ? url.toString() : url;
 
+        if (!/^https?:\/\//i.test(asString)) {
+            return this.sanitizer.bypassSecurityTrustResourceUrl('about:blank');
+        }
+
         return this.sanitizer.bypassSecurityTrustResourceUrl(asString);
     }
 }

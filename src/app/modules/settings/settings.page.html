@@ -74,6 +74,38 @@
             </ion-select>
         </app-settings-group>
 
+        <!-- Контент -->
+        <app-settings-group
+            class="settings-page__section"
+            icon="eye-outline"
+            title="Контент"
+        >
+            <ion-toggle
+                formControlName="showAdultContent"
+                labelPlacement="end"
+                enableOnOffLabels
+                helperText="Показывать аниме с возрастным рейтингом 18+ (rx). По умолчанию такие тайтлы недоступны."
+            >
+                Показывать контент 18+
+            </ion-toggle>
+        </app-settings-group>
+
+        <!-- Discord Rich Presence -->
+        <app-settings-group
+            class="settings-page__section"
+            icon="share-social-outline"
+            title="Discord"
+        >
+            <ion-toggle
+                formControlName="discordRpc"
+                labelPlacement="end"
+                enableOnOffLabels
+                helperText="Показывать текущее аниме в статусе Discord. Требует установки native host."
+            >
+                Discord Rich Presence
+            </ion-toggle>
+        </app-settings-group>
+
         <!-- Плеер -->
         <app-settings-group
             class="settings-page__section"
@@ -85,6 +117,13 @@
                 enableOnOffLabels
                 [helperText]="'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.PLAYER_PAGE.PREFERENCE_TOGGLE.HELP' | transloco">
                 {{ 'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.PLAYER_PAGE.PREFERENCE_TOGGLE.LABEL' | transloco }}
+            </ion-toggle>
+
+            <ion-toggle formControlName="showEpisodeCount"
+                labelPlacement="end"
+                enableOnOffLabels
+                helperText="Показывать количество доступных серий для каждой озвучки в списке.">
+                Кол-во серий у озвучки
             </ion-toggle>
 
             <ion-select
@@ -214,6 +253,45 @@
                 (logout)="shikimoriLogout()"
             />
         </app-settings-group>
+
+        <!-- Статистика -->
+        @if (isShikimoriAuthenticated()) {
+            <app-settings-group
+                class="settings-page__section"
+                icon="stats-chart-outline"
+                title="Статистика просмотров"
+            >
+                <ion-toggle
+                    [formControl]="collectStatsCtrl"
+                    labelPlacement="end"
+                    enableOnOffLabels
+                    helperText="Разрешить ShikiRIP Cinema собирать историю просмотров для формирования статистики."
+                >
+                    Сбор статистики
+                </ion-toggle>
+
+                @if (statsCardUrl()) {
+                    <div class="stats-card-preview__info">
+                        Через ShikiRIP Cinema просмотрено: <strong>{{ scEpisodes() }} эп.</strong>
+                    </div>
+
+                    <div class="stats-card-preview__actions">
+                        <ion-button (click)="goToStats()">
+                            <ion-icon slot="start" name="bar-chart-outline"/>
+                            Подробная статистика
+                        </ion-button>
+                        <ion-button fill="outline" (click)="openStatsCard()">
+                            <ion-icon slot="start" name="open-outline"/>
+                            Карточка
+                        </ion-button>
+                        <ion-button fill="outline" color="medium" (click)="copyStatsCardUrl()">
+                            <ion-icon slot="start" name="copy-outline"/>
+                            Ссылка
+                        </ion-button>
+                    </div>
+                }
+            </app-settings-group>
+        }
 
         <!-- Хранилище -->
         <app-settings-group

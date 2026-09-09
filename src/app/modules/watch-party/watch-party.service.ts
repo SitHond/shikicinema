@@ -17,6 +17,7 @@ export interface WatchPartyVideoState {
     animeId: string | null;
     episode: number | null;
     vkId: string | null;
+    kodikUrl: string | null;
     animeUrl: string | null;
     animeTitle: string | null;
 }
@@ -147,21 +148,34 @@ export class WatchPartyService implements OnDestroy {
         this.videoState.update((s) => s ? { ...s, playing, currentTime } : s);
     }
 
-    shareAnime(animeId: string, episode: number, animeTitle: string, animeUrl: string, vkId?: string): void {
+    shareAnime(
+        animeId: string, episode: number, animeTitle: string,
+        animeUrl: string, vkId?: string, kodikUrl?: string,
+    ): void {
         if (!this.isHost()) return;
-        this.send({ type: 'SET_ANIME', animeId, episode, animeTitle, animeUrl, vkId: vkId ?? null });
+        this.send({
+            type: 'SET_ANIME', animeId, episode, animeTitle, animeUrl,
+            vkId: vkId ?? null, kodikUrl: kodikUrl ?? null,
+        });
         this.videoState.update((s) => ({
             playing: false, currentTime: 0,
             ...s,
             animeId, episode, animeTitle, animeUrl,
-            vkId: vkId ?? s?.vkId ?? null,
+            vkId: vkId ?? null,
+            kodikUrl: kodikUrl ?? null,
         }));
     }
 
     selectSource(vkId: string): void {
         if (!this.isHost()) return;
-        this.send({ type: 'SET_ANIME', vkId });
-        this.videoState.update((s) => s ? { ...s, vkId, playing: false, currentTime: 0 } : s);
+        this.send({ type: 'SET_ANIME', vkId, kodikUrl: null });
+        this.videoState.update((s) => s ? { ...s, vkId, kodikUrl: null, playing: false, currentTime: 0 } : s);
+    }
+
+    selectKodikSource(kodikUrl: string): void {
+        if (!this.isHost()) return;
+        this.send({ type: 'SET_ANIME', kodikUrl, vkId: null });
+        this.videoState.update((s) => s ? { ...s, kodikUrl, vkId: null, playing: false, currentTime: 0 } : s);
     }
 
     kickParticipant(participantId: string): void {
@@ -178,8 +192,10 @@ export class WatchPartyService implements OnDestroy {
         if (!this.isHost()) return;
         const current = this.videoState();
         if (!current?.animeId || episode < 1) return;
-        this.send({ type: 'SET_ANIME', episode, vkId: null });
-        this.videoState.update((s) => s ? { ...s, episode, vkId: null, playing: false, currentTime: 0 } : s);
+        this.send({ type: 'SET_ANIME', episode, vkId: null, kodikUrl: null });
+        this.videoState.update((s) => s
+            ? { ...s, episode, vkId: null, kodikUrl: null, playing: false, currentTime: 0 }
+            : s);
     }
 
     private mapParticipants(raw: { id: string; name: string }[], hostId: string): WatchPartyParticipant[] {

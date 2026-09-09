@@ -23,7 +23,9 @@ import {
     IonText,
     ModalController,
     Platform,
+    ToastController,
 } from '@ionic/angular/standalone';
+import { Observable, of, switchMap, timer } from 'rxjs';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Title } from '@angular/platform-browser';
@@ -35,7 +37,6 @@ import {
     take,
     tap,
 } from 'rxjs/operators';
-import { of, switchMap, timer } from 'rxjs';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 import { AnimeBriefInfoInterface } from '@app/shared/types/shikimori/anime-brief-info.interface';
@@ -43,11 +44,19 @@ import { Comment } from '@app/shared/types/shikimori/comment';
 import { CommentsComponent } from '@app/modules/player/components/comments/comments.component';
 import { ControlPanelComponent } from '@app/modules/player/components/control-panel/control-panel.component';
 import { CvhClient } from '@app/shared/services';
+import { DiscordPresenceService } from '@app/shared/services/discord-presence.service';
 import { FooterComponent } from '@app/shared/components/footer/footer.component';
 import { FranchisePanelComponent } from '@app/modules/player/components/franchise-panel/franchise-panel.component';
 import { GetShikimoriPagePipe } from '@app/shared/pipes/get-shikimori-page/get-shikimori-page.pipe';
+import {
+    KODIK_URL_RE,
+    ResolvedStream,
+    ShikicinemaApiService,
+    SubmitReportParams,
+} from '@app/shared/services/shikicinema-api.service';
 import { PlayerComponent } from '@app/modules/player/components/player/player.component';
 import { PlayerSelectorComponent } from '@app/modules/player/components/player-selector';
+import { ReportModalComponent } from '@app/modules/player/components/report-modal/report-modal.component';
 import { ResourceIdType } from '@app/shared/types/resource-id.type';
 import { ShikimoriAnimeLinkPipe } from '@app/shared/pipes/shikimori-anime-link/shikimori-anime-link.pipe';
 import { SidePanelComponent } from '@app/modules/player/components/side-panel/side-panel.component';
@@ -88,6 +97,8 @@ import {
     selectDomainFilters,
     selectPlayerKindDisplayMode,
     selectPlayerMode,
+    selectShowAdultContent,
+    selectShowEpisodeCount,
 } from '@app/store/settings/selectors/settings.selectors';
 import { selectIsAuthenticated } from '@app/store/auth/selectors/auth.selectors';
 import {
@@ -96,6 +107,7 @@ import {
     selectPlayerComments,
     selectPlayerIsCommentsLoading,
     selectPlayerIsCommentsPartiallyLoading,
+    selectPlayerIsContentRestricted,
     selectPlayerIsShownAllComments,
     selectPlayerRelatedAnimes,
     selectPlayerTopic,
@@ -149,8 +161,11 @@ export class PlayerPage implements OnInit {
     private readonly actions$ = inject(Actions);
     private readonly transloco = inject(TranslocoService);
     private readonly modalController = inject(ModalController);
+    private readonly toastController = inject(ToastController);
     private readonly destroyRef = inject(DestroyRef);
     private readonly cvhClient = inject(CvhClient);
+    private readonly shikicinemaApi = inject(ShikicinemaApiService);
+    readonly discord = inject(DiscordPresenceService);
 
     readonly wp = inject(WatchPartyService);
 
@@ -164,6 +179,8 @@ export class PlayerPage implements OnInit {
     readonly isUserAuthorized = this.store.selectSignal(selectIsAuthenticated);
     readonly domainFilters = this.store.selectSignal(selectDomainFilters);
     readonly shikimoriDomain = this.store.selectSignal(selectShikimoriDomain);
+    readonly showAdultContent = this.store.selectSignal(selectShowAdultContent);
+    readonly showEpisodeCount = this.store.selectSignal(selectShowEpisodeCount);
 
     readonly isMediaMatch = toSignal(this.breakpointObserver.observe([
         '(max-width: 1199.98px)',
@@ -202,6 +219,15 @@ export class PlayerPage implements OnInit {
     maxVideosEpisode = computed(() => getMaxEpisodeFromVideos(this.videos()));
     maxEpisode = computed(() => getMaxEpisode(this.anime(), this.maxVideosEpisode()));
     animeName = computed(() => getAnimeName(this.anime(), this.userSelectedLanguage()));
+    isAdultRestricted = computed(
+        () => !this.isAnimeLoading() && this.anime()?.rating === 'rx' && !this.showAdultContent(),
+    );
+    isContentRestricted = toSignal(
+        toObservable(this.animeIdQ).pipe(
+            switchMap((animeId) => this.store.select(selectPlayerIsContentRestricted(animeId))),
+        ),
+        { initialValue: false },
+    );
     isWatched = computed(() => isEpisodeWatched(this.episodeQ(), this.userRate()));
     isRewatching = computed(() => this.userRate()?.status === 'rewatching');
 
@@ -227,8 +253,8 @@ export class PlayerPage implements OnInit {
 
     readonly resolvedSource = toSignal(
         toObservable(this.currentVideo).pipe(
-            switchMap((video) => {
-                if (!video?.url) return of(null as string | null);
+            switchMap((video): Observable<ResolvedStream | null> => {
+                if (!video?.url) return of(null);
 
                 const CVH_BASE = 'https://cdnvideohub.com/video/';
 
@@ -236,15 +262,31 @@ export class PlayerPage implements OnInit {
                     const vkId = video.url.slice(CVH_BASE.length);
 
                     return this.cvhClient.resolveVideoUrl(vkId).pipe(
-                        catchError(() => of(null as string | null)),
+                        map((url) => ({ url, urlType: 'video' as const })),
+                        catchError(() => of({ url: null, urlType: 'video' as const })),
                     );
                 }
 
-                return of(video.url);
+                if (KODIK_URL_RE.test(video.url)) {
+                    return this.shikicinemaApi.resolveKodikToStream(video.url);
+                }
+
+                if (/rutube\.ru\//.test(video.url)) {
+                    return this.shikicinemaApi.resolveRutubeToStream(video.url);
+                }
+
+                return of({ url: video.url, urlType: video.urlType ?? 'iframe' });
             }),
         ),
-        { initialValue: null as string | null },
+        { initialValue: null as ResolvedStream | null },
     );
+
+    readonly timingKey = computed(() => {
+        const video = this.currentVideo();
+        if (!video) return null;
+        return `${this.animeIdQ()}:${this.episodeQ()}:${video.author}:${video.kind}`;
+    });
+
     editComment = signal<Comment>(null);
     highlightComment = signal<ResourceIdType>(null);
 
@@ -268,6 +310,9 @@ export class PlayerPage implements OnInit {
             this.store.dispatch(changeCurrentAnimeAction({ animeId: anime.id }));
             this.store.dispatch(changeCurrentEpisodeAction({ episode }));
         }
+
+        // Reset presence on episode change — play event will re-arm it
+        this.discord.clear();
     });
 
     ngOnInit(): void {
@@ -325,6 +370,43 @@ export class PlayerPage implements OnInit {
         }
     }
 
+    onPlayerPlay(): void {
+        const anime = this.anime();
+        const animeName = this.animeName();
+        if (!anime || !animeName) return;
+
+        this.discord.play({
+            animeId: anime.id,
+            animeName: anime.name,
+            animeNameRu: anime.russian || undefined,
+            episode: this.episodeQ(),
+            totalEpisodes: this.maxEpisode() || undefined,
+            posterPath: anime.image?.original || undefined,
+            startedAt: Date.now(),
+        });
+    }
+
+    onPlayerPause(): void {
+        this.discord.pause();
+    }
+
+    onPlayerStall(): void {
+        const current = this.currentVideo();
+        if (!current || current.urlType !== 'video') return;
+
+        const videos = this.episodeVideos();
+        const candidates = videos?.filter((v) =>
+            v.urlType === 'video' &&
+            v.author === current.author &&
+            v.kind === current.kind &&
+            v.url !== current.url,
+        );
+
+        if (candidates?.length) {
+            this.onVideoChange(candidates[0], false);
+        }
+    }
+
     onKindChange(kind: VideoKindEnum): void {
         this.currentKind.set(kind);
     }
@@ -332,7 +414,6 @@ export class PlayerPage implements OnInit {
     onEpisodeChange(episode: number): void {
         const animeId = this.animeIdQ();
         const maxEpisodes = this.maxEpisode();
-
         // сброс видео для корректной работы заглушек выхода серий
         this.currentVideo.set(null);
 
@@ -355,6 +436,7 @@ export class PlayerPage implements OnInit {
             selectedKind: this.currentKind,
             selectedVideo: this.currentVideo,
             lastAiredEpisode: this.lastAiredEpisode,
+            showEpisodeCount: this.showEpisodeCount,
         };
         const { VideoSelectorModalComponent } = await import('@app/modules/player/components/video-selector-modal');
 
@@ -388,6 +470,17 @@ export class PlayerPage implements OnInit {
             : isUnwatch ? episode - 1 : episode;
 
         this.store.dispatch(watchAnimeAction({ animeId: anime.id, episode: watchedEpisode, isRewarch }));
+
+        if (!isUnwatch && this.isUserAuthorized()) {
+            const provider = this.currentVideo()?.provider ?? null;
+            this.shikicinemaApi.logWatch(Number(this.animeIdQ()), episode, provider).subscribe();
+            try {
+                const prev = parseInt(localStorage.getItem('sc_episodes') || '0', 10) || 0;
+                localStorage.setItem('sc_episodes', String(prev + 1));
+            } catch (_err: unknown) {
+                return;
+            }
+        }
 
         void this.updateUserPreferences();
     }
@@ -494,8 +587,37 @@ export class PlayerPage implements OnInit {
         const id = this.animeId();
         const ep = Number(this.episode()) || 1;
         const CVH_BASE = 'https://cdnvideohub.com/video/';
+
         const videoUrl = this.currentVideo()?.url ?? '';
         const vkId = videoUrl.startsWith(CVH_BASE) ? videoUrl.slice(CVH_BASE.length) : undefined;
-        this.wp.shareAnime(id, ep, this.animeName(), `#/player/${id}/${ep}`, vkId);
+        const kodikUrl = !vkId && KODIK_URL_RE.test(videoUrl) ? videoUrl : undefined;
+        this.wp.shareAnime(id, ep, this.animeName(), `#/player/${id}/${ep}`, vkId, kodikUrl);
+    }
+
+    async onReport(): Promise<void> {
+        const modal = await this.modalController.create({
+            component: ReportModalComponent,
+            componentProps: {
+                animeId: this.animeId(),
+                episode: this.episodeQ(),
+                videoId: this.currentVideo()?.id ?? null,
+                type: 'anime',
+            },
+            breakpoints: [0, 1],
+            initialBreakpoint: 1,
+        });
+
+        await modal.present();
+        const { data, role } = await modal.onWillDismiss<SubmitReportParams>();
+        if (role !== 'submit' || !data) return;
+
+        this.shikicinemaApi.submitReport(data).subscribe(async ({ ok }) => {
+            const toast = await this.toastController.create({
+                message: ok ? 'Жалоба отправлена' : 'Не удалось отправить жалобу',
+                color: ok ? 'success' : 'danger',
+                duration: 2000,
+            });
+            await toast.present();
+        });
     }
 }

@@ -4,6 +4,7 @@ const SHIKIMORI_URL_PATTERNS = [
     '*://shikimori.fi/*',
     '*://shikimori.net/*',
     '*://shikimori.moe/*',
+    '*://shikimori.mov/*',
     '*://ygg.shiki.rip/*',
 ];
 
@@ -175,17 +176,15 @@ function caesarDecode(str, shift) {
 async function fetchKodikStream(iframeUrl) {
     if (iframeUrl.startsWith('//')) iframeUrl = 'https:' + iframeUrl;
 
+    var shikiDomain = getShikimoriDomain();
     var resp = await fetch(iframeUrl, {
-        headers: { 'Referer': 'https://shikimori.one/' }
+        headers: { 'Referer': shikiDomain + '/' }
     });
     var html = await resp.text();
     var hostname = new URL(resp.url).hostname;
 
     function extract(re) { return (html.match(re) || [])[1] || ''; }
 
-    // Extract video info object
-    var infoMatch = html.match(/var\s+videoInfo\s*=\s*\{([^}]+)\}/);
-    var infoStr = infoMatch ? infoMatch[0] : '';
     var videoType = extract(/videoInfo\s*=\s*\{[^}]*type\s*:\s*['"](\w+)['"]/);
     var videoId   = extract(/videoInfo\s*=\s*\{[^}]*id\s*:\s*['"]?(\d+)['"]?/);
     var videoHash = extract(/videoInfo\s*=\s*\{[^}]*hash\s*:\s*['"]([a-zA-Z0-9]+)['"]/);
@@ -196,7 +195,25 @@ async function fetchKodikStream(iframeUrl) {
     var ref     = extract(/var\s+ref\s*=\s*['"]([^'"]*)['"]/);
     var refSign = extract(/var\s+ref_sign\s*=\s*['"]([^'"]*)['"]/);
 
+
     if (!videoId || !videoHash) throw new Error('Kodik: cannot extract video params from iframe HTML');
+
+    // Dynamically find POST endpoint from the JS bundle
+    var postLink = '/gvi';
+    var scriptSrc = extract(/<script[^>]+src="([^"]*\/assets\/js\/app[^"]*\.js[^"]*)"/);
+    if (scriptSrc) {
+        var scriptUrl = scriptSrc.startsWith('//') ? 'https:' + scriptSrc
+                      : scriptSrc.startsWith('/') ? 'https://' + hostname + scriptSrc
+                      : scriptSrc;
+        try {
+            var jsResp = await fetch(scriptUrl, { headers: { 'Referer': iframeUrl } });
+            var jsText = await jsResp.text();
+            var ajaxMatch = jsText.match(/\$\.ajax\(\{[^}]*type\s*:\s*["']POST["'][^}]*url\s*:\s*(?:atob\()?["']([^"']+)["']\)?/);
+            if (ajaxMatch) {
+                try { postLink = atob(ajaxMatch[1]); } catch (e) { postLink = ajaxMatch[1]; }
+            }
+        } catch (e) { /* fallback to /gvi */ }
+    }
 
     var body = new URLSearchParams({
         type: videoType || 'seria',
@@ -212,7 +229,8 @@ async function fetchKodikStream(iframeUrl) {
         cdn_is_working: 'true',
     });
 
-    var postResp = await fetch('https://' + hostname + '/gvi', {
+    var postUrl = postLink.startsWith('http') ? postLink : 'https://' + hostname + postLink;
+    var postResp = await fetch(postUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -230,13 +248,20 @@ async function fetchKodikStream(iframeUrl) {
         var sources = data.links[qualities[qi]];
         if (!sources || !sources.length) continue;
         var encoded = sources[0].src;
+
+        // Already decoded
+        if (encoded.includes('mp4:hls:manifest')) {
+            var baseUrl = encoded.replace(/^https?:/, '').replace(/\/[^/]*$/, '');
+            return { ok: true, streamUrl: 'https:' + baseUrl + '/' + qualities[qi] + '.mp4:hls:manifest.m3u8', quality: qualities[qi] };
+        }
+
         for (var shift = 0; shift <= 25; shift++) {
             try {
-                var decoded = caesarDecode(atob(encoded), shift);
-                if (decoded.includes('://') && (decoded.includes('.m3u8') || decoded.includes('mp4:hls'))) {
-                    var streamUrl = decoded.replace(/mp4:hls:manifest/g, 'index.m3u8');
-                    if (streamUrl.startsWith('//')) streamUrl = 'https:' + streamUrl;
-                    return { ok: true, streamUrl: streamUrl, quality: qualities[qi] };
+                var padded = encoded + '==='.slice((encoded.length + 3) % 4);
+                var decoded = caesarDecode(atob(padded), shift);
+                if (decoded.includes('mp4:hls:manifest')) {
+                    var baseUrl = decoded.replace(/^https?:/, '').replace(/\/[^/]*$/, '');
+                    return { ok: true, streamUrl: 'https:' + baseUrl + '/' + qualities[qi] + '.mp4:hls:manifest.m3u8', quality: qualities[qi] };
                 }
             } catch (e) { /* wrong shift, try next */ }
         }
@@ -244,21 +269,161 @@ async function fetchKodikStream(iframeUrl) {
     throw new Error('Kodik: could not decode stream URL');
 }
 
+// ── Kodik CDN: fix Referer + CORS (Firefox/v2 webRequest) ────────────────────
+
+if (typeof chrome !== 'undefined' && chrome.webRequest) {
+    chrome.webRequest.onBeforeSendHeaders.addListener(
+        function(details) {
+            var headers = details.requestHeaders || [];
+            var hasReferer = false;
+            for (var i = 0; i < headers.length; i++) {
+                if (headers[i].name.toLowerCase() === 'referer') {
+                    headers[i].value = 'https://kodik.info/';
+                    hasReferer = true;
+                }
+            }
+            if (!hasReferer) {
+                headers.push({ name: 'Referer', value: 'https://kodik.info/' });
+            }
+            return { requestHeaders: headers };
+        },
+        { urls: ['https://*.solodcdn.com/*'] },
+        ['blocking', 'requestHeaders']
+    );
+
+    chrome.webRequest.onHeadersReceived.addListener(
+        function(details) {
+            var headers = details.responseHeaders || [];
+            headers = headers.filter(function(h) {
+                return h.name.toLowerCase() !== 'access-control-allow-origin';
+            });
+            headers.push({ name: 'Access-Control-Allow-Origin', value: '*' });
+            return { responseHeaders: headers };
+        },
+        { urls: ['https://*.solodcdn.com/*'] },
+        ['blocking', 'responseHeaders']
+    );
+}
+
+// ── Rutube CDN: fix Referer + CORS (Firefox/v2 webRequest) ───────────────────
+
+if (typeof chrome !== 'undefined' && chrome.webRequest) {
+    chrome.webRequest.onBeforeSendHeaders.addListener(
+        function(details) {
+            var headers = details.requestHeaders || [];
+            var hasReferer = false;
+            for (var i = 0; i < headers.length; i++) {
+                if (headers[i].name.toLowerCase() === 'referer') {
+                    headers[i].value = 'https://rutube.ru/';
+                    hasReferer = true;
+                }
+            }
+            if (!hasReferer) {
+                headers.push({ name: 'Referer', value: 'https://rutube.ru/' });
+            }
+            return { requestHeaders: headers };
+        },
+        { urls: ['https://*.rutube.ru/*', 'https://rutube.ru/*'] },
+        ['blocking', 'requestHeaders']
+    );
+
+    chrome.webRequest.onHeadersReceived.addListener(
+        function(details) {
+            var headers = details.responseHeaders || [];
+            headers = headers.filter(function(h) {
+                var n = h.name.toLowerCase();
+                return n !== 'access-control-allow-origin' && n !== 'access-control-allow-methods';
+            });
+            headers.push({ name: 'Access-Control-Allow-Origin', value: '*' });
+            headers.push({ name: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS, HEAD' });
+            return { responseHeaders: headers };
+        },
+        { urls: ['https://*.rutube.ru/*'] },
+        ['blocking', 'responseHeaders']
+    );
+}
+
+// ── Unread messages badge ─────────────────────────────────────────────────────
+
+var UNREAD_POLL_INTERVAL = 5 * 60 * 1000; // 5 min
+
+function getStoredJson(key) {
+    try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; }
+}
+
+function getAuthToken() {
+    var auth = getStoredJson('auth');
+    return auth && auth.shikimoriBearerToken ? auth.shikimoriBearerToken : null;
+}
+
+function getShikimoriDomain() {
+    var shikimori = getStoredJson('shikimori');
+    return (shikimori && shikimori.shikimoriDomain) || 'https://shikimori.rip';
+}
+
+function setBadge(count) {
+    var text = count > 0 ? String(count > 99 ? 99 : count) : '';
+    var api = chrome.action || chrome.browserAction;
+    if (!api) return;
+    api.setBadgeText({ text: text });
+    if (count > 0) api.setBadgeBackgroundColor({ color: '#e53935' });
+}
+
+async function checkUnreadMessages() {
+    var token = getAuthToken();
+    if (!token) { setBadge(0); return; }
+    var domain = getShikimoriDomain();
+    try {
+        var resp = await fetch(domain + '/api/messages/unread_count', {
+            headers: { 'Authorization': token },
+        });
+        if (!resp.ok) return;
+        var data = await resp.json();
+        var total = (data.messages || 0) + (data.news || 0) + (data.notifications || 0);
+        setBadge(total);
+    } catch (e) { /* network error — keep old badge */ }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 function run() {
+    // Start unread badge polling
+    checkUnreadMessages();
+    setInterval(checkUnreadMessages, UNREAD_POLL_INTERVAL);
+
+    function isTrustedSender(sender) {
+        if (!sender.tab || !sender.url) return false;
+        try {
+            var origin = new URL(sender.url).hostname;
+            return SHIKIMORI_URL_PATTERNS.some(function(p) {
+                // pattern: '*://shikimori.rip/*' → extract hostname
+                var m = p.match(/\*:\/\/([^/]+)\//);
+                if (!m) return false;
+                var host = m[1].replace(/^\*\./, '');
+                return origin === host || origin.endsWith('.' + host);
+            });
+        } catch { return false; }
+    }
+
     try {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (!isTrustedSender(sender)) return false;
+
             if (request.openUrl) {
+                var openUrl = request.openUrl;
+                var isExtensionUrl = typeof openUrl === 'string' && openUrl.startsWith(chrome.runtime.getURL(''));
+                var isSafeUrl = typeof openUrl === 'string' && /^https?:\/\//i.test(openUrl);
+                if (!isExtensionUrl && !isSafeUrl) return false;
+
                 chrome.storage.local.get('settings', (obj) => {
                     const settings = obj.settings;
 
                     if (settings && settings.playerTabOpens && settings.playerTabOpens === 'same') {
-                        chrome.tabs.update(sender.tab.id, { url: request.openUrl });
+                        chrome.tabs.update(sender.tab.id, { url: openUrl });
                     } else {
                         chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
                             const currentIndex = tabs[0].index;
-                            chrome.tabs.create({ url: request.openUrl, index: currentIndex + 1, active: true });
+                            chrome.tabs.create({ url: openUrl, index: currentIndex + 1, active: true });
                         });
                     }
                 });

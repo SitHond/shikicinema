@@ -23,6 +23,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { shareReplay, take } from 'rxjs/operators';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
+import { ShikiPlayerComponent } from '@app/modules/player/components/shiki-player/shiki-player.component';
 import { UrlSanitizerPipe } from '@app/shared/pipes/url-sanitizer/url-sanitizer.pipe';
 
 @Component({
@@ -33,6 +34,7 @@ import { UrlSanitizerPipe } from '@app/shared/pipes/url-sanitizer/url-sanitizer.
         AsyncPipe,
         TranslocoPipe,
         DatePipe,
+        ShikiPlayerComponent,
     ],
     templateUrl: './player.component.html',
     styleUrl: './player.component.scss',
@@ -52,11 +54,16 @@ export class PlayerComponent {
 
     source = input<string>();
     urlType = input<'iframe' | 'video'>('iframe');
+    streams = input<Record<string, string>>();
+    timingKey = input<string>();
     showNextEpisodeAt = input(false);
     nextEpisodeAt = input<Date | string | number | null>();
 
     loaded = output<boolean>();
     timedOut = output<boolean>();
+    stall = output<void>();
+    played = output<void>();
+    paused = output<void>();
 
     timeout$: Observable<boolean> = EMPTY;
 

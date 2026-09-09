@@ -1,0 +1,85 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-title>Сообщить о проблеме</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="dismiss()">Закрыть</ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+        <ion-item>
+            <ion-label position="stacked">Категория</ion-label>
+            <ion-select formControlName="category" interface="action-sheet" placeholder="Выберите категорию">
+                @for (cat of categories; track cat.value) {
+                    <ion-select-option [value]="cat.value">{{ cat.label }}</ion-select-option>
+                }
+            </ion-select>
+        </ion-item>
+
+        @if (isCopyright()) {
+            <ion-item>
+                <ion-label position="stacked">Организация / Правообладатель <ion-note color="danger">*</ion-note></ion-label>
+                <ion-input
+                    formControlName="copyrightHolder"
+                    placeholder="Название компании или ФИО"
+                    clearInput
+                />
+            </ion-item>
+
+            <ion-item>
+                <ion-label position="stacked">Контактный email или телефон <ion-note color="danger">*</ion-note></ion-label>
+                <ion-input
+                    formControlName="copyrightContact"
+                    type="email"
+                    placeholder="legal@company.com"
+                    clearInput
+                />
+            </ion-item>
+
+            <ion-item>
+                <ion-label position="stacked">Произведения, права на которые нарушены</ion-label>
+                <ion-textarea
+                    formControlName="copyrightWorks"
+                    placeholder="Перечислите конкретные аниме, серии, материалы"
+                    [autoGrow]="true"
+                    rows="3"
+                />
+            </ion-item>
+
+            <ion-item>
+                <ion-label position="stacked">Правовое основание</ion-label>
+                <ion-input
+                    formControlName="copyrightBasis"
+                    placeholder="Напр.: исключительные права, лицензионный договор"
+                    clearInput
+                />
+            </ion-item>
+        }
+
+        <ion-item>
+            <ion-label position="stacked">
+                @if (isCopyright()) {
+                    Дополнительные сведения
+                } @else {
+                    Описание (необязательно)
+                }
+            </ion-label>
+            <ion-textarea
+                formControlName="description"
+                [placeholder]="isCopyright() ? 'Любые дополнительные подробности' : 'Опишите проблему подробнее…'"
+                [autoGrow]="true"
+                rows="3"
+            />
+        </ion-item>
+
+        <div class="ion-padding-top">
+            <ion-button expand="block" type="submit" color="danger" [disabled]="form.invalid">
+                Отправить жалобу
+            </ion-button>
+        </div>
+
+    </form>
+</ion-content>

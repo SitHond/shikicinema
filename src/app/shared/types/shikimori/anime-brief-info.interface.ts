@@ -1,4 +1,5 @@
 import { AnimeKindType } from '@app/shared/types/shikimori/anime-kind.type';
+import { AnimeRatingType } from '@app/shared/types/shikimori/queries/find-anime-query';
 import { AnimeReleaseStatus, UserAnimeRate } from '@app/shared/types/shikimori/user-anime-rate';
 
 export interface AnimeBriefInfoInterface {
@@ -27,6 +28,7 @@ export interface AnimeBriefInfoInterface {
     };
     url: string;
     kind: AnimeKindType;
+    rating?: AnimeRatingType;
     score: string;
     status: AnimeReleaseStatus;
     episodes: number;

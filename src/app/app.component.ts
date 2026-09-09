@@ -15,6 +15,7 @@ import { DEFAULT_SHIKIMORI_DOMAIN, SHIKIMORI_DOMAINS } from '@app/core/providers
 import { HeaderComponent } from '@app/core/components/header/header.component';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { PersistenceService } from '@app/shared/services';
+import { SecretGamesComponent } from '@app/shared/components/secret-games/secret-games.component';
 import { Store } from '@ngrx/store';
 import { TranslocoService, getBrowserLang } from '@jsverse/transloco';
 import { addHours, compareAsc } from 'date-fns';
@@ -46,6 +47,7 @@ import { updateLanguageAction, visitPageAction } from '@app/store/settings/actio
         IonRouterOutlet,
         IonApp,
         HeaderComponent,
+        SecretGamesComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     encapsulation: ViewEncapsulation.None,
@@ -139,7 +141,7 @@ export class AppComponent implements OnInit {
 
                     this.renderer.setAttribute(styleEl, 'id', userCustomStyleId);
                     this.renderer.appendChild(headEl, styleEl);
-                    styleEl.innerHTML = customTheme;
+                    styleEl.innerHTML = this._sanitizeCss(customTheme);
                 } else {
                     const styleEl = this.document.querySelector(`#${userCustomStyleId}`);
 
@@ -162,12 +164,19 @@ export class AppComponent implements OnInit {
                     const styleEl = this.document.querySelector(`#${userCustomStyleId}`);
 
                     if (styleEl) {
-                        styleEl.innerHTML = customTheme;
+                        styleEl.innerHTML = this._sanitizeCss(customTheme);
                     }
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
+    }
+
+    private _sanitizeCss(css: string): string {
+        return css
+            .replace(/@import\b[^;]*/gi, '')
+            .replace(/url\s*\(\s*(['"]?)https?:\/\//gi, 'url($1about:blank')
+            .replace(/url\s*\(\s*(?!['"]?(?:data:|#))/gi, 'url(about:blank');
     }
 
     initUser(): void {

@@ -18,4 +18,7 @@ export interface SettingsStoreInterface {
     useCustomAnimeStatusOrder: boolean;
     userAnimeStatusOrder: string[];
     filterPlayerDomains: string[];
+    showAdultContent: boolean;
+    discordRpc: boolean;
+    showEpisodeCount: boolean;
 }

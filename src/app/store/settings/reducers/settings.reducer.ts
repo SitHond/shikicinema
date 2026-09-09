@@ -28,6 +28,9 @@ const initialState: SettingsStoreInterface = {
     useCustomAnimeStatusOrder: false,
     userAnimeStatusOrder: DEFAULT_ANIME_STATUS_ORDER,
     filterPlayerDomains: [],
+    showAdultContent: false,
+    discordRpc: false,
+    showEpisodeCount: false,
 };
 
 const reducer = createReducer(

@@ -13,13 +13,16 @@
         </div>
     </div>
 } @else if (urlType() === 'video') {
-    <video
+    <app-shiki-player
         class="responsive-16by9 player__video"
-        controls
-        [class.ion-hide]="isLoading()"
-        [src]="source() | urlSanitizer"
-        (canplay)="onLoad()"
-    ></video>
+        [src]="source()"
+        [streams]="streams()"
+        [timingKey]="timingKey()"
+        (canPlay)="onLoad()"
+        (stall)="stall.emit()"
+        (played)="played.emit()"
+        (paused)="paused.emit()"
+    />
 } @else {
     <iframe
         class="responsive-16by9 player__video"

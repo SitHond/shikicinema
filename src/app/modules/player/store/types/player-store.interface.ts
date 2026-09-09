@@ -18,4 +18,7 @@ export interface PlayerStoreInterface {
     comments: {
         [animeId: string]: EpisodeCommentsInterface;
     };
+    restrictedAnimes: {
+        [animeId: string]: boolean;
+    };
 }

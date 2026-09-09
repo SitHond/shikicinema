@@ -1,0 +1,176 @@
+<div #containerEl
+    class="vp"
+    tabindex="0"
+    role="application"
+    [class.vp--playing]="isPlaying()"
+    [class.vp--buffering]="isBuffering()"
+    [class.vp--controls-visible]="showControls()"
+    [class.vp--fullscreen]="isFullscreen()"
+    [class.vp--pip]="isPip()"
+    (mousemove)="onMouseMove()"
+    (mouseleave)="showControls.set(isPlaying() ? false : true)"
+    (click)="onContainerClick($event)"
+    (keydown)="onContainerKeyDown($event)"
+    (dblclick)="onContainerDblClick($event)"
+>
+    <video
+        #videoEl
+        class="vp__video"
+        preload="metadata"
+        playsinline
+        [muted]="isMuted()"
+        (canplay)="onCanPlay()"
+        (timeupdate)="onTimeUpdate()"
+        (progress)="onProgress()"
+        (ended)="onEnded()"
+        (waiting)="onWaiting()"
+        (playing)="onPlaying()"
+        (loadedmetadata)="onLoadedMetadata()"
+    ></video>
+
+    <!-- Buffering spinner -->
+    @if (isBuffering() && effectiveSrc()) {
+        <div class="vp__spinner">
+            <div class="vp__spinner-ring"></div>
+        </div>
+    }
+
+    <!-- Error overlay -->
+    @if (hasError()) {
+        <div class="vp__error">
+            <ion-icon name="alert-circle-outline" />
+            <span>{{ errorMsg() || 'Не удалось загрузить видео' }}</span>
+        </div>
+    }
+
+    <!-- Play/Pause burst indicator -->
+    @if (showPlayBurst()) {
+        <div class="vp__burst" [class.vp__burst--play]="isPlaying()" [class.vp__burst--pause]="!isPlaying()">
+            <ion-icon [name]="isPlaying() ? 'play-outline' : 'pause-outline'" />
+        </div>
+    }
+
+    <!-- Skip opening / ending button (visibility controlled directly via DOM in onTimeUpdate) -->
+    <button
+        #skipBtnEl
+        class="vp__skip-btn"
+        style="display: none"
+        (click)="skipToEnd(); $event.stopPropagation()"
+    >
+        <span #skipLabelEl></span>
+        <ion-icon name="play-forward-outline" />
+    </button>
+
+    <!-- Controls -->
+    <div class="vp__controls" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+
+        <!-- Progress bar -->
+        <div #progressEl class="vp__progress"
+            (mousedown)="onProgressMouseDown($event)"
+            (touchstart)="onProgressTouchStart($event)"
+        >
+            <div class="vp__progress-track">
+                <div class="vp__progress-buffered" [style.width.%]="buffered()"></div>
+                <div class="vp__progress-played" [style.width.%]="progress()"></div>
+                <div class="vp__progress-thumb" [style.left.%]="progress()"></div>
+            </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="vp__bar">
+
+            <!-- Play/Pause -->
+            <button class="vp__btn" (click)="togglePlay()" [title]="isPlaying() ? 'Пауза (Пробел)' : 'Воспроизвести (Пробел)'">
+                <ion-icon [name]="isPlaying() ? 'pause-outline' : 'play-outline'" />
+            </button>
+
+            <!-- Skip back/forward -->
+            <button class="vp__btn vp__btn--skip" (click)="skip(-10)" title="-10 сек (←)">
+                <ion-icon name="play-skip-back-outline" />
+                <span class="vp__skip-label">10</span>
+            </button>
+            <button class="vp__btn vp__btn--skip" (click)="skip(10)" title="+10 сек (→)">
+                <ion-icon name="play-skip-forward-outline" />
+                <span class="vp__skip-label">10</span>
+            </button>
+
+            <!-- Time -->
+            <span class="vp__time">{{ timeDisplay() }}</span>
+
+            <div class="vp__spacer"></div>
+
+            <!-- Volume -->
+            <div class="vp__volume-wrap" (mouseenter)="showVolumeSlider.set(true)" (mouseleave)="showVolumeSlider.set(false)">
+                <button class="vp__btn" (click)="toggleMute()" title="Звук (M)">
+                    <ion-icon [name]="isMuted() || volume() === 0 ? 'volume-mute-outline' : 'volume-medium-outline'" />
+                </button>
+                <div class="vp__volume-slider" [class.vp__volume-slider--visible]="showVolumeSlider()">
+                    <div #volumeBarEl class="vp__volume-bar" tabindex="0" role="none"
+                        (click)="onVolumeBarClick($event)">
+                        <div class="vp__volume-fill" [style.width.%]="isMuted() ? 0 : volume() * 100"></div>
+                        <div class="vp__volume-thumb" [style.left.%]="isMuted() ? 0 : volume() * 100"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quality selector -->
+            @if (qualities().length > 1) {
+                <div class="vp__quality-wrap">
+                    <button class="vp__btn vp__btn--text" (click)="showQualityMenu.set(!showQualityMenu())" title="Качество">
+                        {{ currentQuality() }}p
+                    </button>
+                    @if (showQualityMenu()) {
+                        <div class="vp__quality-menu" (mouseleave)="showQualityMenu.set(false)">
+                            @for (q of qualities(); track q) {
+                                <button
+                                    class="vp__quality-item"
+                                    [class.vp__quality-item--active]="currentQuality() === q"
+                                    (click)="setQuality(q)"
+                                >{{ q }}p</button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Auto-skip toggle -->
+            @if (skipIntervals().length) {
+                <button
+                    class="vp__btn vp__btn--text"
+                    [class.vp__btn--active]="autoSkip()"
+                    (click)="toggleAutoSkip()"
+                    title="Авто-скип опенинга/эндинга"
+                >AS</button>
+            }
+
+            <!-- Speed -->
+            <div class="vp__speed-wrap">
+                <button class="vp__btn vp__btn--text" (click)="showSpeedMenu.set(!showSpeedMenu())" title="Скорость">
+                    {{ speed() }}×
+                </button>
+                @if (showSpeedMenu()) {
+                    <div class="vp__speed-menu" (mouseleave)="showSpeedMenu.set(false)">
+                        @for (s of speeds; track s) {
+                            <button
+                                class="vp__speed-item"
+                                [class.vp__speed-item--active]="speed() === s"
+                                (click)="setSpeed(s)"
+                            >{{ s }}×</button>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Picture-in-Picture -->
+            <button class="vp__btn" (click)="togglePip()" title="Картинка в картинке (P)">
+                <ion-icon name="phone-portrait-outline" />
+            </button>
+
+            <!-- Fullscreen -->
+            <button class="vp__btn" (click)="toggleFullscreen()" title="Полный экран (F/двойной клик)">
+                <ion-icon [name]="isFullscreen() ? 'contract-outline' : 'expand-outline'" />
+            </button>
+
+        </div>
+    </div>
+</div>

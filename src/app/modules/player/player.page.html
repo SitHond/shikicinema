@@ -2,6 +2,30 @@
     appSwipe
     (appSwipeRight)="onOpenVideoSelectorModal()">
 
+    @if (isAdultRestricted()) {
+        <div class="player-page__adult-block">
+            <ion-text color="danger">
+                <h2 class="player-page__adult-block-title">Контент 18+</h2>
+            </ion-text>
+            <ion-text color="medium">
+                <p>Этот тайтл имеет возрастной рейтинг 18+ (rx) и скрыт настройками.</p>
+                <p>Чтобы просматривать такой контент, включите опцию <strong>«Показывать контент 18+»</strong> в настройках.</p>
+            </ion-text>
+        </div>
+    }
+
+    @if (isContentRestricted()) {
+        <div class="player-page__adult-block">
+            <ion-text color="warning">
+                <h2 class="player-page__adult-block-title">Контент недоступен</h2>
+            </ion-text>
+            <ion-text color="medium">
+                <p>Доступ к этому тайтлу ограничен администрацией.</p>
+            </ion-text>
+        </div>
+    }
+
+    @if (!isAdultRestricted() && !isContentRestricted()) {
     <div class="player-page__wrapper"
         [class.player-page__wrapper--mobile]="isSmallScreen()"
         [class.player-page__wrapper--compact]="playerMode() === 'compact'">
@@ -26,26 +50,37 @@
                 }
             </div>
 
-            @if (wp.status() === 'room' && wp.isHost()) {
-                <ion-button
-                    class="player-page__wp-btn"
-                    size="small"
-                    fill="outline"
-                    color="primary"
-                    (click)="onShareToWatchParty()"
-                >
-                    <ion-icon slot="start" name="tv-outline" />
-                    Watch Party · {{ wp.roomId() }}
+            <div class="player-page__header-actions">
+                @if (wp.status() === 'room' && wp.isHost()) {
+                    <ion-button
+                        class="player-page__wp-btn"
+                        size="small"
+                        fill="outline"
+                        color="primary"
+                        (click)="onShareToWatchParty()"
+                    >
+                        <ion-icon slot="start" name="tv-outline" />
+                        Watch Party · {{ wp.roomId() }}
+                    </ion-button>
+                }
+
+                <ion-button fill="clear" size="small" color="danger" title="Сообщить о проблеме" (click)="onReport()">
+                    <ion-icon slot="icon-only" name="flag-outline" />
                 </ion-button>
-            }
+            </div>
 
         </div>
 
         <app-player class="player-page__player responsive-16by9"
             [showNextEpisodeAt]="nextEpisodeAt() !== null"
-            [source]="resolvedSource()"
-            [urlType]="currentVideo()?.urlType"
+            [source]="resolvedSource()?.url ?? null"
+            [urlType]="resolvedSource()?.urlType ?? currentVideo()?.urlType"
+            [streams]="resolvedSource()?.streams"
+            [timingKey]="timingKey()"
             [nextEpisodeAt]="nextEpisodeAt()"
+            (stall)="onPlayerStall()"
+            (played)="onPlayerPlay()"
+            (paused)="onPlayerPause()"
         />
 
         <app-player-selector
@@ -127,6 +162,8 @@
             (cancelEdit)="onCancelCommentEdit()"
         />
     </div>
+
+    } <!-- /if !isAdultRestricted -->
 
     <app-footer />
 </ion-content>

@@ -15,4 +15,5 @@ export interface VideoInfoInterface {
     author?: string;
     quality: VideoQualityEnum;
     language: string;
+    provider?: string;
 }
