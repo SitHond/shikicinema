@@ -49,6 +49,23 @@ a.upload-video:before {
     position: relative;
 }
 
+.shikicinema-embed__collapse {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 4px;
+    opacity: 0.6;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.shikicinema-embed__collapse:hover {
+    opacity: 1;
+}
+
 .shikicinema-embed__source {
     font-size: 12px;
     font-weight: 400;

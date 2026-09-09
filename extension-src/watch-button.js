@@ -49,9 +49,17 @@ async function embedInlinePlayer(animeId) {
     const container = document.createElement('div');
     container.id = 'shikicinema-embed';
 
+    const collapsed = isEmbedCollapsed();
+
     const header = document.createElement('div');
     header.className = 'shikicinema-embed__header';
     header.innerHTML = '<span>Смотреть</span><span class="shikicinema-embed__source"></span>';
+
+    const collapseBtn = document.createElement('button');
+    collapseBtn.className = 'shikicinema-embed__collapse';
+    collapseBtn.textContent = collapsed ? '▼' : '▲';
+    collapseBtn.title = collapsed ? 'Показать' : 'Свернуть';
+    header.appendChild(collapseBtn);
 
     const controls = document.createElement('div');
     controls.className = 'shikicinema-embed__controls';
@@ -69,20 +77,32 @@ async function embedInlinePlayer(animeId) {
 
     const iframe = document.createElement('iframe');
     iframe.id = 'shikicinema-embed__frame';
-    iframe.allowFullscreen = true;
     iframe.setAttribute('allow', 'fullscreen; autoplay');
     iframe.setAttribute('scrolling', 'no');
 
     playerWrap.appendChild(iframe);
     container.appendChild(header);
-    container.appendChild(controls);
-    container.appendChild(playerWrap);
+
+    const embedBody = document.createElement('div');
+    embedBody.className = 'shikicinema-embed__body';
+    embedBody.appendChild(controls);
+    embedBody.appendChild(playerWrap);
+    if (collapsed) embedBody.hidden = true;
+    container.appendChild(embedBody);
 
     const target = document.querySelector('div.b-db_entry');
 
     if (target) {
         target.insertAdjacentElement('afterend', container);
     }
+
+    collapseBtn.addEventListener('click', () => {
+        const isNowCollapsed = !isEmbedCollapsed();
+        setEmbedCollapsed(isNowCollapsed);
+        embedBody.hidden = isNowCollapsed;
+        collapseBtn.textContent = isNowCollapsed ? '▼' : '▲';
+        collapseBtn.title = isNowCollapsed ? 'Показать' : 'Свернуть';
+    });
 
     const [shikiResults, kodikVideos, cvhVideos] = await Promise.all([
         Promise.allSettled(
@@ -169,7 +189,6 @@ async function embedInlinePlayer(animeId) {
                 playerWrap.innerHTML = '';
                 frameEl = document.createElement('iframe');
                 frameEl.id = 'shikicinema-embed__frame';
-                frameEl.allowFullscreen = true;
                 frameEl.setAttribute('allow', 'fullscreen; autoplay');
                 frameEl.setAttribute('scrolling', 'no');
                 playerWrap.appendChild(frameEl);
@@ -384,6 +403,16 @@ async function _getMaxUploadedEpisode(anime, timeout = FETCH_RESOURCE_TIMEOUT) {
   return Math.min(1, +maxAvailable);
 }
 
+const EMBED_COLLAPSED_KEY = 'shikicinema_embed_collapsed';
+
+function isEmbedCollapsed() {
+    try { return localStorage.getItem(EMBED_COLLAPSED_KEY) === '1'; } catch { return false; }
+}
+
+function setEmbedCollapsed(collapsed) {
+    try { localStorage.setItem(EMBED_COLLAPSED_KEY, collapsed ? '1' : '0'); } catch {}
+}
+
 async function appendWatchButtonTo(element, anime) {
   const lastOrMaxEpisodeAvailable = await _getMaxUploadedEpisode(anime);
   const isEnglishLocale = getShikimoriLocale() === 'en';
@@ -395,7 +424,6 @@ async function appendWatchButtonTo(element, anime) {
   PLAYER_BUTTON.href = `${PLAYER_URL}#player/${anime.id}`
 
   INFO_DIV.classList.add('watch-button-div');
-
   INFO_DIV.appendChild(PLAYER_BUTTON);
   element.appendChild(INFO_DIV);
 

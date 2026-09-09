@@ -222,8 +222,11 @@ export class PlayerPage implements OnInit {
     isAdultRestricted = computed(
         () => !this.isAnimeLoading() && this.anime()?.rating === 'rx' && !this.showAdultContent(),
     );
-    isContentRestricted = computed(
-        () => this.store.selectSignal(selectPlayerIsContentRestricted(this.animeIdQ()))(),
+    isContentRestricted = toSignal(
+        toObservable(this.animeIdQ).pipe(
+            switchMap((animeId) => this.store.select(selectPlayerIsContentRestricted(animeId))),
+        ),
+        { initialValue: false },
     );
     isWatched = computed(() => isEpisodeWatched(this.episodeQ(), this.userRate()));
     isRewatching = computed(() => this.userRate()?.status === 'rewatching');

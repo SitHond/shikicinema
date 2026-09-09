@@ -62,6 +62,7 @@ export {
     flagOutline,
     copyOutline,
     statsChartOutline,
+    barChartOutline,
     mailOutline,
     phonePortraitOutline,
     shareSocialOutline,
