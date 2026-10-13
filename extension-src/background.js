@@ -1,12 +1,230 @@
 
+// Mutable — updated from API on startup so isTrustedSender() picks up new domains.
 const SHIKIMORI_URL_PATTERNS = [
     '*://shikimori.rip/*',
     '*://shikimori.fi/*',
     '*://shikimori.net/*',
     '*://shikimori.moe/*',
     '*://shikimori.mov/*',
+    '*://shikimori.life/*',
     '*://ygg.shiki.rip/*',
 ];
+
+// ── Dynamic domain management ─────────────────────────────────────────────────
+
+var DOMAINS_API_URL = 'https://api.sithond.com/api/config/domains';
+var DOMAINS_CACHE_KEY = 'shikirip_domains_cache';
+var FALLBACK_DOMAINS = [
+    'https://shikimori.rip',
+    'https://shikimori.fi',
+    'https://shikimori.net',
+    'https://shikimori.moe',
+    'https://shikimori.mov',
+    'https://shikimori.life',
+    'https://ygg.shiki.rip',
+];
+
+function domainToPattern(domain) {
+    try {
+        var parsed = new URL(domain);
+        return parsed.protocol + '//' + parsed.hostname + '/*';
+    } catch { return null; }
+}
+
+function domainToOrigin(domain) {
+    return domain.replace(/\/$/, '') + '/*';
+}
+
+function scriptIdForDomain(domain) {
+    return 'sc_' + domain.replace(/https?:\/\//, '').replace(/[^a-z0-9]/gi, '_');
+}
+
+async function loadDomainList() {
+    try {
+        var resp = await fetch(DOMAINS_API_URL, { signal: AbortSignal.timeout(8000) });
+        if (resp.ok) {
+            var data = await resp.json();
+            if (Array.isArray(data.domains) && data.domains.length > 0) {
+                await chrome.storage.local.set({ [DOMAINS_CACHE_KEY]: data.domains });
+                return data.domains;
+            }
+        }
+    } catch (e) { /* network error — use cache */ }
+
+    try {
+        var stored = await chrome.storage.local.get(DOMAINS_CACHE_KEY);
+        if (stored[DOMAINS_CACHE_KEY] && stored[DOMAINS_CACHE_KEY].length) {
+            return stored[DOMAINS_CACHE_KEY];
+        }
+    } catch (e) {}
+
+    return FALLBACK_DOMAINS;
+}
+
+var hasScriptingApi = typeof chrome !== 'undefined' && !!chrome.scripting && !!chrome.scripting.getRegisteredContentScripts;
+
+async function registerContentScriptsForGrantedDomains(domains) {
+    if (!hasScriptingApi) return; // Firefox MV2 uses static content_scripts
+    for (var i = 0; i < domains.length; i++) {
+        var domain = domains[i];
+        try {
+            var hasPermission = await chrome.permissions.contains({ origins: [domainToOrigin(domain)] });
+            if (!hasPermission) continue;
+
+            var id = scriptIdForDomain(domain);
+            var existing = await chrome.scripting.getRegisteredContentScripts({ ids: [id] });
+            if (existing.length > 0) continue;
+
+            var pattern = domainToPattern(domain);
+            if (!pattern) continue;
+
+            await chrome.scripting.registerContentScripts([{
+                id: id,
+                matches: [pattern],
+                js: ['shikicinema.js'],
+                css: ['watch-button.css'],
+                runAt: 'document_idle',
+            }]);
+        } catch (e) {
+            console.warn('[ShikiRIP] registerContentScripts failed for', domain, e.message);
+        }
+    }
+}
+
+async function cleanupRemovedDomains(activeDomains) {
+    if (!hasScriptingApi) return;
+    try {
+        var registered = await chrome.scripting.getRegisteredContentScripts();
+        for (var i = 0; i < registered.length; i++) {
+            var script = registered[i];
+            if (!script.id.startsWith('sc_')) continue;
+            var isActive = activeDomains.some(function(d) {
+                return domainToPattern(d) === (script.matches && script.matches[0]);
+            });
+            if (!isActive) {
+                await chrome.scripting.unregisterContentScripts({ ids: [script.id] });
+            }
+        }
+    } catch (e) { /* ignore */ }
+}
+
+function syncUrlPatterns(domains) {
+    SHIKIMORI_URL_PATTERNS.length = 0;
+    for (var i = 0; i < domains.length; i++) {
+        var p = domainToPattern(domains[i]);
+        if (p) SHIKIMORI_URL_PATTERNS.push(p);
+    }
+}
+
+async function initDynamicDomains() {
+    var domains = await loadDomainList();
+    syncUrlPatterns(domains);
+    await registerContentScriptsForGrantedDomains(domains);
+    await cleanupRemovedDomains(domains);
+}
+
+// Show notification when user visits a Shikimori domain without permission
+async function checkTabForNewDomain(tab) {
+    if (!tab || !tab.url) return;
+    var url;
+    try { url = new URL(tab.url); } catch { return; }
+    if (url.protocol !== 'https:') return;
+
+    var stored = await chrome.storage.local.get(DOMAINS_CACHE_KEY);
+    var domains = (stored[DOMAINS_CACHE_KEY] && stored[DOMAINS_CACHE_KEY].length)
+        ? stored[DOMAINS_CACHE_KEY]
+        : FALLBACK_DOMAINS;
+
+    var matched = null;
+    for (var i = 0; i < domains.length; i++) {
+        try {
+            if (new URL(domains[i]).hostname === url.hostname) { matched = domains[i]; break; }
+        } catch {}
+    }
+    if (!matched) return;
+
+    var hasPermission = await chrome.permissions.contains({ origins: [domainToOrigin(matched)] });
+    if (hasPermission) return;
+
+    // Avoid repeated notifications for the same tab
+    var stateKey = 'notif_shown_' + tab.id;
+    var alreadyShown = await chrome.storage.local.get(stateKey);
+    if (alreadyShown[stateKey]) return;
+    await chrome.storage.local.set({ [stateKey]: true });
+
+    var notifId = 'new_shiki_domain_' + tab.id;
+    chrome.notifications.create(notifId, {
+        type: 'basic',
+        iconUrl: 'assets/icon128.png',
+        title: 'ShikiRIP Cinema',
+        message: 'Обнаружен новый домен Shikimori: ' + url.hostname + '\nНажмите на это уведомление, чтобы разрешить работу расширения.',
+        requireInteraction: true,
+    });
+    await chrome.storage.local.set({ [notifId]: { domain: matched, tabId: tab.id } });
+}
+
+// Body click works on all platforms (unlike buttons which fail on Firefox/Linux)
+chrome.notifications.onClicked.addListener(function(notifId) {
+    if (!notifId.startsWith('new_shiki_domain_')) return;
+    chrome.notifications.clear(notifId);
+    chrome.storage.local.get(notifId, function(data) {
+        var info = data[notifId];
+        if (!info) return;
+        var url = chrome.runtime.getURL('permission-grant.html')
+            + '?domain=' + encodeURIComponent(info.domain)
+            + '&tabId=' + info.tabId
+            + '&notifId=' + encodeURIComponent(notifId);
+        chrome.tabs.create({ url: url, active: true });
+    });
+});
+
+// permission-grant.html notifies background after user grants permission
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.type === 'DOMAIN_PERMISSION_GRANTED' && request.domain) {
+        var grantedDomains = Array.isArray(request.domain) ? request.domain : [request.domain];
+        registerContentScriptsForGrantedDomains(grantedDomains).then(function() {
+            loadDomainList().then(syncUrlPatterns);
+            // Reload all open tabs on any of the newly granted domains
+            chrome.tabs.query({}, function(tabs) {
+                tabs.forEach(function(tab) {
+                    if (!tab.url) return;
+                    var tabHost;
+                    try { tabHost = new URL(tab.url).hostname; } catch { return; }
+                    var matches = grantedDomains.some(function(d) {
+                        try { return new URL(d).hostname === tabHost; } catch { return false; }
+                    });
+                    if (matches) chrome.tabs.reload(tab.id);
+                });
+            });
+        });
+    }
+});
+
+// Clear per-tab notification state when tab is closed
+chrome.tabs.onRemoved.addListener(function(tabId) {
+    chrome.storage.local.remove(['notif_shown_' + tabId, 'new_shiki_domain_' + tabId]);
+});
+
+chrome.runtime.onInstalled.addListener(function(details) {
+    initDynamicDomains();
+    if (details.reason === 'install') {
+        loadDomainList().then(function(domains) {
+            var url = chrome.runtime.getURL('permission-grant.html')
+                + '?domains=' + encodeURIComponent(domains.join(','))
+                + '&mode=initial';
+            chrome.tabs.create({ url: url, active: true });
+        });
+    }
+});
+chrome.runtime.onStartup.addListener(function() { initDynamicDomains(); });
+
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    if (changeInfo.status === 'complete' && tab.url) {
+        checkTabForNewDomain(tab);
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Shared promise while a proxy tab is being created/loading.
 // All concurrent requests reuse this promise instead of spawning multiple tabs.

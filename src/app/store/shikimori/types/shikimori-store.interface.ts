@@ -9,6 +9,7 @@ export interface ShikimoriStoreInterface {
     foundAnimes: AnimeBriefInfoInterface[] | null;
 
     shikimoriDomain: string;
+    shikimoriDomainsList: string[];
 
     errors: unknown;
 }

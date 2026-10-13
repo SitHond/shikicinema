@@ -30,7 +30,7 @@ import {
     take,
     tap,
 } from 'rxjs/operators';
-import { detectShikimoriDomainAction, updateShikimoriDomainAction } from '@app/store/shikimori/actions';
+import { detectShikimoriDomainAction, fetchShikimoriDomainsListAction, updateShikimoriDomainAction } from '@app/store/shikimori/actions';
 import { environment } from '@app-env/environment';
 import { getCurrentUserAction } from '@app/store/shikimori/actions/get-current-user.action';
 import { selectCacheLastCheckUp } from '@app/store/cache/selectors/cache.selectors';
@@ -231,6 +231,8 @@ export class AppComponent implements OnInit {
                         this.store.dispatch(detectShikimoriDomainAction());
                         return;
                     }
+
+                    this.store.dispatch(fetchShikimoriDomainsListAction());
 
                     if (!SHIKIMORI_DOMAINS.includes(domain)) {
                         this.store.dispatch(updateShikimoriDomainAction({ domain: DEFAULT_SHIKIMORI_DOMAIN }));
