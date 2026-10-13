@@ -49,6 +49,11 @@ export const selectShikimoriDomain = createSelector(
     (state) => state.shikimoriDomain,
 );
 
+export const selectShikimoriDomainsList = createSelector(
+    selectShikimori,
+    (state) => state.shikimoriDomainsList,
+);
+
 export const selectShikimoriCurrentUserAvatar = createSelector(
     selectShikimoriCurrentUser,
     selectShikimoriDomain,

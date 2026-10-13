@@ -112,4 +112,10 @@ export class ShikicinemaApiService {
             ),
         );
     }
+
+    getShikimoriDomains(): Observable<string[]> {
+        return this.http
+            .get<{ domains: string[] }>(`${this.baseUri}/api/config/domains`)
+            .pipe(map((r) => r.domains));
+    }
 }

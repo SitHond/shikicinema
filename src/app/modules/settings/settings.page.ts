@@ -66,6 +66,7 @@ import {
     selectShikimoriCurrentUserId,
     selectShikimoriCurrentUserNickname,
     selectShikimoriDomain,
+    selectShikimoriDomainsList,
 } from '@app/store/shikimori/selectors/shikimori.selectors';
 import { updateSettingsAction } from '@app/store/settings/actions/settings.actions';
 import { updateShikimoriDomainAction } from '@app/store/shikimori/actions';
@@ -134,7 +135,11 @@ export class SettingsPage implements OnInit {
     });
 
     readonly availableLangs = this.transloco.getAvailableLangs() as string[];
-    readonly shikimoriDomains = SHIKIMORI_DOMAINS;
+    readonly shikimoriDomainsList = this.store.selectSignal(selectShikimoriDomainsList);
+    readonly shikimoriDomains = computed(() => {
+        const list = this.shikimoriDomainsList();
+        return list.length > 0 ? list : SHIKIMORI_DOMAINS;
+    });
 
     readonly settingsForm = new FormGroup({
         language: new FormControl<string>('en', [Validators.required]),

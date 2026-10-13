@@ -18,25 +18,6 @@
             }
         }
     },
-    "content_scripts": [
-        {
-            "matches": [
-                "*://shikimori.rip/*",
-                "*://shikimori.fi/*",
-                "*://shikimori.net/*",
-                "*://shikimori.moe/*",
-                "*://shikimori.mov/*",
-                "*://ygg.shiki.rip/*"
-            ],
-            "js": [
-                "shikicinema.js"
-            ],
-            "css": [
-                "watch-button.css"
-            ],
-            "run_at": "document_idle"
-        }
-    ],
     "background": {
         "scripts": [
             "background.js"
@@ -46,21 +27,16 @@
     "web_accessible_resources": [
         "assets/*.png",
         "index.html",
-        "styles.css"
+        "styles.css",
+        "permission-grant.html",
+        "permission-grant.js"
     ],
     "permissions": [
-        "https://shikimori.rip/*",
-        "https://shikimori.fi/*",
-        "https://shikimori.net/*",
-        "https://shikimori.moe/*",
-        "https://shikimori.mov/*",
-        "https://ygg.shiki.rip/*",
         "https://api.sithond.com/*",
 
         "https://remanga.org/*",
         "https://*.remanga.org/*",
         "https://plapi.cdnvideohub.com/*",
-        "https://kodikplayer.com/*",
         "https://kodik.info/*",
         "https://kodik.biz/*",
         "https://kodik.cc/*",
@@ -72,7 +48,20 @@
         "http://127.0.0.1/*",
         "storage",
         "tabs",
+        "scripting",
+        "notifications",
         "webRequest",
         "webRequestBlocking"
+    ],
+    "optional_permissions": [
+        "https://*/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["https://*/*"],
+            "js": ["shikicinema.js"],
+            "css": ["watch-button.css"],
+            "run_at": "document_idle"
+        }
     ]
 }

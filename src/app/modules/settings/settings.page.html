@@ -66,7 +66,7 @@
                 [label]="'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.GENERAL.SHIKIMORI_DOMAIN.LABEL' | transloco"
                 [helperText]="'SETTINGS_MODULE.SETTINGS_PAGE.SETTING_GROUPS.GENERAL.SHIKIMORI_DOMAIN.HELP' | transloco"
             >
-                @for (domain of shikimoriDomains; track $index) {
+                @for (domain of shikimoriDomains(); track $index) {
                     <ion-select-option [value]="domain">
                         {{ domain }}
                     </ion-select-option>

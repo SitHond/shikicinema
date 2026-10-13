@@ -79,6 +79,12 @@ const webpackConfig = {
                 {
                     from: './extension-src/rules/',
                     to: 'rules/',
+                },
+                {
+                    from: './extension-src/permission-grant.html'
+                },
+                {
+                    from: './extension-src/permission-grant.js'
                 }
             ]
         }),

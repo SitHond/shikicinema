@@ -17,3 +17,12 @@ export const updateShikimoriDomainAction = createAction(
     '[Shikimori API] Update shikimori domain',
     props<{ domain: string }>(),
 );
+
+export const updateShikimoriDomainsListAction = createAction(
+    '[Shikimori API] Update shikimori domains list',
+    props<{ domains: string[] }>(),
+);
+
+export const fetchShikimoriDomainsListAction = createAction(
+    '[Shikimori API] Fetch shikimori domains list',
+);
