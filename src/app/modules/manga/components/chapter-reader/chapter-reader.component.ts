@@ -164,7 +164,7 @@ export class ChapterReaderComponent implements OnDestroy {
                     this.currentImageUrl.set(dataUrl);
                     this.schedulePreload(this.currentIndex());
                 }
-
+                
                 this.imageCache
                     .set(this.cacheKeyFor(page), dataUrl)
                     .catch(() => undefined);

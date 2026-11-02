@@ -616,8 +616,8 @@ function run() {
         try {
             var origin = new URL(sender.url).hostname;
             return SHIKIMORI_URL_PATTERNS.some(function(p) {
-                // pattern: '*://shikimori.rip/*' → extract hostname
-                var m = p.match(/\*:\/\/([^/]+)\//);
+                // supports both '*://hostname/*' (static) and 'https://hostname/*' (dynamic)
+                var m = p.match(/(?:\*|https?):\/\/([^/]+)\//);
                 if (!m) return false;
                 var host = m[1].replace(/^\*\./, '');
                 return origin === host || origin.endsWith('.' + host);
